@@ -1,0 +1,194 @@
+/* =========================================================
+   FRIENDS AURORA
+   Animation System
+========================================================= */
+
+/* Aurora Background */
+
+@keyframes aurora-flow {
+
+    0%{
+        transform:translate3d(-8%,0,0) rotate(0deg) scale(1);
+    }
+
+    50%{
+        transform:translate3d(8%,2%,0) rotate(3deg) scale(1.08);
+    }
+
+    100%{
+        transform:translate3d(-8%,0,0) rotate(0deg) scale(1);
+    }
+
+}
+
+
+/* Logo */
+
+@keyframes logo-pulse{
+
+    0%{
+
+        filter:drop-shadow(0 0 0 rgba(0,230,118,0));
+
+    }
+
+    50%{
+
+        filter:
+
+        drop-shadow(0 0 18px rgba(0,230,118,.8))
+
+        drop-shadow(0 0 42px rgba(38,240,241,.45));
+
+    }
+
+    100%{
+
+        filter:drop-shadow(0 0 0 rgba(0,230,118,0));
+
+    }
+
+}
+
+
+/* Fade */
+
+@keyframes fade-up{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+/* Glass Hover */
+
+@keyframes glass-hover{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    100%{
+
+        transform:translateY(-6px);
+
+    }
+
+}
+
+
+/* Glow */
+
+@keyframes glow{
+
+    0%{
+
+        box-shadow:
+
+        0 0 10px rgba(0,230,118,.10);
+
+    }
+
+    50%{
+
+        box-shadow:
+
+        0 0 35px rgba(0,230,118,.45),
+
+        0 0 60px rgba(38,240,241,.18);
+
+    }
+
+    100%{
+
+        box-shadow:
+
+        0 0 10px rgba(0,230,118,.10);
+
+    }
+
+}
+
+
+/* Floating */
+
+@keyframes floating{
+
+    0%{
+
+        transform:translateY(0px);
+
+    }
+
+    50%{
+
+        transform:translateY(-6px);
+
+    }
+
+    100%{
+
+        transform:translateY(0px);
+
+    }
+
+}
+
+
+/* Classes */
+
+.fade-up{
+
+    animation:
+
+    fade-up .7s ease forwards;
+
+}
+
+.glow{
+
+    animation:
+
+    glow 4s ease-in-out infinite;
+
+}
+
+.logo-pulse{
+
+    animation:
+
+    logo-pulse 6s ease-in-out infinite;
+
+}
+
+.floating{
+
+    animation:
+
+    floating 5s ease-in-out infinite;
+
+}
+
+.aurora-flow{
+
+    animation:
+
+    aurora-flow 24s ease-in-out infinite;
+
+}

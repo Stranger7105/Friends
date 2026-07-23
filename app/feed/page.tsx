@@ -1,0 +1,1035 @@
+"use client";
+
+import Link from "next/link";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import AuroraComposer from "@/components/aurora/AuroraComposer";
+import "@/styles/aurora-feed.css";
+import { supabase } from "@/lib/supabase";
+
+const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
+type ReactionValue = (typeof REACTIONS)[number];
+
+type Profile = {
+  id?: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
+type Post = {
+  id: number;
+  content: string;
+  user_id: string;
+  image_path: string | null;
+  shared_post_id: number | null;
+  created_at: string;
+  updated_at: string | null;
+  profiles: Profile | null;
+  shared_post: {
+    id: number;
+    content: string;
+    user_id: string;
+    image_path: string | null;
+    created_at: string;
+    profiles: Profile | null;
+  } | null;
+};
+
+type Reaction = {
+  id: number;
+  post_id: number;
+  user_id: string;
+  reaction: ReactionValue;
+};
+
+type Comment = {
+  id: number;
+  post_id: number;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string | null;
+  profiles: Profile | null;
+};
+
+function normalizeProfile(value: unknown): Profile | null {
+  if (!value) return null;
+  if (Array.isArray(value)) return (value[0] as Profile | undefined) ?? null;
+  return value as Profile;
+}
+
+function getDisplayName(profile: Profile | null) {
+  return profile?.full_name || profile?.username || "Utilizator";
+}
+
+function getInitials(profile: Profile | null) {
+  return getDisplayName(profile)
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
+
+function formatRelativeDate(value: string) {
+  const date = new Date(value);
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+
+  if (seconds < 30) return "acum";
+  if (seconds < 60) return `acum ${seconds} secunde`;
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `acum ${minutes} ${minutes === 1 ? "minut" : "minute"}`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `acum ${hours} ${hours === 1 ? "oră" : "ore"}`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `acum ${days} ${days === 1 ? "zi" : "zile"}`;
+
+  return date.toLocaleString("ro-RO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function FeedPage() {
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [postText, setPostText] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [publishing, setPublishing] = useState(false);
+  const [busyPostId, setBusyPostId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [openReactionPostId, setOpenReactionPostId] = useState<number | null>(null);
+  const [openCommentsPostId, setOpenCommentsPostId] = useState<number | null>(null);
+  const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
+
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const previewUrl = useMemo(
+    () => (selectedImage ? URL.createObjectURL(selectedImage) : null),
+    [selectedImage]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const loadFeed = useCallback(async () => {
+    setLoadingPosts(true);
+    setErrorMessage("");
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      setErrorMessage("Nu ești autentificat.");
+      setLoadingPosts(false);
+      return;
+    }
+
+    setCurrentUserId(user.id);
+
+    const postsResult = await supabase
+      .from("posts")
+      .select(`
+        id,
+        content,
+        user_id,
+        image_path,
+        shared_post_id,
+        created_at,
+        updated_at
+      `)
+      .order("created_at", { ascending: false });
+
+    if (postsResult.error) {
+      setErrorMessage(`Postările nu au putut fi încărcate: ${postsResult.error.message}`);
+      setLoadingPosts(false);
+      return;
+    }
+
+    const basePosts = (postsResult.data ?? []).map((row: any) => ({
+      ...row,
+      profiles: null,
+      shared_post: null,
+    })) as Post[];
+
+    const postIds = basePosts.map((post) => post.id);
+    const sharedPostIds = [
+      ...new Set(
+        basePosts
+          .map((post) => post.shared_post_id)
+          .filter((id): id is number => typeof id === "number")
+      ),
+    ];
+
+    let rawSharedPosts: any[] = [];
+
+    if (sharedPostIds.length > 0) {
+      const sharedPostsResult = await supabase
+        .from("posts")
+        .select(`
+          id,
+          content,
+          user_id,
+          image_path,
+          created_at
+        `)
+        .in("id", sharedPostIds);
+
+      if (sharedPostsResult.error) {
+        setErrorMessage(
+          `Postările distribuite nu au putut fi încărcate: ${sharedPostsResult.error.message}`
+        );
+      } else {
+        rawSharedPosts = sharedPostsResult.data ?? [];
+      }
+    }
+
+    let rawReactions: Reaction[] = [];
+    let rawComments: any[] = [];
+
+    if (postIds.length > 0) {
+      const [reactionResult, commentResult] = await Promise.all([
+        supabase
+          .from("post_reactions")
+          .select("id, post_id, user_id, reaction")
+          .in("post_id", postIds),
+        supabase
+          .from("post_comments")
+          .select(`
+            id,
+            post_id,
+            user_id,
+            content,
+            created_at,
+            updated_at
+          `)
+          .in("post_id", postIds)
+          .order("created_at", { ascending: true }),
+      ]);
+
+      if (reactionResult.error) {
+        setErrorMessage(`Reacțiile nu au putut fi încărcate: ${reactionResult.error.message}`);
+      } else {
+        rawReactions = (reactionResult.data ?? []) as Reaction[];
+      }
+
+      if (commentResult.error) {
+        setErrorMessage(`Comentariile nu au putut fi încărcate: ${commentResult.error.message}`);
+      } else {
+        rawComments = commentResult.data ?? [];
+      }
+    }
+
+    const profileUserIds = [
+      ...new Set([
+        ...basePosts.map((post) => post.user_id),
+        ...rawSharedPosts.map((post) => post.user_id),
+        ...rawComments.map((comment) => comment.user_id),
+      ]),
+    ].filter(Boolean);
+
+    const profilesById = new Map<string, Profile>();
+
+    if (profileUserIds.length > 0) {
+      const profilesResult = await supabase
+        .from("profiles")
+        .select("id, username, full_name, avatar_url")
+        .in("id", profileUserIds);
+
+      if (profilesResult.error) {
+        setErrorMessage(
+          `Profilurile nu au putut fi încărcate: ${profilesResult.error.message}`
+        );
+      } else {
+        for (const profile of profilesResult.data ?? []) {
+          profilesById.set(profile.id, profile as Profile);
+        }
+      }
+    }
+
+    const sharedPostsById = new Map<number, Post["shared_post"]>(
+      rawSharedPosts.map((row: any) => [
+        row.id,
+        {
+          ...row,
+          profiles: profilesById.get(row.user_id) ?? null,
+        },
+      ])
+    );
+
+    const normalizedPosts = basePosts.map((post) => ({
+      ...post,
+      profiles: profilesById.get(post.user_id) ?? null,
+      shared_post:
+        post.shared_post_id !== null
+          ? sharedPostsById.get(post.shared_post_id) ?? null
+          : null,
+    }));
+
+    const normalizedComments = rawComments.map((row: any) => ({
+      ...row,
+      profiles: profilesById.get(row.user_id) ?? null,
+    })) as Comment[];
+
+    setPosts(normalizedPosts);
+    setReactions(rawReactions);
+    setComments(normalizedComments);
+    setLoadingPosts(false);
+  }, []);
+
+  useEffect(() => {
+    void loadFeed();
+  }, [loadFeed]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("feed-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "posts" },
+        () => void loadFeed()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "post_reactions" },
+        () => void loadFeed()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "post_comments" },
+        () => void loadFeed()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadFeed]);
+
+  useEffect(() => {
+    const paths = new Set<string>();
+
+    for (const post of posts) {
+      if (post.image_path) paths.add(post.image_path);
+      if (post.shared_post?.image_path) paths.add(post.shared_post.image_path);
+    }
+
+    const missingPaths = [...paths].filter((path) => !imageUrls[path]);
+    if (missingPaths.length === 0) return;
+
+    let cancelled = false;
+
+    async function createUrls() {
+      const entries = await Promise.all(
+        missingPaths.map(async (path) => {
+          const { data, error } = await supabase.storage
+            .from("post-images")
+            .createSignedUrl(path, 60 * 60);
+
+          return !error && data?.signedUrl ? ([path, data.signedUrl] as const) : null;
+        })
+      );
+
+      if (cancelled) return;
+
+      setImageUrls((current) => {
+        const next = { ...current };
+        for (const entry of entries) {
+          if (entry) next[entry[0]] = entry[1];
+        }
+        return next;
+      });
+    }
+
+    void createUrls();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [posts, imageUrls]);
+
+  function selectImageFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Poți selecta doar o imagine.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMessage("Imaginea este prea mare. Limita este de 10 MB.");
+      return;
+    }
+
+    setErrorMessage("");
+    setSelectedImage(file);
+  }
+
+  function handleImageSelect(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Poți selecta doar o imagine.");
+      event.currentTarget.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMessage("Imaginea este prea mare. Limita este de 10 MB.");
+      event.currentTarget.value = "";
+      return;
+    }
+
+    selectImageFile(file);
+  }
+
+  async function handlePublish(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const content = postText.trim();
+    if ((!content && !selectedImage) || !currentUserId || publishing) return;
+
+    setPublishing(true);
+    setErrorMessage("");
+
+    let uploadedPath: string | null = null;
+
+    try {
+      if (selectedImage) {
+        const extension =
+          selectedImage.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ||
+          "jpg";
+
+        uploadedPath = `${currentUserId}/${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("post-images")
+          .upload(uploadedPath, selectedImage, {
+            contentType: selectedImage.type,
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          setErrorMessage(`Imaginea nu a putut fi încărcată: ${uploadError.message}`);
+          return;
+        }
+      }
+
+      const { error } = await supabase.from("posts").insert({
+        content,
+        user_id: currentUserId,
+        image_path: uploadedPath,
+      });
+
+      if (error) {
+        if (uploadedPath) {
+          await supabase.storage.from("post-images").remove([uploadedPath]);
+        }
+
+        setErrorMessage(`Postarea nu a putut fi publicată: ${error.message}`);
+        return;
+      }
+
+      setPostText("");
+      setSelectedImage(null);
+
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
+      }
+
+      await loadFeed();
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  async function toggleReaction(postId: number, reaction: ReactionValue) {
+    if (!currentUserId || busyPostId !== null) return;
+
+    setBusyPostId(postId);
+    setOpenReactionPostId(null);
+    setErrorMessage("");
+
+    const existing = reactions.find(
+      (item) => item.post_id === postId && item.user_id === currentUserId
+    );
+
+    if (existing?.reaction === reaction) {
+      const { error } = await supabase
+        .from("post_reactions")
+        .delete()
+        .eq("id", existing.id)
+        .eq("user_id", currentUserId);
+
+      if (error) setErrorMessage(`Reacția nu a putut fi eliminată: ${error.message}`);
+    } else {
+      const { error } = await supabase.from("post_reactions").upsert(
+        {
+          post_id: postId,
+          user_id: currentUserId,
+          reaction,
+        },
+        { onConflict: "post_id,user_id" }
+      );
+
+      if (error) {
+  console.error(error);
+  alert(error.message);
+  setErrorMessage(`Reacția nu a putut fi salvată: ${error.message}`);
+}
+    }
+
+    setBusyPostId(null);
+    await loadFeed();
+  }
+
+  async function addComment(event: FormEvent<HTMLFormElement>, postId: number) {
+    event.preventDefault();
+
+    const content = (commentDrafts[postId] ?? "").trim();
+    if (!content || !currentUserId || busyPostId !== null) return;
+
+    setBusyPostId(postId);
+    setErrorMessage("");
+
+    const { error } = await supabase.from("post_comments").insert({
+      post_id: postId,
+      user_id: currentUserId,
+      content,
+    });
+
+    if (error) {
+      setErrorMessage(`Comentariul nu a putut fi publicat: ${error.message}`);
+    } else {
+      setCommentDrafts((current) => ({ ...current, [postId]: "" }));
+      await loadFeed();
+    }
+
+    setBusyPostId(null);
+  }
+
+  async function deleteComment(comment: Comment) {
+    if (comment.user_id !== currentUserId || busyPostId !== null) return;
+
+    setBusyPostId(comment.post_id);
+    setErrorMessage("");
+
+    const { error } = await supabase
+      .from("post_comments")
+      .delete()
+      .eq("id", comment.id)
+      .eq("user_id", currentUserId);
+
+    if (error) {
+      setErrorMessage(`Comentariul nu a putut fi șters: ${error.message}`);
+    } else {
+      await loadFeed();
+    }
+
+    setBusyPostId(null);
+  }
+
+  function beginEditing(post: Post) {
+    setEditingPostId(post.id);
+    setEditingText(post.content);
+  }
+
+  async function saveEdit(post: Post) {
+    const content = editingText.trim();
+    if ((!content && !post.image_path) || post.user_id !== currentUserId) return;
+
+    setBusyPostId(post.id);
+    setErrorMessage("");
+
+    const { error } = await supabase
+      .from("posts")
+      .update({
+        content,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", post.id)
+      .eq("user_id", currentUserId);
+
+    if (error) {
+      setErrorMessage(`Postarea nu a putut fi editată: ${error.message}`);
+    } else {
+      setEditingPostId(null);
+      setEditingText("");
+      await loadFeed();
+    }
+
+    setBusyPostId(null);
+  }
+
+  async function deletePost(post: Post) {
+    if (post.user_id !== currentUserId || busyPostId !== null) return;
+
+    const confirmed = window.confirm("Ștergi această postare?");
+    if (!confirmed) return;
+
+    setBusyPostId(post.id);
+    setErrorMessage("");
+
+    const { error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", post.id)
+      .eq("user_id", currentUserId);
+
+    if (error) {
+      setErrorMessage(`Postarea nu a putut fi ștearsă: ${error.message}`);
+      setBusyPostId(null);
+      return;
+    }
+
+    if (post.image_path) {
+      await supabase.storage.from("post-images").remove([post.image_path]);
+    }
+
+    setBusyPostId(null);
+    await loadFeed();
+  }
+
+  async function sharePost(post: Post) {
+    if (!currentUserId || busyPostId !== null) return;
+
+    const sharedId = post.shared_post_id ?? post.id;
+    setBusyPostId(post.id);
+    setErrorMessage("");
+
+    const { error } = await supabase.from("posts").insert({
+      user_id: currentUserId,
+      content: "",
+      shared_post_id: sharedId,
+    });
+
+    if (error) {
+      setErrorMessage(`Postarea nu a putut fi distribuită: ${error.message}`);
+    } else {
+      await loadFeed();
+    }
+
+    setBusyPostId(null);
+  }
+
+  return (
+    <div className="aurora-feed-page">
+      <div className="aurora-feed-glow aurora-feed-glow-one" aria-hidden="true" />
+      <div className="aurora-feed-glow aurora-feed-glow-two" aria-hidden="true" />
+      <div className="aurora-feed-glow aurora-feed-glow-three" aria-hidden="true" />
+
+      <main className="aurora-feed-shell aurora-feed-layout">
+        <aside className="aurora-feed-leftbar" aria-label="Navigare rapidă">
+          <section className="aurora-left-profile-card">
+            <div className="aurora-left-orbit" aria-hidden="true" />
+            <span className="aurora-sidebar-kicker">SPAȚIUL TĂU</span>
+            <h2>Friends Aurora</h2>
+            <p>Un loc mai calm pentru oameni, idei și momente reale.</p>
+          </section>
+
+          <nav className="aurora-quick-nav" aria-label="Scurtături">
+            <Link href="/feed" className="aurora-quick-link aurora-quick-link-active"><span>⌂</span><strong>Feed</strong></Link>
+            <Link href="/people" className="aurora-quick-link"><span>✦</span><strong>Descoperă</strong></Link>
+            <Link href="/friends" className="aurora-quick-link"><span>◉</span><strong>Prieteni</strong></Link>
+            <Link href="/messages" className="aurora-quick-link"><span>◌</span><strong>Conversații</strong></Link>
+            <Link href="/notifications" className="aurora-quick-link"><span>◇</span><strong>Noutăți</strong></Link>
+          </nav>
+
+          <section className="aurora-left-note">
+            <span className="aurora-left-note-icon">✺</span>
+            <div><strong>Mod Aurora</strong><p>Mai puțin zgomot. Mai multă apropiere.</p></div>
+          </section>
+        </aside>
+
+        <div className="aurora-feed-main">
+          <section className="aurora-feed-hero">
+            <div>
+              <span className="aurora-feed-eyebrow">FEED PERSONAL</span>
+              <h1>Momentele oamenilor tăi</h1>
+              <p>Descoperă ce este nou și lasă un semn acolo unde contează.</p>
+            </div>
+            <div className="aurora-feed-hero-badge"><span className="aurora-live-dot" aria-hidden="true" />LIVE</div>
+          </section>
+
+        {errorMessage && (
+          <div className="aurora-feed-alert">
+            {errorMessage}
+          </div>
+        )}
+
+        <AuroraComposer
+  postText={postText}
+  selectedImage={selectedImage}
+  previewUrl={previewUrl}
+  publishing={publishing}
+  imageInputRef={imageInputRef}
+  onPostTextChange={setPostText}
+  onImageSelect={handleImageSelect}
+  onDroppedImage={selectImageFile}
+  onRemoveImage={() => {
+    setSelectedImage(null);
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  }}
+  onPublish={handlePublish}
+/>
+
+        <section className="aurora-feed-section">
+          <h2 className="aurora-feed-heading">Postări</h2>
+
+          {loadingPosts ? (
+            <div className="aurora-feed-state">
+              Se încarcă postările...
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="aurora-feed-state">
+              Nu există încă postări.
+            </div>
+          ) : (
+            <div className="aurora-post-list">
+              {posts.map((post) => {
+                const postReactions = reactions.filter(
+                  (reaction) => reaction.post_id === post.id
+                );
+                const postComments = comments.filter(
+                  (comment) => comment.post_id === post.id
+                );
+                const myReaction = postReactions.find(
+                  (reaction) => reaction.user_id === currentUserId
+                );
+                const reactionCounts = REACTIONS.map((reaction) => ({
+                  reaction,
+                  count: postReactions.filter((item) => item.reaction === reaction).length,
+                })).filter((item) => item.count > 0);
+
+                return (
+                  <article
+                    key={post.id}
+                    className="aurora-post-card"
+                  >
+                    <header className="aurora-post-header">
+                      <div className="flex items-center gap-3">
+                        <div className="aurora-post-avatar">
+                          {post.profiles?.avatar_url ? (
+                            <img
+                              src={post.profiles.avatar_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            getInitials(post.profiles)
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="aurora-post-author">
+                            {getDisplayName(post.profiles)}
+                          </p>
+                          <p className="aurora-post-time">
+                            {formatRelativeDate(post.created_at)}
+                            {post.updated_at ? " · editat" : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      {post.user_id === currentUserId && (
+                        <div className="aurora-post-owner-actions">
+                          <button
+                            type="button"
+                            onClick={() => beginEditing(post)}
+                            className="aurora-text-button aurora-text-button-edit"
+                          >
+                            Editează
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void deletePost(post)}
+                            disabled={busyPostId === post.id}
+                            className="aurora-text-button aurora-text-button-delete"
+                          >
+                            Șterge
+                          </button>
+                        </div>
+                      )}
+                    </header>
+
+                    {editingPostId === post.id ? (
+                      <div className="aurora-comments">
+                        <textarea
+                          value={editingText}
+                          onChange={(event) => setEditingText(event.target.value)}
+                          className="aurora-edit-textarea"
+                        />
+                        <div className="mt-2 flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPostId(null);
+                              setEditingText("");
+                            }}
+                            className="aurora-secondary-button"
+                          >
+                            Renunță
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void saveEdit(post)}
+                            disabled={busyPostId === post.id}
+                            className="aurora-primary-button"
+                          >
+                            Salvează
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      post.content && (
+                        <p className="aurora-post-content">
+                          {post.content}
+                        </p>
+                      )
+                    )}
+
+                    {post.image_path && imageUrls[post.image_path] && (
+                      <img
+                        src={imageUrls[post.image_path]}
+                        alt="Fotografie din postare"
+                        className="aurora-post-image"
+                      />
+                    )}
+
+                    {post.shared_post && (
+                      <div className="aurora-shared-post">
+                        <p className="aurora-post-author">
+                          {getDisplayName(post.shared_post.profiles)}
+                        </p>
+                        <p className="aurora-post-time">
+                          {formatRelativeDate(post.shared_post.created_at)}
+                        </p>
+                        {post.shared_post.content && (
+                          <p className="mt-3 whitespace-pre-wrap break-words text-gray-800">
+                            {post.shared_post.content}
+                          </p>
+                        )}
+                        {post.shared_post.image_path &&
+                          imageUrls[post.shared_post.image_path] && (
+                            <img
+                              src={imageUrls[post.shared_post.image_path]}
+                              alt="Fotografie distribuită"
+                              className="mt-3 max-h-[500px] w-full rounded-lg object-contain"
+                            />
+                          )}
+                      </div>
+                    )}
+
+                    {(reactionCounts.length > 0 || postComments.length > 0) && (
+                      <div className="aurora-post-meta">
+                        <div className="flex flex-wrap gap-2">
+                          {reactionCounts.map((item) => (
+                            <span key={item.reaction}>
+                              {item.reaction} {item.count}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenCommentsPostId((current) =>
+                              current === post.id ? null : post.id
+                            )
+                          }
+                          className="hover:underline"
+                        >
+                          {postComments.length}{" "}
+                          {postComments.length === 1 ? "comentariu" : "comentarii"}
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="aurora-post-actions">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenReactionPostId((current) =>
+                            current === post.id ? null : post.id
+                          )
+                        }
+                        className={`aurora-post-action ${
+                          myReaction ? "aurora-post-action-active" : ""
+                        }`}
+                      >
+                        {myReaction?.reaction ?? "👍"} Reacționează
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenCommentsPostId((current) =>
+                            current === post.id ? null : post.id
+                          )
+                        }
+                        className="aurora-post-action"
+                      >
+                        💬 Comentează
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => void sharePost(post)}
+                        disabled={busyPostId === post.id}
+                        className="aurora-post-action disabled:opacity-50"
+                      >
+                        🔄 Distribuie
+                      </button>
+
+                      {openReactionPostId === post.id && (
+                        <div className="aurora-reaction-picker">
+                          {REACTIONS.map((reaction) => (
+                            <button
+                              key={reaction}
+                              type="button"
+                              onClick={() => void toggleReaction(post.id, reaction)}
+                              disabled={busyPostId === post.id}
+                              className="aurora-reaction-option"
+                              title={reaction}
+                            >
+                              {reaction}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {openCommentsPostId === post.id && (
+                      <div className="aurora-comments">
+                        <div className="aurora-comment-list">
+                          {postComments.map((comment) => (
+                            <div key={comment.id} className="aurora-comment-row">
+                              <div className="aurora-comment-avatar">
+                                {comment.profiles?.avatar_url ? (
+                                  <img
+                                    src={comment.profiles.avatar_url}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  getInitials(comment.profiles)
+                                )}
+                              </div>
+
+                              <div className="aurora-comment-bubble">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-900">
+                                      {getDisplayName(comment.profiles)}
+                                    </p>
+                                    <p className="whitespace-pre-wrap break-words text-sm text-gray-800">
+                                      {comment.content}
+                                    </p>
+                                  </div>
+
+                                  {comment.user_id === currentUserId && (
+                                    <button
+                                      type="button"
+                                      onClick={() => void deleteComment(comment)}
+                                      className="text-xs text-red-600 hover:underline"
+                                    >
+                                      Șterge
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <form
+                          onSubmit={(event) => void addComment(event, post.id)}
+                          className="aurora-comment-form"
+                        >
+                          <input
+                            value={commentDrafts[post.id] ?? ""}
+                            onChange={(event) =>
+                              setCommentDrafts((current) => ({
+                                ...current,
+                                [post.id]: event.target.value,
+                              }))
+                            }
+                            maxLength={2000}
+                            placeholder="Scrie un comentariu..."
+                            className="aurora-comment-input"
+                          />
+                          <button
+                            type="submit"
+                            disabled={
+                              busyPostId === post.id ||
+                              !(commentDrafts[post.id] ?? "").trim()
+                            }
+                            className="aurora-comment-submit"
+                          >
+                            Trimite
+                          </button>
+                        </form>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+        </div>
+
+        <aside className="aurora-feed-rightbar" aria-label="Rezumat feed">
+          <section className="aurora-sidebar-card aurora-sidebar-welcome">
+            <span className="aurora-sidebar-kicker">ACUM ÎN FRIENDS</span>
+            <h3>Comunitatea ta respiră</h3>
+            <p>Vezi activitatea din feed fără să pierzi ceea ce contează.</p>
+          </section>
+          <section className="aurora-sidebar-card">
+            <div className="aurora-sidebar-title-row"><h3>Activitate</h3><span className="aurora-live-dot" /></div>
+            <div className="aurora-sidebar-stats">
+              <div><strong>{posts.length}</strong><span>Postări</span></div>
+              <div><strong>{reactions.length}</strong><span>Reacții</span></div>
+              <div><strong>{comments.length}</strong><span>Comentarii</span></div>
+            </div>
+          </section>
+          <section className="aurora-sidebar-card">
+            <h3>Scurtături</h3>
+            <div className="aurora-sidebar-links">
+              <Link href="/people">Descoperă persoane <span>→</span></Link>
+              <Link href="/requests">Vezi cererile <span>→</span></Link>
+              <Link href="/messages">Deschide mesajele <span>→</span></Link>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+  );
+}

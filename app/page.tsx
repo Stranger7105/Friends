@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-violet-50">
@@ -11,14 +12,17 @@ export default function Home() {
             <span className="text-2xl font-bold text-slate-900">Friends</span>
           </div>
 
-          <button className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800 transition hover:bg-slate-50">
-            Conectează-te
-          </button>
+        <Link
+  href="/login"
+  className="rounded-xl border border-slate-300 px-5 py-3 transition hover:bg-slate-100"
+>
+  Conectează-te
+</Link>
         </header>
 
         <section className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-2">
           <div>
-            <span className="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
+            <span className="inline-block rounded-full bg-emerald-900/70 px-4 py-2 text-sm font-semibold text-lime-300">
               O comunitate creată pentru oameni
             </span>
 
@@ -35,13 +39,14 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <button className="rounded-xl bg-blue-600 px-7 py-4 font-semibold text-white shadow-lg transition hover:bg-blue-700">
-                Creează cont
-              </button>
+              
 
-              <button className="rounded-xl border border-slate-300 bg-white px-7 py-4 font-semibold text-slate-800 transition hover:bg-slate-50">
-                Află mai multe
-              </button>
+              <Link
+  href="/register"
+  className="rounded-xl bg-emerald-600 px-7 py-4 text-center font-semibold text-white shadow-lg transition hover:bg-emerald-500"
+>
+  Creează cont
+</Link>
             </div>
 
             <div className="mt-10 flex flex-wrap gap-6 text-sm text-slate-500">

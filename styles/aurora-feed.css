@@ -1,0 +1,480 @@
+/* Friends Aurora — Pachetul 1
+   Fundal, structură și carduri glass pentru pagina Feed. */
+
+.aurora-feed-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 168, 107, 0.13), transparent 30rem),
+    radial-gradient(circle at 88% 14%, rgba(124, 252, 0, 0.12), transparent 28rem),
+    radial-gradient(circle at 50% 82%, rgba(16, 185, 129, 0.10), transparent 32rem),
+    linear-gradient(145deg, #FBFFFC 0%, #F0FDF4 44%, #F0FFF4 100%);
+}
+
+.aurora-feed-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(rgba(124, 252, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 252, 0, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+.aurora-feed-glow {
+  position: fixed;
+  z-index: -2;
+  width: 28rem;
+  height: 28rem;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.25;
+  animation: aurora-float 13s ease-in-out infinite;
+}
+
+.aurora-feed-glow-one { top: 7rem; left: -10rem; background: #00A86B; }
+.aurora-feed-glow-two { top: 18rem; right: -11rem; background: #7CFC00; animation-delay: -4s; }
+.aurora-feed-glow-three { bottom: -13rem; left: 38%; background: #7CFC00; animation-delay: -8s; }
+
+.aurora-feed-shell {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  padding: 3rem 1rem 8rem;
+}
+
+.aurora-feed-alert {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  border-radius: 1.25rem;
+  background: rgba(254, 242, 242, 0.82);
+  padding: 1rem 1.15rem;
+  color: #b91c1c;
+  box-shadow: 0 16px 45px -32px rgba(185, 28, 28, 0.65);
+  backdrop-filter: blur(18px);
+}
+
+.aurora-feed-section { margin-top: 1.75rem; }
+.aurora-feed-heading { margin: 0 0 1rem; font-size: clamp(1.35rem, 2vw, 1.7rem); font-weight: 850; letter-spacing: -0.035em; color: #182033; }
+.aurora-feed-state { border: 1px solid rgba(255,255,255,.76); border-radius: 1.6rem; background: rgba(255,255,255,.68); padding: 1.5rem; color: #64748b; box-shadow: 0 24px 70px -44px rgba(30,41,59,.55); backdrop-filter: blur(22px); }
+.aurora-post-list { display: grid; gap: 1.15rem; }
+
+.aurora-post-card {
+  position: relative;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 1.75rem;
+  background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.62));
+  padding: 1.25rem;
+  box-shadow: 0 25px 80px -48px rgba(51, 65, 85, 0.68);
+  backdrop-filter: blur(24px) saturate(135%);
+  transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s ease, border-color .28s ease;
+  animation: aurora-card-enter .5s both;
+}
+
+.aurora-post-card:hover { transform: translateY(-3px); border-color: rgba(110,231,183,.78); box-shadow: 0 32px 90px -46px rgba(5,150,105,.40); }
+.aurora-post-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .85rem; }
+.aurora-post-avatar { display:flex; width:2.85rem; height:2.85rem; flex:0 0 auto; align-items:center; justify-content:center; overflow:hidden; border:2px solid rgba(255,255,255,.9); border-radius:1rem; background:linear-gradient(135deg,#00A86B,#10B981 55%,#7CFC00); color:white; font-weight:800; box-shadow:0 10px 26px -14px rgba(0,168,107,.75); }
+.aurora-post-author { font-weight:800; letter-spacing:-.015em; color:#172033; }
+.aurora-post-time { margin-top:.1rem; font-size:.76rem; color:#8490a4; }
+.aurora-post-owner-actions { display:flex; gap:.35rem; font-size:.82rem; }
+.aurora-text-button { border:0; border-radius:.75rem; background:transparent; padding:.42rem .65rem; font-weight:700; transition:transform .2s ease, background .2s ease; }
+.aurora-text-button:hover { transform:translateY(-1px) scale(1.03); }
+.aurora-text-button-edit { color:#00A86B; } .aurora-text-button-edit:hover { background:#ECFDF5; }
+.aurora-text-button-delete { color:#e05266; } .aurora-text-button-delete:hover { background:#fff0f2; }
+.aurora-post-content { margin-top:1rem; white-space:pre-wrap; overflow-wrap:anywhere; color:#344054; line-height:1.72; }
+.aurora-post-image { display:block; width:100%; max-height:650px; margin-top:1rem; border:1px solid rgba(255,255,255,.78); border-radius:1.35rem; background:rgba(241,245,249,.7); object-fit:contain; box-shadow:0 18px 45px -32px rgba(15,23,42,.6); }
+.aurora-shared-post { margin-top:1rem; border:1px solid rgba(203,213,225,.62); border-radius:1.25rem; background:rgba(248,250,252,.7); padding:1rem; }
+.aurora-post-meta { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:1rem; border-bottom:1px solid rgba(203,213,225,.55); padding-bottom:.8rem; font-size:.85rem; color:#7c879a; }
+.aurora-post-actions { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.45rem; margin-top:.55rem; border-bottom:1px solid rgba(203,213,225,.48); padding-bottom:.55rem; }
+.aurora-post-action { border:0; border-radius:1rem; background:transparent; padding:.72rem .55rem; color:#667085; font-size:.9rem; font-weight:750; transition:transform .2s cubic-bezier(.22,1,.36,1), background .2s ease, color .2s ease; }
+.aurora-post-action:hover { transform:translateY(-2px) scale(1.025); background:rgba(209,250,229,.75); color:#00A86B; }
+.aurora-post-action-active { color:#00A86B; background:rgba(209,250,229,.68); }
+.aurora-reaction-picker { position:absolute; bottom:3.35rem; left:0; z-index:30; display:flex; gap:.18rem; border:1px solid rgba(255,255,255,.9); border-radius:999px; background:rgba(255,255,255,.88); padding:.48rem; font-size:1.45rem; box-shadow:0 20px 55px -25px rgba(15,23,42,.5); backdrop-filter:blur(18px); animation:aurora-pop .2s both; }
+.aurora-reaction-option { border:0; border-radius:999px; background:transparent; padding:.28rem; transition:transform .18s cubic-bezier(.22,1,.36,1), background .18s ease; }
+.aurora-reaction-option:hover { transform:translateY(-7px) scale(1.3); background:rgba(209,250,229,.8); }
+.aurora-comments { margin-top:1rem; }
+.aurora-comment-list { display:grid; gap:.72rem; }
+.aurora-comment-row { display:flex; align-items:flex-start; gap:.55rem; }
+.aurora-comment-avatar { display:flex; width:2rem; height:2rem; flex:0 0 auto; align-items:center; justify-content:center; overflow:hidden; border-radius:.8rem; background:linear-gradient(135deg,#e2e8f0,#cbd5e1); color:#475569; font-size:.72rem; font-weight:800; }
+.aurora-comment-bubble { min-width:0; flex:1; border:1px solid rgba(226,232,240,.7); border-radius:1.15rem; background:rgba(248,250,252,.78); padding:.65rem .8rem; }
+.aurora-comment-form { display:flex; gap:.55rem; margin-top:1rem; }
+.aurora-comment-input, .aurora-edit-textarea { width:100%; border:1px solid rgba(203,213,225,.72); border-radius:1rem; background:rgba(255,255,255,.76); padding:.72rem .9rem; color:#334155; outline:none; transition:border-color .2s ease, box-shadow .2s ease; }
+.aurora-comment-input:focus, .aurora-edit-textarea:focus { border-color:#7CFC00; box-shadow:0 0 0 4px rgba(139,92,246,.09); }
+.aurora-comment-submit, .aurora-primary-button { border:0; border-radius:1rem; background:linear-gradient(90deg,#00A86B,#10B981,#7CFC00); padding:.72rem 1rem; color:#fff; font-weight:800; box-shadow:0 12px 28px -15px rgba(0,168,107,.75); transition:transform .2s ease, opacity .2s ease; }
+.aurora-comment-submit:hover, .aurora-primary-button:hover { transform:translateY(-2px) scale(1.025); }
+.aurora-secondary-button { border:1px solid rgba(203,213,225,.72); border-radius:1rem; background:rgba(255,255,255,.72); padding:.65rem .9rem; font-weight:700; color:#64748b; }
+.aurora-edit-textarea { min-height:6rem; resize:vertical; }
+
+@keyframes aurora-float { 0%,100% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(24px,-18px,0) scale(1.08); } }
+@keyframes aurora-card-enter { from { opacity:0; transform:translateY(16px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes aurora-pop { from { opacity:0; transform:translateY(8px) scale(.9); } to { opacity:1; transform:translateY(0) scale(1); } }
+
+@media (max-width: 640px) {
+  .aurora-feed-shell { padding:1.5rem .75rem 7rem; }
+  .aurora-post-card { border-radius:1.45rem; padding:1rem; }
+  .aurora-post-owner-actions { flex-direction:column; align-items:flex-end; }
+  .aurora-post-action { font-size:.78rem; padding:.7rem .2rem; }
+  .aurora-post-meta { align-items:flex-start; flex-direction:column; gap:.45rem; }
+  .aurora-comment-form { align-items:stretch; flex-direction:column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-feed-glow, .aurora-post-card, .aurora-reaction-picker { animation:none !important; }
+  .aurora-post-card, .aurora-post-action, .aurora-reaction-option { transition:none !important; }
+}
+
+
+/* Friends Aurora UI v3 Core */
+.aurora-feed-shell.aurora-feed-layout{width:min(calc(100% - 2rem),1440px);display:grid;grid-template-columns:238px minmax(0,760px) 282px;gap:1.15rem;align-items:start;padding-top:2rem}.aurora-feed-main{min-width:0}.aurora-feed-leftbar,.aurora-feed-rightbar{position:sticky;top:5.6rem;display:grid;gap:.9rem;align-self:start}.aurora-left-profile-card,.aurora-left-note,.aurora-quick-nav,.aurora-sidebar-card{border:1px solid rgba(255,255,255,.82);background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.56));box-shadow:0 28px 80px -54px rgba(49,46,129,.58);backdrop-filter:blur(26px) saturate(145%)}.aurora-left-profile-card{position:relative;overflow:hidden;min-height:190px;border-radius:1.65rem;padding:1.25rem}.aurora-left-profile-card:after{content:"";position:absolute;width:9rem;height:9rem;right:-4.5rem;bottom:-4rem;border-radius:999px;background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(124,252,0,.28));filter:blur(4px)}.aurora-left-orbit{width:3.35rem;height:3.35rem;margin-bottom:1.1rem;border:1px solid rgba(255,255,255,.88);border-radius:1.15rem;background:radial-gradient(circle at 35% 30%,#fff 0 5%,transparent 6%),conic-gradient(from 210deg,#00A86B,#10B981,#7CFC00,#7CFC00,#00A86B);box-shadow:0 16px 34px -18px rgba(0,168,107,.9);animation:aurora-orbit-breathe 4s ease-in-out infinite}.aurora-sidebar-kicker,.aurora-feed-eyebrow{color:#059669;font-size:.64rem;font-weight:900;letter-spacing:.17em}.aurora-left-profile-card h2{margin-top:.45rem;color:#172033;font-size:1.28rem;letter-spacing:-.04em}.aurora-left-profile-card p{position:relative;z-index:1;margin-top:.55rem;color:#707b90;font-size:.82rem;line-height:1.55}.aurora-quick-nav{display:grid;gap:.3rem;border-radius:1.55rem;padding:.65rem}.aurora-quick-link{display:flex;align-items:center;gap:.75rem;min-height:3rem;border-radius:1rem;padding:.65rem .75rem;color:#667085;font-size:.83rem;text-decoration:none;transition:.22s cubic-bezier(.22,1,.36,1)}.aurora-quick-link span{display:grid;width:2rem;height:2rem;place-items:center;border:1px solid rgba(226,232,240,.8);border-radius:.75rem;background:rgba(255,255,255,.66)}.aurora-quick-link:hover{transform:translateX(4px);background:rgba(209,250,229,.72);color:#059669}.aurora-quick-link-active{color:#fff;background:linear-gradient(110deg,rgba(124,58,237,.9),rgba(0,168,107,.86),rgba(124,252,0,.82));box-shadow:0 15px 34px -20px rgba(0,168,107,.9)}.aurora-quick-link-active span{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.16)}.aurora-left-note{display:flex;align-items:center;gap:.75rem;border-radius:1.35rem;padding:.9rem}.aurora-left-note-icon{display:grid;width:2.2rem;height:2.2rem;place-items:center;border-radius:.85rem;background:linear-gradient(135deg,#D1FAE5,#cffafe);color:#00A86B}.aurora-left-note strong{color:#30384b;font-size:.8rem}.aurora-left-note p{margin-top:.15rem;color:#8a94a7;font-size:.7rem;line-height:1.35}.aurora-feed-hero{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,.72);border-radius:1.65rem;background:radial-gradient(circle at 100% 0%,rgba(124,252,0,.18),transparent 45%),radial-gradient(circle at 0% 100%,rgba(139,92,246,.18),transparent 48%),rgba(255,255,255,.5);padding:1.1rem 1.25rem;box-shadow:0 24px 65px -48px rgba(49,46,129,.62);backdrop-filter:blur(24px)}.aurora-feed-hero h1{margin-top:.28rem;color:#172033;font-size:clamp(1.35rem,2.2vw,1.85rem);line-height:1.1;letter-spacing:-.045em}.aurora-feed-hero p{margin-top:.35rem;color:#7b869a;font-size:.8rem}.aurora-feed-hero-badge{display:flex;align-items:center;gap:.55rem;border:1px solid rgba(255,255,255,.82);border-radius:999px;background:rgba(255,255,255,.64);padding:.55rem .75rem;color:#526075;font-size:.66rem;font-weight:900;letter-spacing:.12em}.aurora-live-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:999px;background:#7CFC00;box-shadow:0 0 0 5px rgba(124,252,0,.12),0 0 15px rgba(124,252,0,.65);animation:aurora-live-pulse 1.8s ease-in-out infinite}.aurora-sidebar-card{border-radius:1.55rem;padding:1rem}.aurora-sidebar-card h3{color:#253046;font-size:.95rem}.aurora-sidebar-card p{margin-top:.45rem;color:#7b869a;font-size:.76rem;line-height:1.5}.aurora-sidebar-title-row{display:flex;align-items:center;justify-content:space-between}.aurora-sidebar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.8rem}.aurora-sidebar-stats div{display:grid;gap:.1rem;border:1px solid rgba(226,232,240,.7);border-radius:1rem;background:rgba(255,255,255,.55);padding:.65rem .35rem;text-align:center}.aurora-sidebar-stats strong{color:#059669;font-size:1rem}.aurora-sidebar-stats span{color:#8a94a7;font-size:.58rem}.aurora-sidebar-links{display:grid;gap:.35rem;margin-top:.65rem}.aurora-sidebar-links a{display:flex;justify-content:space-between;border-radius:.85rem;padding:.55rem .6rem;color:#667085;font-size:.75rem;text-decoration:none}.aurora-sidebar-links a:hover{background:rgba(209,250,229,.72);color:#059669}.aurora-post-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;border-radius:1.75rem 0 0 1.75rem;background:linear-gradient(to bottom,transparent,rgba(139,92,246,.52),rgba(124,252,0,.45),transparent);opacity:.55}@keyframes aurora-orbit-breathe{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(5deg) scale(1.06)}}@keyframes aurora-live-pulse{0%,100%{opacity:.7;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}@media(max-width:1260px){.aurora-feed-shell.aurora-feed-layout{grid-template-columns:220px minmax(0,760px)}.aurora-feed-rightbar{display:none}}@media(max-width:980px){.aurora-feed-shell.aurora-feed-layout{width:min(100%,820px);grid-template-columns:minmax(0,1fr)}.aurora-feed-leftbar{display:none}}@media(max-width:640px){.aurora-feed-hero{align-items:flex-start;flex-direction:column;border-radius:1.35rem;padding:1rem}}
+
+
+/* =========================================================
+   FRIENDS AURORA v4 — PASUL 1
+   Fundal viu, feed centrat și panouri premium
+   ========================================================= */
+
+.aurora-feed-page {
+  background:
+    radial-gradient(circle at 8% 16%, rgba(129, 92, 246, .20), transparent 26rem),
+    radial-gradient(circle at 92% 14%, rgba(38, 198, 218, .18), transparent 30rem),
+    radial-gradient(circle at 48% 92%, rgba(124, 252, 0, .16), transparent 34rem),
+    linear-gradient(145deg, #fbfcff 0%, #f5f1ff 46%, #edfaff 100%);
+}
+
+.aurora-feed-page::after {
+  content: "";
+  position: fixed;
+  inset: -18%;
+  z-index: -4;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from 210deg at 35% 40%,
+      rgba(0, 168, 107, .18),
+      rgba(124, 252, 0, .10),
+      rgba(124, 252, 0, .15),
+      rgba(124, 252, 0, .14),
+      rgba(0, 168, 107, .18)
+    );
+  filter: blur(90px);
+  opacity: .72;
+  animation: aurora-v4-drift 28s ease-in-out infinite alternate;
+}
+
+.aurora-feed-glow {
+  opacity: .31;
+  filter: blur(96px);
+  animation-duration: 18s;
+}
+
+.aurora-feed-shell.aurora-feed-layout {
+  width: min(calc(100% - 2rem), 1510px);
+  grid-template-columns: 260px minmax(0, 780px) 292px;
+  gap: 1.35rem;
+  justify-content: center;
+}
+
+.aurora-feed-main {
+  width: 100%;
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+.aurora-feed-leftbar,
+.aurora-feed-rightbar {
+  top: 6.35rem;
+}
+
+.aurora-left-profile-card,
+.aurora-left-note,
+.aurora-quick-nav,
+.aurora-sidebar-card,
+.aurora-feed-hero,
+.aurora-post-card {
+  border-color: rgba(255,255,255,.86);
+  background:
+    linear-gradient(150deg, rgba(255,255,255,.82), rgba(255,255,255,.52));
+  box-shadow:
+    0 28px 90px -58px rgba(35, 27, 82, .52),
+    inset 0 1px 0 rgba(255,255,255,.86);
+  backdrop-filter: blur(30px) saturate(155%);
+}
+
+.aurora-left-profile-card,
+.aurora-quick-nav,
+.aurora-left-note,
+.aurora-sidebar-card {
+  transition:
+    transform .28s cubic-bezier(.22,1,.36,1),
+    box-shadow .28s ease,
+    border-color .28s ease;
+}
+
+.aurora-left-profile-card:hover,
+.aurora-quick-nav:hover,
+.aurora-left-note:hover,
+.aurora-sidebar-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(110,231,183,.88);
+  box-shadow: 0 34px 100px -58px rgba(0,168,107,.46);
+}
+
+.aurora-quick-link {
+  min-height: 3.25rem;
+  border: 1px solid transparent;
+  padding: .68rem .82rem;
+}
+
+.aurora-quick-link span {
+  position: relative;
+  overflow: hidden;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: .82rem;
+  box-shadow: 0 12px 22px -18px rgba(15,23,42,.65);
+  transition: transform .24s cubic-bezier(.22,1,.36,1);
+}
+
+.aurora-quick-link:hover span {
+  transform: scale(1.16) rotate(-4deg);
+}
+
+.aurora-quick-link-active {
+  border-color: rgba(255,255,255,.2);
+}
+
+.aurora-feed-hero {
+  min-height: 110px;
+  border-radius: 1.85rem;
+  padding: 1.25rem 1.4rem;
+}
+
+.aurora-feed-hero h1 {
+  font-size: clamp(1.5rem,2.4vw,2rem);
+}
+
+.aurora-feed-hero-badge {
+  box-shadow: 0 14px 34px -23px rgba(16,185,129,.7);
+}
+
+.aurora-post-card {
+  border-radius: 1.9rem;
+}
+
+.aurora-post-card:hover {
+  transform: translateY(-6px) scale(1.004);
+  border-color: rgba(52,211,153,.78);
+  box-shadow: 0 42px 115px -60px rgba(5,150,105,.48);
+}
+
+@keyframes aurora-v4-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) rotate(-4deg) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) rotate(5deg) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-1%, 4%, 0) rotate(-2deg) scale(1.04);
+  }
+}
+
+@media (max-width: 1320px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    grid-template-columns: 232px minmax(0, 760px);
+  }
+
+  .aurora-feed-rightbar {
+    display: none;
+  }
+}
+
+@media (max-width: 1010px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    width: min(100%, 850px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aurora-feed-leftbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-feed-page::after {
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   FRIENDS AURORA v4 — PASUL 2
+   Composer aerisit, carduri mai cinematice, dock macOS
+   ========================================================= */
+
+.aurora-post-avatar {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 1.15rem;
+  box-shadow:
+    0 16px 34px -20px rgba(0,168,107,.85),
+    0 0 0 5px rgba(255,255,255,.36);
+  transition: transform .24s cubic-bezier(.22,1,.36,1);
+}
+
+.aurora-post-card:hover .aurora-post-avatar {
+  transform: translateY(-2px) scale(1.055) rotate(-2deg);
+}
+
+.aurora-post-header {
+  padding-inline: .15rem;
+}
+
+.aurora-post-content {
+  margin-top: 1.15rem;
+  font-size: 1rem;
+  line-height: 1.78;
+}
+
+.aurora-post-image {
+  width: calc(100% + 2.5rem);
+  max-width: none;
+  margin-right: -1.25rem;
+  margin-left: -1.25rem;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+  box-shadow: 0 22px 55px -36px rgba(15,23,42,.68);
+  transition:
+    transform .38s cubic-bezier(.22,1,.36,1),
+    filter .38s ease;
+}
+
+.aurora-post-card:hover .aurora-post-image {
+  transform: scale(1.006);
+  filter: saturate(1.05) contrast(1.015);
+}
+
+.aurora-post-actions {
+  margin-top: .7rem;
+  gap: .55rem;
+}
+
+.aurora-post-action {
+  border: 1px solid transparent;
+  background: rgba(255,255,255,.38);
+}
+
+.aurora-post-action:hover {
+  border-color: rgba(110,231,183,.7);
+  background: rgba(209,250,229,.82);
+}
+
+.aurora-reaction-picker {
+  transform-origin: left bottom;
+  box-shadow:
+    0 25px 65px -28px rgba(15,23,42,.58),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.aurora-comment-bubble {
+  backdrop-filter: blur(16px);
+}
+
+@media (max-width: 640px) {
+  .aurora-post-image {
+    width: calc(100% + 2rem);
+    margin-right: -1rem;
+    margin-left: -1rem;
+  }
+}
+
+
+/* =========================================================
+   FRIENDS AURORA — JADE TO PHOSPHOR GREEN THEME
+   ========================================================= */
+
+:root {
+  --friends-jade: #00A86B;
+  --friends-emerald: #10B981;
+  --friends-aurora: #34D399;
+  --friends-phosphor: #7CFC00;
+}
+
+.aurora-feed-page {
+  background:
+    radial-gradient(circle at 8% 16%, rgba(0,168,107,.22), transparent 27rem),
+    radial-gradient(circle at 92% 18%, rgba(52,211,153,.18), transparent 31rem),
+    radial-gradient(circle at 52% 94%, rgba(124,252,0,.13), transparent 35rem),
+    linear-gradient(145deg, #fbfffd 0%, #f2fff7 48%, #edfff2 100%) !important;
+}
+
+.aurora-feed-page::after {
+  background:
+    conic-gradient(
+      from 210deg at 35% 40%,
+      rgba(0,168,107,.23),
+      rgba(16,185,129,.15),
+      rgba(52,211,153,.20),
+      rgba(124,252,0,.14),
+      rgba(0,168,107,.23)
+    ) !important;
+}
+
+.aurora-feed-glow-one { background: #00A86B !important; }
+.aurora-feed-glow-two { background: #34D399 !important; }
+.aurora-feed-glow-three { background: #7CFC00 !important; }
+
+.aurora-quick-link-active,
+.aurora-comment-submit,
+.aurora-primary-button {
+  background: linear-gradient(100deg, #00A86B, #10B981, #34D399, #7CFC00) !important;
+}
+
+.aurora-live-dot {
+  background: #7CFC00 !important;
+  box-shadow:
+    0 0 0 5px rgba(124,252,0,.14),
+    0 0 18px rgba(124,252,0,.88) !important;
+}
+
+.aurora-feed-eyebrow,
+.aurora-sidebar-kicker,
+.aurora-text-button-edit,
+.aurora-post-action-active {
+  color: #059669 !important;
+}
+
+.aurora-post-action:hover,
+.aurora-quick-link:hover,
+.aurora-sidebar-links a:hover {
+  color: #047857 !important;
+  background: rgba(209,250,229,.80) !important;
+}
+
+.aurora-post-card:hover,
+.aurora-sidebar-card:hover,
+.aurora-left-profile-card:hover,
+.aurora-quick-nav:hover,
+.aurora-left-note:hover {
+  border-color: rgba(52,211,153,.88) !important;
+  box-shadow: 0 38px 110px -58px rgba(0,168,107,.48) !important;
+}
+
+.aurora-post-avatar,
+.aurora-left-orbit {
+  background:
+    conic-gradient(from 210deg, #00A86B, #10B981, #34D399, #7CFC00, #00A86B) !important;
+}
+
+.aurora-feed-heading::before {
+  background: linear-gradient(135deg, #00A86B, #7CFC00) !important;
+  box-shadow: 0 0 0 5px rgba(16,185,129,.10) !important;
+}

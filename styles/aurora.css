@@ -1,0 +1,185 @@
+/* =========================================================
+   FRIENDS AURORA UI
+   Aurora Core
+========================================================= */
+
+:root {
+
+  /* Aurora Palette */
+
+  --aurora-green: #00E676;
+  --aurora-emerald: #00C853;
+  --aurora-cyan: #26F0F1;
+  --aurora-blue: #0A2540;
+  --aurora-dark: #050A14;
+  --aurora-night: #02050D;
+
+  /* Glass */
+
+  --glass-bg: rgba(255,255,255,.07);
+  --glass-border: rgba(255,255,255,.12);
+
+  /* Text */
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255,255,255,.72);
+
+  /* Glow */
+
+  --glow-green:
+      0 0 12px rgba(0,230,118,.35),
+      0 0 30px rgba(0,230,118,.15);
+
+  --glow-cyan:
+      0 0 12px rgba(38,240,241,.35),
+      0 0 30px rgba(38,240,241,.15);
+
+  /* Radius */
+
+  --radius-small:16px;
+  --radius-medium:24px;
+  --radius-large:34px;
+
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
+html,
+body{
+
+    min-height:100%;
+    overflow-x:hidden;
+
+    color:var(--text-primary);
+
+    background:
+
+    radial-gradient(circle at 15% 20%,
+    rgba(0,230,118,.18),
+    transparent 28%),
+
+    radial-gradient(circle at 80% 10%,
+    rgba(38,240,241,.14),
+    transparent 32%),
+
+    radial-gradient(circle at 50% 80%,
+    rgba(0,200,83,.12),
+    transparent 35%),
+
+    linear-gradient(
+        180deg,
+        #081322 0%,
+        #050A14 45%,
+        #02050D 100%
+    );
+
+}
+
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+a{
+
+    color:inherit;
+
+    text-decoration:none;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar{
+
+    width:12px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#081322;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:linear-gradient(
+
+        180deg,
+
+        var(--aurora-green),
+
+        var(--aurora-cyan)
+
+    );
+
+    border-radius:999px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:var(--aurora-green);
+
+}
+
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection{
+
+    background:rgba(0,230,118,.35);
+
+    color:white;
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+.aurora-container{
+
+    width:min(1700px,95vw);
+
+    margin:auto;
+
+}
+
+.text-glow{
+
+    text-shadow:
+
+    0 0 10px rgba(0,230,118,.45),
+
+    0 0 30px rgba(0,230,118,.25);
+
+}
+
+.green-glow{
+
+    box-shadow:var(--glow-green);
+
+}
+
+.cyan-glow{
+
+    box-shadow:var(--glow-cyan);
+
+}
+
+.round-xl{
+
+    border-radius:var(--radius-large);
+
+}

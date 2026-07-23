@@ -1,0 +1,248 @@
+/* =========================================================
+   FRIENDS AURORA
+   Glass System
+========================================================= */
+
+/* Card de bază */
+
+.glass{
+
+    background: rgba(255,255,255,.06);
+
+    backdrop-filter: blur(22px);
+
+    -webkit-backdrop-filter: blur(22px);
+
+    border:1px solid rgba(255,255,255,.10);
+
+    border-radius:32px;
+
+    box-shadow:
+
+        0 8px 32px rgba(0,0,0,.35),
+
+        inset 0 1px 0 rgba(255,255,255,.08);
+
+}
+
+
+/* Card Premium */
+
+.glass-premium{
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(255,255,255,.10),
+
+            rgba(255,255,255,.04)
+
+        );
+
+    backdrop-filter: blur(28px);
+
+    -webkit-backdrop-filter: blur(28px);
+
+    border:1px solid rgba(255,255,255,.12);
+
+    border-radius:36px;
+
+    box-shadow:
+
+        0 20px 60px rgba(0,0,0,.45),
+
+        inset 0 1px 0 rgba(255,255,255,.15),
+
+        0 0 30px rgba(0,230,118,.08);
+
+}
+
+
+/* Sidebar */
+
+.glass-sidebar{
+
+    background:
+
+        rgba(8,18,34,.72);
+
+    backdrop-filter: blur(24px);
+
+    -webkit-backdrop-filter: blur(24px);
+
+    border-right:
+
+        1px solid rgba(255,255,255,.08);
+
+}
+
+
+/* Dock */
+
+.glass-dock{
+
+    background:
+
+        rgba(255,255,255,.08);
+
+    backdrop-filter: blur(30px);
+
+    -webkit-backdrop-filter: blur(30px);
+
+    border:
+
+        1px solid rgba(255,255,255,.12);
+
+    border-radius:999px;
+
+    box-shadow:
+
+        0 20px 50px rgba(0,0,0,.45);
+
+}
+
+
+/* Butoane */
+
+.glass-button{
+
+    background:
+
+        rgba(255,255,255,.08);
+
+    border:
+
+        1px solid rgba(255,255,255,.10);
+
+    border-radius:20px;
+
+    transition:
+
+        transform .35s,
+
+        box-shadow .35s,
+
+        background .35s;
+
+    cursor:pointer;
+
+}
+
+
+.glass-button:hover{
+
+    transform:
+
+        translateY(-3px);
+
+    background:
+
+        rgba(255,255,255,.12);
+
+    box-shadow:
+
+        0 0 20px rgba(0,230,118,.25);
+
+}
+
+
+/* Cercuri */
+
+.glass-circle{
+
+    width:72px;
+
+    height:72px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+
+        rgba(255,255,255,.08);
+
+    border:
+
+        1px solid rgba(255,255,255,.12);
+
+    backdrop-filter:blur(22px);
+
+    transition:.35s;
+
+}
+
+
+.glass-circle:hover{
+
+    transform:
+
+        scale(1.08);
+
+    box-shadow:
+
+        0 0 25px rgba(0,230,118,.35);
+
+}
+
+
+/* Glow */
+
+.glass-glow{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+
+.glass-glow::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:-2px;
+
+    border-radius:inherit;
+
+    padding:1px;
+
+    background:
+
+        linear-gradient(
+
+            135deg,
+
+            rgba(0,230,118,.55),
+
+            rgba(38,240,241,.20),
+
+            transparent
+
+        );
+
+    -webkit-mask:
+
+        linear-gradient(#fff 0 0) content-box,
+
+        linear-gradient(#fff 0 0);
+        mask:
+  linear-gradient(#fff 0 0) content-box,
+  linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite:xor;
+
+            mask-composite:exclude;
+
+    pointer-events:none;
+
+}

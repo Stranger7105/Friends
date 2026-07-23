@@ -1,0 +1,62 @@
+/* styles/dock.css */
+
+.glass-glow{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.35),
+    inset 0 1px 1px rgba(255,255,255,.15);
+}
+
+.glass-glow::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  padding:1px;
+  border-radius:inherit;
+  background:linear-gradient(
+    135deg,
+    rgba(0,230,118,.55),
+    rgba(38,240,241,.25),
+    rgba(99,102,241,.25)
+  );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+
+  pointer-events:none;
+}
+
+.glass-glow::after{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background:
+    radial-gradient(circle at top,
+      rgba(255,255,255,.18),
+      transparent 60%);
+  animation:auroraFloat 8s linear infinite;
+}
+
+@keyframes auroraFloat{
+  from{transform:translateX(-25%) rotate(0deg);}
+  to{transform:translateX(25%) rotate(360deg);}
+}
+
+@media (max-width:768px){
+  .glass-glow{
+    transform:scale(.92);
+  }
+}
