@@ -103,7 +103,7 @@ export default function FriendsPage() {
   if (loading) {
     return (
       <main className="aurora-page min-h-screen px-4 py-8">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow">
+        <div className="mx-auto max-w-4xl rounded-2xl p-6 shadow" style={{ background: "var(--friends-surface)", color: "var(--friends-text)", border: "1px solid var(--friends-border)" }}>
           Se încarcă prietenii...
         </div>
       </main>
@@ -114,12 +114,13 @@ export default function FriendsPage() {
     <main className="aurora-page min-h-screen px-4 py-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold text-gray-900">Prietenii mei</h1>
+          <h1 className="text-3xl font-bold" style={{ color: "var(--friends-text)" }}>Prietenii mei</h1>
 
           <button
             type="button"
             onClick={() => router.push("/people")}
-            className="rounded-lg bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-500"
+            className="rounded-lg px-5 py-2.5 font-semibold text-white transition hover:-translate-y-0.5"
+            style={{ background: "var(--friends-primary)" }}
           >
             Găsește prieteni
           </button>
@@ -132,7 +133,7 @@ export default function FriendsPage() {
         )}
 
         {friends.length === 0 ? (
-          <div className="rounded-2xl bg-white p-6 text-gray-600 shadow">
+          <div className="rounded-2xl p-6 shadow" style={{ background: "var(--friends-surface)", color: "var(--friends-muted)", border: "1px solid var(--friends-border)" }}>
             Nu ai încă prieteni.
           </div>
         ) : (
@@ -145,9 +146,11 @@ export default function FriendsPage() {
               return (
                 <article
                   key={friend.id}
-                  className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow"
+                  className="flex items-center gap-4 rounded-2xl p-5 shadow"
+                  style={{ background: "var(--friends-surface)", color: "var(--friends-text)", border: "1px solid var(--friends-border)" }}
                 >
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-xl font-bold text-white">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full text-xl font-bold text-white"
+                    style={{ background: "var(--friends-primary)" }}>
                     {friend.avatar_url ? (
                       <img
                         src={friend.avatar_url}
@@ -160,18 +163,19 @@ export default function FriendsPage() {
                   </div>
 
                   <div className="min-w-0">
-                    <h2 className="truncate text-lg font-bold text-gray-900">
+                    <h2 className="truncate text-lg font-bold"
+                      style={{ color: "var(--friends-text)" }}>
                       {friend.full_name || friend.username || "Utilizator"}
                     </h2>
 
                     {friend.username && (
-                      <p className="truncate text-gray-500">
+                      <p className="truncate" style={{ color: "var(--friends-muted)" }}>
                         @{friend.username}
                       </p>
                     )}
 
                     {location && (
-                      <p className="mt-1 truncate text-sm text-gray-600">
+                      <p className="mt-1 truncate text-sm" style={{ color: "var(--friends-muted)" }}>
                         📍 {location}
                       </p>
                     )}

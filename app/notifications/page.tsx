@@ -9,10 +9,24 @@ type NotificationRow = {
   id: number;
   recipient_id: string;
   actor_id: string | null;
-  type: "reaction" | "comment" | "share" | "friend_request" | "friend_accepted" | "message";
+  type:
+    | "reaction"
+    | "comment"
+    | "share"
+    | "friend_request"
+    | "friend_accepted"
+    | "message"
+    | "reel_comment_reply"
+    | "reel_comment_like"
+    | "reel_comment_reaction"
+    | "reel_like"
+    | "reel_reaction";
   post_id: number | null;
   friend_request_id: number | null;
   message_id: number | null;
+  reel_id: string | null;
+  comment_id: string | null;
+  reaction: string | null;
   text: string;
   is_read: boolean;
   created_at: string;
@@ -74,6 +88,11 @@ function notificationIcon(type: NotificationRow["type"]) {
   if (type === "friend_request") return "👥";
   if (type === "friend_accepted") return "✅";
   if (type === "message") return "📩";
+  if (type === "reel_comment_reply") return "💬";
+  if (type === "reel_comment_like") return "❤️";
+  if (type === "reel_comment_reaction") return "✨";
+  if (type === "reel_like") return "❤️";
+  if (type === "reel_reaction") return "✨";
   return "🔔";
 }
 
@@ -105,7 +124,7 @@ export default function NotificationsPage() {
 
     const result = await supabase
       .from("notifications")
-      .select("id, recipient_id, actor_id, type, post_id, friend_request_id, message_id, text, is_read, created_at")
+      .select("id, recipient_id, actor_id, type, post_id, friend_request_id, message_id, reel_id, comment_id, reaction, text, is_read, created_at")
       .eq("recipient_id", user.id)
       .order("created_at", { ascending: false })
       .limit(100);
@@ -260,6 +279,20 @@ export default function NotificationsPage() {
 
     if (notification.type === "message") {
       router.push("/messages");
+      return;
+    }
+
+    if (
+      notification.type === "reel_comment_reply" ||
+      notification.type === "reel_comment_like" ||
+      notification.type === "reel_comment_reaction" ||
+      notification.type === "reel_like" ||
+      notification.type === "reel_reaction"
+    ) {
+      const params = new URLSearchParams();
+      if (notification.reel_id) params.set("reelId", notification.reel_id);
+      if (notification.comment_id) params.set("commentId", notification.comment_id);
+      router.push(`/reels${params.size ? `?${params.toString()}` : ""}`);
     }
   }
 

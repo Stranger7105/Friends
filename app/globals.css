@@ -1,28 +1,455 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =========================================================
+   FRIENDS 6.2 — SINGLE GLOBAL THEME ENGINE
+   Nu mai importa aurora-v5.css aici.
+========================================================= */
+
+:root,
+html[data-friends-theme="aurora"] {
+  color-scheme: dark;
+
+  --background: #061d19;
+  --foreground: #f8fffd;
+
+  --friends-bg-1-rgb: 6 29 25;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 15 118 110;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 52 211 153;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 16 185 129;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 34 211 238;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 110 231 183;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 248 255 253;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 202 235 226;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 8 35 31;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 11 49 43;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 110 231 183;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 16% 14%, rgb(var(--friends-primary-rgb) / 0.38), transparent 30%),
+    radial-gradient(circle at 82% 20%, rgb(var(--friends-secondary-rgb) / 0.28), transparent 31%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 48%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.72);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.58);
+  --friends-particles-opacity: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html[data-friends-theme="ocean"] {
+  color-scheme: dark;
+
+  --background: #031b2d;
+  --foreground: #f4fbff;
+
+  --friends-bg-1-rgb: 3 27 45;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 7 89 133;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 8 145 178;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 34 211 238;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 45 212 191;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 125 211 252;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 244 251 255;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 199 228 240;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 4 35 55;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 7 55 78;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 125 211 252;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 18% 16%, rgb(var(--friends-accent-rgb) / 0.46), transparent 31%),
+    radial-gradient(circle at 82% 20%, rgb(var(--friends-secondary-rgb) / 0.34), transparent 29%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 48%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.74);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.62);
+  --friends-particles-opacity: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html[data-friends-theme="purple"] {
+  color-scheme: dark;
+
+  --background: #180c2e;
+  --foreground: #fff8ff;
+
+  --friends-bg-1-rgb: 24 12 46;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 88 28 135;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 126 34 206;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 192 132 252;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 244 114 182;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 216 180 254;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 255 248 255;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 232 208 242;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 38 19 64;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 62 28 91;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 216 180 254;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 16% 16%, rgb(var(--friends-accent-rgb) / 0.42), transparent 31%),
+    radial-gradient(circle at 84% 20%, rgb(var(--friends-secondary-rgb) / 0.34), transparent 30%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 48%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.72);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.60);
+  --friends-particles-opacity: 0;
+}
+
+html[data-friends-theme="sunset"] {
+  color-scheme: dark;
+
+  --background: #431407;
+  --foreground: #fffaf7;
+
+  --friends-bg-1-rgb: 67 20 7;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 194 65 12;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 219 39 119;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 251 146 60;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 244 114 182;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 253 230 138;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 255 250 247;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 246 214 198;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 74 28 14;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 105 39 20;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 253 186 116;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 18% 16%, rgb(var(--friends-accent-rgb) / 0.52), transparent 32%),
+    radial-gradient(circle at 82% 22%, rgb(var(--friends-secondary-rgb) / 0.38), transparent 30%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 48%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.76);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.62);
+  --friends-particles-opacity: 0;
+}
+
+html[data-friends-theme="space"] {
+  color-scheme: dark;
+
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  --friends-bg-1-rgb: 2 6 23;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 17 24 39;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 30 27 75;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 99 102 241;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 168 85 247;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 129 140 248;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 248 250 252;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 203 213 225;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 15 23 42;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 30 41 59;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 129 140 248;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 20% 20%, rgb(var(--friends-primary-rgb) / 0.34), transparent 30%),
+    radial-gradient(circle at 82% 12%, rgb(var(--friends-secondary-rgb) / 0.28), transparent 28%),
+    linear-gradient(
+      160deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 52%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.62);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.54);
+  --friends-particles-opacity: 0.5;
+}
+
+html[data-friends-theme="frozen"] {
+  color-scheme: light;
+
+  --background: #dff7ff;
+  --foreground: #082f49;
+
+  --friends-bg-1-rgb: 223 247 255;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 158 232 255;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 219 234 254;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 14 165 233;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 34 211 238;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 255 255 255;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 8 47 73;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 39 83 108;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 255 255 255;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 224 242 254;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 14 165 233;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 15% 12%, rgb(255 255 255 / 0.92), transparent 25%),
+    radial-gradient(circle at 78% 18%, rgb(var(--friends-secondary-rgb) / 0.72), transparent 30%),
+    radial-gradient(circle at 50% 88%, rgb(186 230 253 / 0.68), transparent 35%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 42%,
+      rgb(103 212 245) 72%,
+      rgb(var(--friends-bg-3-rgb)) 100%
+    );
+
+  --friends-glow-one: rgb(255 255 255 / 0.92);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.68);
+  --friends-particles-opacity: 0.52;
+}
+
+
+html[data-friends-theme="cherry-blossom"] {
+  color-scheme: light;
+
+  --background: #fff1f7;
+  --foreground: #4a1731;
+
+  --friends-bg-1-rgb: 255 241 247;
+  --friends-bg-1: rgb(var(--friends-bg-1-rgb));
+  --friends-bg-2-rgb: 249 168 212;
+  --friends-bg-2: rgb(var(--friends-bg-2-rgb));
+  --friends-bg-3-rgb: 216 180 254;
+  --friends-bg-3: rgb(var(--friends-bg-3-rgb));
+
+  --friends-primary-rgb: 236 72 153;
+  --friends-primary: rgb(var(--friends-primary-rgb));
+  --friends-secondary-rgb: 168 85 247;
+  --friends-secondary: rgb(var(--friends-secondary-rgb));
+  --friends-accent-rgb: 251 207 232;
+  --friends-accent: rgb(var(--friends-accent-rgb));
+
+  --friends-text-rgb: 74 23 49;
+  --friends-text: rgb(var(--friends-text-rgb));
+  --friends-muted-rgb: 122 74 99;
+  --friends-muted: rgb(var(--friends-muted-rgb));
+  --friends-surface-rgb: 255 250 253;
+  --friends-surface: rgb(var(--friends-surface-rgb));
+  --friends-surface-strong-rgb: 255 240 247;
+  --friends-surface-strong: rgb(var(--friends-surface-strong-rgb));
+  --friends-border-rgb: 236 72 153;
+  --friends-border: rgb(var(--friends-border-rgb));
+
+  --friends-bg:
+    radial-gradient(circle at 16% 14%, rgb(255 228 238 / 0.90), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgb(var(--friends-primary-rgb) / 0.42), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgb(var(--friends-secondary-rgb) / 0.34), transparent 36%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1-rgb)) 0%,
+      rgb(var(--friends-bg-2-rgb)) 42%,
+      rgb(var(--friends-bg-3-rgb)) 76%,
+      rgb(253 242 248) 100%
+    );
+
+  --friends-glow-one: rgb(var(--friends-primary-rgb) / 0.58);
+  --friends-glow-two: rgb(var(--friends-secondary-rgb) / 0.42);
+  --friends-particles-opacity: 0.16;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  background: var(--friends-bg-1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  min-height: 100vh;
+  margin: 0;
+  background: transparent !important;
+  color: var(--friends-text);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@import "../styles/aurora-v5.css";
+/* Fundal unic pentru întreaga aplicație */
+.friends-app-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--friends-bg);
+  transition: background 0.35s ease;
+}
+
+.friends-app-background-base {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(2 6 23 / 0.14));
+}
+
+.friends-app-background-glow {
+  position: absolute;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 999px;
+  filter: blur(110px);
+  opacity: 0.42;
+  transition: background 0.35s ease;
+}
+
+.friends-app-background-glow-one {
+  top: -12rem;
+  left: -10rem;
+  background: var(--friends-glow-one);
+}
+
+.friends-app-background-glow-two {
+  right: -12rem;
+  bottom: -10rem;
+  background: var(--friends-glow-two);
+}
+
+.friends-app-background-particles {
+  position: absolute;
+  inset: -8%;
+  opacity: var(--friends-particles-opacity);
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 0.92) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgb(255 255 255 / 0.66) 0 1.4px, transparent 2.2px);
+  background-position: 0 0, 38px 54px;
+  background-size: 78px 78px, 118px 118px;
+  animation: friends-global-particles 20s linear infinite;
+}
+
+/* Conținutul este întotdeauna deasupra fundalului */
+body > *:not(.friends-app-background) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Paginile nu mai desenează un al doilea fundal */
+body main,
+.aurora-feed-page,
+.chat-theme-page {
+  background-color: transparent !important;
+}
+
+/* Linkuri */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgb(var(--friends-primary-rgb) / 0.35);
+  color: var(--friends-text);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--friends-bg-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--friends-primary-rgb)),
+    rgb(var(--friends-secondary-rgb))
+  );
+  border-radius: 999px;
+}
+
+@keyframes friends-global-particles {
+  from { transform: translate3d(0, -30px, 0); }
+  to { transform: translate3d(28px, 100px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friends-app-background-particles {
+    animation: none;
+  }
+}

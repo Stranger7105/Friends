@@ -1,0 +1,119 @@
+.window {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 0%, rgba(74, 217, 166, 0.09), transparent 35%),
+    radial-gradient(circle at 15% 100%, rgba(43, 152, 207, 0.08), transparent 40%),
+    #071217;
+}
+
+.header {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(5, 16, 21, 0.68);
+  color: white;
+  backdrop-filter: blur(18px);
+}
+
+.identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+
+.identity div {
+  display: grid;
+  min-width: 0;
+}
+
+.identity strong,
+.identity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity span {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+}
+
+.actions button {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.messageList {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bodyEmpty,
+.noConversation {
+  display: grid;
+  height: 100%;
+  place-content: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+.bodyEmpty strong,
+.noConversation strong {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.noConversation {
+  flex: 1;
+}
+
+.orb {
+  display: grid;
+  width: 74px;
+  height: 74px;
+  place-items: center;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(112, 236, 181, 0.19);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(90, 232, 166, 0.22), rgba(32, 112, 154, 0.11));
+  box-shadow: 0 0 45px rgba(69, 219, 168, 0.11);
+  font-size: 29px;
+}
+
+@media (max-width: 760px) {
+  .header { min-height: 70px; padding: 10px 12px; }
+  .body { padding: 13px 10px; }
+  .actions button { width: 36px; height: 36px; }
+}

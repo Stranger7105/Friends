@@ -1,0 +1,1108 @@
+/* =========================================================
+   FRIENDS — AURORA FEED V2
+   Suprascrieri vizuale peste aurora-feed.css
+   ========================================================= */
+
+.aurora-v2-post-card {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(241, 255, 249, 0.64)),
+    rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.12),
+    0 8px 26px rgba(16, 185, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.aurora-v2-post-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(52, 211, 153, 0.44);
+  box-shadow:
+    0 32px 85px rgba(15, 23, 42, 0.16),
+    0 12px 34px rgba(16, 185, 129, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.aurora-v2-card-shine {
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.aurora-v2-card-shine::before {
+  content: "";
+  position: absolute;
+  top: -130px;
+  right: -95px;
+  width: 250px;
+  height: 250px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(52, 211, 153, 0.18),
+    rgba(56, 189, 248, 0.08) 48%,
+    transparent 72%
+  );
+  filter: blur(6px);
+}
+
+.aurora-v2-post-header {
+  position: relative;
+  z-index: 2;
+}
+
+.aurora-v2-avatar {
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 7px 22px rgba(15, 23, 42, 0.14),
+    0 0 0 3px rgba(52, 211, 153, 0.13);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.aurora-v2-avatar:hover {
+  transform: scale(1.07);
+  box-shadow:
+    0 9px 26px rgba(15, 23, 42, 0.18),
+    0 0 0 5px rgba(52, 211, 153, 0.13);
+}
+
+.aurora-v2-owner-actions {
+  padding: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.aurora-v2-post-content {
+  font-size: 1.02rem;
+  line-height: 1.72;
+  color: #1e293b;
+}
+
+.aurora-v2-media-button {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  background: #07111f;
+  cursor: zoom-in;
+  box-shadow:
+    0 20px 46px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.aurora-v2-post-image {
+  display: block;
+  width: 100%;
+  max-height: 680px;
+  object-fit: contain;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(52, 211, 153, 0.16), transparent 42%),
+    #07111f;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), filter 300ms ease;
+}
+
+.aurora-v2-media-button:hover .aurora-v2-post-image {
+  transform: scale(1.018);
+  filter: brightness(0.94);
+}
+
+.aurora-v2-media-hint {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(5, 15, 25, 0.62);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(7px);
+  backdrop-filter: blur(14px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.aurora-v2-media-button:hover .aurora-v2-media-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.aurora-v2-shared-post {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(240, 253, 250, 0.86), rgba(239, 246, 255, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.aurora-v2-shared-label {
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aurora-v2-shared-media {
+  margin-top: 14px;
+}
+
+.aurora-v2-post-meta {
+  margin-top: 18px;
+  padding: 11px 2px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.aurora-v2-reaction-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.aurora-v2-reaction-summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.aurora-v2-comment-count {
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 650;
+  transition: color 160ms ease;
+}
+
+.aurora-v2-comment-count:hover {
+  color: #047857;
+}
+
+.aurora-v2-reaction-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 2vw, 13px);
+  margin: 14px 0 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.aurora-v2-reaction-chip {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.34rem;
+  transform-origin: bottom center;
+  transition:
+    transform 150ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.aurora-v2-reaction-chip:hover {
+  z-index: 2;
+  transform: translateY(-6px) scale(1.34);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.15);
+}
+
+.aurora-v2-reaction-chip-active {
+  background: linear-gradient(
+    145deg,
+    rgba(209, 250, 229, 0.96),
+    rgba(224, 242, 254, 0.92)
+  );
+  box-shadow:
+    0 8px 20px rgba(16, 185, 129, 0.14),
+    inset 0 0 0 1px rgba(16, 185, 129, 0.22);
+  transform: translateY(-2px) scale(1.08);
+}
+
+.aurora-v2-post-actions {
+  position: relative;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.aurora-v2-action {
+  min-height: 47px;
+  border-radius: 15px;
+  font-weight: 760;
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.aurora-v2-action:hover {
+  transform: translateY(-3px) scale(1.025);
+  background: rgba(236, 253, 245, 0.86);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.1);
+}
+
+.aurora-v2-action-icon {
+  display: inline-block;
+  margin-right: 5px;
+  transition: transform 160ms ease;
+}
+
+.aurora-v2-action:hover .aurora-v2-action-icon {
+  transform: scale(1.18);
+}
+
+.aurora-v2-floating-picker {
+  left: 8px;
+  bottom: calc(100% + 8px);
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(20px);
+}
+
+.aurora-v2-edit-zone,
+.aurora-v2-comments {
+  border: 1px solid rgba(52, 211, 153, 0.18);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(248, 250, 252, 0.88), rgba(240, 253, 250, 0.66));
+}
+
+.aurora-v2-empty-comments {
+  padding: 8px 4px 15px;
+  color: #64748b;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.aurora-v2-comment-avatar {
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.11);
+}
+
+.aurora-v2-comment-bubble {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.055);
+}
+
+.aurora-v2-delete-comment {
+  color: #dc2626;
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.72;
+  transition: opacity 150ms ease;
+}
+
+.aurora-v2-delete-comment:hover {
+  opacity: 1;
+}
+
+.aurora-v2-comment-form {
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.aurora-v2-comment-input {
+  border-color: rgba(52, 211, 153, 0.22);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.aurora-v2-comment-input:focus {
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow:
+    0 0 0 4px rgba(16, 185, 129, 0.1),
+    inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  outline: none;
+}
+
+.aurora-v2-comment-submit {
+  border-radius: 13px;
+  background: linear-gradient(135deg, #059669, #0ea5e9);
+  box-shadow: 0 9px 22px rgba(5, 150, 105, 0.2);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.aurora-v2-comment-submit:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 13px 26px rgba(5, 150, 105, 0.27);
+}
+
+/* Fullscreen media viewer */
+.aurora-v2-viewer {
+  position: fixed;
+  z-index: 99999;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 70px 28px 48px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(16, 185, 129, 0.19), transparent 34%),
+    radial-gradient(circle at 84% 18%, rgba(14, 165, 233, 0.18), transparent 36%),
+    rgba(2, 6, 23, 0.93);
+  backdrop-filter: blur(22px);
+  animation: auroraViewerIn 180ms ease both;
+}
+
+.aurora-v2-viewer-image {
+  max-width: min(94vw, 1500px);
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.13);
+  animation: auroraViewerImageIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.aurora-v2-viewer-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.62);
+  color: white;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  backdrop-filter: blur(15px);
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.aurora-v2-viewer-close:hover {
+  transform: scale(1.1) rotate(4deg);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.aurora-v2-viewer-help {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+@keyframes auroraViewerIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes auroraViewerImageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .aurora-v2-post-card {
+    border-radius: 22px;
+  }
+
+  .aurora-v2-reaction-strip {
+    gap: 3px;
+    padding-inline: 5px;
+  }
+
+  .aurora-v2-reaction-chip {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+
+  .aurora-v2-post-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .aurora-v2-action {
+    min-height: 45px;
+    padding-inline: 5px;
+    font-size: 0.78rem;
+  }
+
+  .aurora-v2-action-icon {
+    display: block;
+    margin: 0 auto 2px;
+  }
+
+  .aurora-v2-media-hint {
+    opacity: 1;
+    transform: none;
+  }
+
+  .aurora-v2-viewer {
+    padding: 62px 10px 44px;
+  }
+
+  .aurora-v2-viewer-image {
+    max-width: 98vw;
+    max-height: 84vh;
+    border-radius: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-v2-post-card,
+  .aurora-v2-avatar,
+  .aurora-v2-post-image,
+  .aurora-v2-media-hint,
+  .aurora-v2-reaction-chip,
+  .aurora-v2-action,
+  .aurora-v2-action-icon,
+  .aurora-v2-comment-submit,
+  .aurora-v2-viewer,
+  .aurora-v2-viewer-image,
+  .aurora-v2-viewer-close {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* =========================================================
+   PACK 3.0B.2 — COMENTARII ÎN FULLSCREEN
+   ========================================================= */
+
+.aurora-v2-viewer-layout {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  width: min(96vw, 1700px);
+  max-height: 84vh;
+}
+
+.aurora-v2-viewer-stage {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  place-items: center;
+}
+
+.aurora-v2-viewer-stage .aurora-v2-viewer-image {
+  max-width: 100%;
+  max-height: 78vh;
+}
+
+.aurora-v2-viewer-reactions {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(calc(100% - 28px), 760px);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(8, 47, 73, 0.68), rgba(5, 78, 59, 0.7)),
+    rgba(2, 6, 23, 0.66);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transform: translateX(-50%);
+  backdrop-filter: blur(18px) saturate(145%);
+}
+
+.aurora-v2-viewer-reaction-info {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 92px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.aurora-v2-viewer-current-reaction {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 1.05rem;
+}
+
+.aurora-v2-viewer-reaction-buttons {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.aurora-v2-viewer-reaction-button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.35rem;
+  transition:
+    transform 150ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.aurora-v2-viewer-reaction-button:hover {
+  z-index: 2;
+  transform: translateY(-7px) scale(1.28);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.26);
+}
+
+.aurora-v2-viewer-reaction-button-active {
+  border-color: rgba(110, 231, 183, 0.7);
+  background: rgba(16, 185, 129, 0.34);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+  transform: translateY(-3px) scale(1.1);
+}
+
+.aurora-v2-viewer-comments-button {
+  flex: 0 0 auto;
+  min-width: 55px;
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.aurora-v2-viewer-comments-button:hover,
+.aurora-v2-viewer-comments-button-active {
+  transform: scale(1.06);
+  background: rgba(52, 211, 153, 0.28);
+}
+
+.aurora-v2-viewer-comments-panel {
+  display: flex;
+  flex: 0 0 370px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 24px;
+  background: rgba(248, 250, 252, 0.94);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+  flex-direction: column;
+  backdrop-filter: blur(22px);
+  animation: auroraCommentsPanelIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.aurora-v2-viewer-comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.aurora-v2-viewer-comments-title {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.aurora-v2-viewer-comments-subtitle {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.aurora-v2-viewer-panel-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #334155;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.aurora-v2-viewer-comment-list {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aurora-v2-viewer-empty-comments {
+  margin: auto;
+  color: #64748b;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.aurora-v2-viewer-comment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.aurora-v2-viewer-comment-bubble {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 8px 17px 17px 17px;
+  background: white;
+  box-shadow: 0 7px 18px rgba(15, 23, 42, 0.06);
+}
+
+.aurora-v2-viewer-comment-form {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.aurora-v2-viewer-comment-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 14px;
+  background: white;
+  color: #0f172a;
+  outline: none;
+}
+
+.aurora-v2-viewer-comment-input:focus {
+  border-color: rgba(16, 185, 129, 0.64);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.aurora-v2-viewer-comment-submit {
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #059669, #0ea5e9);
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.aurora-v2-viewer-comment-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+@keyframes auroraCommentsPanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .aurora-v2-viewer-layout {
+    position: relative;
+    width: 98vw;
+  }
+
+  .aurora-v2-viewer-comments-panel {
+    position: absolute;
+    z-index: 4;
+    right: 6px;
+    bottom: 0;
+    width: min(92vw, 390px);
+    height: min(70vh, 620px);
+  }
+}
+
+@media (max-width: 720px) {
+  .aurora-v2-viewer-stage .aurora-v2-viewer-image {
+    max-height: 72vh;
+  }
+
+  .aurora-v2-viewer-reactions {
+    bottom: 9px;
+    gap: 5px;
+    width: calc(100% - 14px);
+    padding: 7px;
+  }
+
+  .aurora-v2-viewer-reaction-info {
+    min-width: 40px;
+  }
+
+  .aurora-v2-viewer-reaction-info span:last-child {
+    display: none;
+  }
+
+  .aurora-v2-viewer-reaction-button {
+    width: 34px;
+    height: 34px;
+    font-size: 1.13rem;
+  }
+
+  .aurora-v2-viewer-comments-panel {
+    right: 3px;
+    width: calc(100% - 6px);
+    height: 72vh;
+  }
+}
+
+
+/* =========================================================
+   PACK 3.0C — AURORA MEDIA VIEWER
+   ========================================================= */
+
+.aurora-v3-image-canvas {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 18px;
+  touch-action: none;
+  user-select: none;
+}
+
+.aurora-v3-image-canvas-zoomed {
+  cursor: grab;
+}
+
+.aurora-v3-image-canvas-zoomed:active {
+  cursor: grabbing;
+}
+
+.aurora-v3-transformable-image {
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 120ms ease-out;
+  pointer-events: none;
+  user-select: none;
+}
+
+.aurora-v3-image-canvas:active .aurora-v3-transformable-image {
+  transition: none;
+}
+
+.aurora-v3-viewer-toolbar {
+  position: absolute;
+  z-index: 5;
+  top: 14px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 28px);
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.68);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  transform: translateX(-50%);
+  backdrop-filter: blur(17px);
+}
+
+.aurora-v3-viewer-toolbar button,
+.aurora-v3-viewer-toolbar a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  color: white;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 780;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.aurora-v3-viewer-toolbar button:hover:not(:disabled),
+.aurora-v3-viewer-toolbar a:hover,
+.aurora-v3-toolbar-active {
+  transform: translateY(-2px) scale(1.04);
+  background: rgba(52, 211, 153, 0.27) !important;
+}
+
+.aurora-v3-viewer-toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+
+.aurora-v3-viewer-toolbar > span {
+  min-width: 49px;
+  color: rgba(255, 255, 255, 0.83);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.aurora-v3-double-like {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  font-size: clamp(5rem, 12vw, 9rem);
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.4));
+  animation: auroraDoubleLike 820ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.aurora-v3-viewer-info {
+  position: absolute;
+  z-index: 6;
+  top: 66px;
+  left: 16px;
+  display: flex;
+  gap: 11px;
+  width: min(360px, calc(100% - 32px));
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.76);
+  color: white;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px);
+  animation: auroraInfoIn 180ms ease both;
+}
+
+.aurora-v3-info-avatar {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.aurora-v3-info-author {
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.aurora-v3-info-date {
+  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.7rem;
+}
+
+.aurora-v3-info-content {
+  display: -webkit-box;
+  margin-top: 7px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.aurora-v3-viewer-message {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  bottom: 84px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.82);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 750;
+  transform: translateX(-50%);
+  backdrop-filter: blur(14px);
+  animation: auroraMessageIn 180ms ease both;
+}
+
+@keyframes auroraDoubleLike {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(-12deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.16) rotate(4deg);
+  }
+  72% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.96) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -62%) scale(1.08);
+  }
+}
+
+@keyframes auroraInfoIn {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes auroraMessageIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 7px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 850px) {
+  .aurora-v3-viewer-toolbar {
+    top: 8px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    width: calc(100% - 18px);
+    border-radius: 16px;
+    scrollbar-width: none;
+  }
+
+  .aurora-v3-viewer-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .aurora-v3-viewer-toolbar button,
+  .aurora-v3-viewer-toolbar a {
+    flex: 0 0 auto;
+  }
+
+  .aurora-v3-viewer-info {
+    top: 62px;
+    left: 8px;
+    width: min(340px, calc(100% - 16px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-v3-transformable-image,
+  .aurora-v3-viewer-toolbar button,
+  .aurora-v3-viewer-toolbar a,
+  .aurora-v3-double-like,
+  .aurora-v3-viewer-info,
+  .aurora-v3-viewer-message {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* =========================================================
+   PACK 3.0C.1 — FIX ZOOM + DRAG
+   Cauza: animația inițială a imaginii suprascria transform-ul
+   folosit pentru zoom și deplasare.
+   ========================================================= */
+
+.aurora-v3-transformable-image {
+  animation: none !important;
+  transform-origin: center center !important;
+  will-change: transform;
+}
+
+.aurora-v3-image-canvas {
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.aurora-v3-image-canvas-zoomed {
+  cursor: grab;
+}
+
+.aurora-v3-image-canvas-zoomed:active {
+  cursor: grabbing;
+}
+
+.aurora-v3-image-canvas-zoomed .aurora-v3-transformable-image {
+  transition: none !important;
+}

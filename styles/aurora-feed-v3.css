@@ -1,0 +1,395 @@
+
+/* =========================================================
+   FRIENDS — PACK 3A: AURORA FEED MOTION
+   Additive stylesheet. Keeps existing feed behavior intact.
+   ========================================================= */
+
+.aurora-feed-motion-page {
+  isolation: isolate;
+}
+
+.aurora-feed-motion-page::before,
+.aurora-feed-motion-page::after {
+  position: fixed;
+  z-index: -2;
+  content: "";
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: 0.34;
+  animation: aurora-feed-drift 17s ease-in-out infinite alternate;
+}
+
+.aurora-feed-motion-page::before {
+  top: 14vh;
+  left: -9vw;
+  width: 34vw;
+  height: 34vw;
+  min-width: 300px;
+  min-height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.42), rgba(34, 211, 238, 0.16) 48%, transparent 72%);
+}
+
+.aurora-feed-motion-page::after {
+  right: -10vw;
+  bottom: 8vh;
+  width: 38vw;
+  height: 38vw;
+  min-width: 320px;
+  min-height: 320px;
+  background: radial-gradient(circle, rgba(163, 230, 53, 0.28), rgba(139, 92, 246, 0.18) 46%, transparent 72%);
+  animation-delay: -7s;
+}
+
+.aurora-feed-hero,
+.aurora-stories-section,
+.aurora-composer-motion,
+.aurora-feed-section,
+.aurora-feed-leftbar,
+.aurora-feed-rightbar {
+  animation: aurora-feed-enter 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.aurora-stories-section { animation-delay: 0.06s; }
+.aurora-composer-motion { animation-delay: 0.11s; }
+.aurora-feed-section { animation-delay: 0.17s; }
+.aurora-feed-leftbar { animation-delay: 0.09s; }
+.aurora-feed-rightbar { animation-delay: 0.14s; }
+
+.aurora-post-motion-list > * {
+  opacity: 0;
+  animation: aurora-post-rise 0.66s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.aurora-post-motion-list > *:nth-child(1) { animation-delay: 0.04s; }
+.aurora-post-motion-list > *:nth-child(2) { animation-delay: 0.10s; }
+.aurora-post-motion-list > *:nth-child(3) { animation-delay: 0.16s; }
+.aurora-post-motion-list > *:nth-child(4) { animation-delay: 0.22s; }
+.aurora-post-motion-list > *:nth-child(5) { animation-delay: 0.28s; }
+.aurora-post-motion-list > *:nth-child(n+6) { animation-delay: 0.32s; }
+
+/* Works even when FeedPost uses its own card class. */
+.aurora-post-motion-list > * {
+  transform-origin: center top;
+  transition:
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 420ms ease,
+    box-shadow 420ms ease;
+}
+
+.aurora-post-motion-list > *:hover {
+  transform: translateY(-5px) scale(1.006);
+  filter: saturate(1.025);
+}
+
+.aurora-post-motion-list img {
+  transition:
+    transform 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 500ms ease;
+}
+
+.aurora-post-motion-list > *:hover img {
+  transform: scale(1.018);
+  filter: saturate(1.04) contrast(1.015);
+}
+
+.aurora-card-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(52, 211, 153, 0.9),
+    rgba(34, 211, 238, 0.82),
+    transparent
+  );
+}
+
+.aurora-card-orb {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.2), rgba(163, 230, 53, 0.08), transparent 70%);
+}
+
+.aurora-card-interactive::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(white, white) padding-box,
+    linear-gradient(115deg, transparent 20%, rgba(52, 211, 153, 0.25), rgba(34, 211, 238, 0.18), transparent 80%) border-box;
+  opacity: 0;
+  transition: opacity 450ms ease;
+}
+
+.aurora-card-interactive:hover::after {
+  opacity: 1;
+}
+
+.aurora-composer-motion {
+  transition:
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 420ms ease;
+}
+
+.aurora-composer-motion:focus-within {
+  transform: translateY(-3px);
+  box-shadow: 0 36px 110px -52px rgba(5, 150, 105, 0.58);
+}
+
+.aurora-navbar-motion {
+  animation: aurora-navbar-drop 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Premium skeleton */
+.aurora-feed-skeleton-list {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.aurora-feed-skeleton-card {
+  overflow: hidden;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 22px 70px -44px rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(24px);
+}
+
+.aurora-feed-skeleton-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.aurora-feed-skeleton-avatar,
+.aurora-feed-skeleton-lines span,
+.aurora-feed-skeleton-text,
+.aurora-feed-skeleton-media,
+.aurora-feed-skeleton-actions span {
+  display: block;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(226, 232, 240, 0.7) 20%,
+      rgba(255, 255, 255, 0.95) 38%,
+      rgba(209, 250, 229, 0.72) 52%,
+      rgba(226, 232, 240, 0.7) 70%
+    );
+  background-size: 220% 100%;
+  animation: aurora-skeleton-sweep 1.45s ease-in-out infinite;
+}
+
+.aurora-feed-skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border-radius: 18px;
+}
+
+.aurora-feed-skeleton-lines {
+  width: min(58%, 280px);
+}
+
+.aurora-feed-skeleton-lines span {
+  height: 12px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+}
+
+.aurora-feed-skeleton-lines span:last-child {
+  width: 55%;
+  height: 9px;
+  margin-bottom: 0;
+}
+
+.aurora-feed-skeleton-text {
+  width: 66%;
+  height: 11px;
+  margin: 9px 0;
+  border-radius: 999px;
+}
+
+.aurora-feed-skeleton-text-wide {
+  width: 91%;
+}
+
+.aurora-feed-skeleton-media {
+  height: clamp(180px, 30vw, 340px);
+  margin-top: 1rem;
+  border-radius: 22px;
+}
+
+.aurora-feed-skeleton-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.aurora-feed-skeleton-actions span {
+  width: 92px;
+  height: 34px;
+  border-radius: 14px;
+}
+
+@keyframes aurora-feed-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes aurora-post-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.986);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes aurora-navbar-drop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes aurora-feed-drift {
+  from { transform: translate3d(-3%, -2%, 0) scale(0.94); }
+  to { transform: translate3d(8%, 7%, 0) scale(1.08); }
+}
+
+@keyframes aurora-skeleton-sweep {
+  0% { background-position: 115% 0; }
+  100% { background-position: -115% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-feed-motion-page::before,
+  .aurora-feed-motion-page::after,
+  .aurora-feed-hero,
+  .aurora-stories-section,
+  .aurora-composer-motion,
+  .aurora-feed-section,
+  .aurora-feed-leftbar,
+  .aurora-feed-rightbar,
+  .aurora-post-motion-list > *,
+  .aurora-navbar-motion,
+  .aurora-feed-skeleton-avatar,
+  .aurora-feed-skeleton-lines span,
+  .aurora-feed-skeleton-text,
+  .aurora-feed-skeleton-media,
+  .aurora-feed-skeleton-actions span {
+    animation: none !important;
+  }
+
+  .aurora-post-motion-list > *:hover,
+  .aurora-post-motion-list > *:hover img,
+  .aurora-composer-motion:focus-within {
+    transform: none;
+  }
+}
+/* ==========================================================
+   FRIENDS • Ambient Aurora Layer
+========================================================== */
+
+.aurora-feed-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.aurora-feed-page::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 15% 20%,
+      rgba(80,255,180,.22) 0%,
+      transparent 34%),
+
+    radial-gradient(circle at 85% 30%,
+      rgba(0,180,255,.18) 0%,
+      transparent 35%),
+
+    radial-gradient(circle at 55% 85%,
+      rgba(130,255,200,.14) 0%,
+      transparent 38%);
+
+  filter: blur(90px);
+  opacity: .75;
+
+  animation: auroraAmbient 24s ease-in-out infinite alternate;
+}
+
+.aurora-feed-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.05),
+      rgba(255,255,255,0)
+    );
+
+  mix-blend-mode: screen;
+}
+
+@keyframes auroraAmbient {
+
+  0% {
+    transform:
+      translate3d(0,0,0)
+      scale(1)
+      rotate(0deg);
+  }
+
+  25% {
+    transform:
+      translate3d(-2%,1%,0)
+      scale(1.04)
+      rotate(-1deg);
+  }
+
+  50% {
+    transform:
+      translate3d(2%,-2%,0)
+      scale(1.08)
+      rotate(1deg);
+  }
+
+  75% {
+    transform:
+      translate3d(-1%,2%,0)
+      scale(1.03)
+      rotate(-0.5deg);
+  }
+
+  100% {
+    transform:
+      translate3d(3%,-1%,0)
+      scale(1.09)
+      rotate(1deg);
+  }
+
+}

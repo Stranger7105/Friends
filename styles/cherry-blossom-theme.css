@@ -1,0 +1,18 @@
+/* =========================================================
+   FRIENDS — CHERRY BLOSSOM THEME
+   Activează când ThemeLoader setează:
+   document.documentElement.dataset.theme = "cherry-blossom"
+   ========================================================= */
+
+:root[data-theme="cherry-blossom"],
+html[data-theme="cherry-blossom"],
+body[data-theme="cherry-blossom"] {
+  --friends-primary: #ec4899;
+  --friends-secondary: #a855f7;
+  --friends-accent: #f9a8d4;
+  --friends-surface: rgba(255, 247, 252, 0.78);
+  --friends-surface-strong: rgba(255, 250, 253, 0.96);
+  --friends-border: rgba(157, 23, 77, 0.16);
+  --friends-text: #4a1731;
+  --friends-muted: rgba(74, 23, 49, 0.62);
+}

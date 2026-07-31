@@ -1,0 +1,42 @@
+.friends-real-call-layer{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:20px;background:rgba(2,10,8,.88);backdrop-filter:blur(16px)}
+.friends-real-call-screen{position:relative;width:min(94vw,760px);min-height:560px;overflow:hidden;border:1px solid rgba(167,243,208,.22);border-radius:32px;background:linear-gradient(160deg,#061612,#0b211b);box-shadow:0 30px 90px rgba(0,0,0,.55);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:42px}
+.friends-real-call-person{position:relative;z-index:3;text-align:center;display:flex;flex-direction:column;align-items:center}.friends-real-call-avatar{width:142px;height:142px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:rgba(16,185,129,.2);border:3px solid rgba(163,230,53,.5);font-size:42px;font-weight:900;box-shadow:0 0 50px rgba(16,185,129,.2)}
+.friends-real-call-avatar img{width:100%;height:100%;object-fit:cover}.friends-real-call-person h2{margin:22px 0 5px;font-size:30px}.friends-real-call-person p{margin:0;color:#a7f3d0;font-weight:700}.friends-real-call-person strong{margin-top:9px;font-size:18px;letter-spacing:.08em}.friends-real-call-error{max-width:440px;margin-top:12px;color:#fecaca;font-size:14px}
+.friends-real-call-controls{position:relative;z-index:4;margin-top:55px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap}.friends-real-call-controls button{width:92px;min-height:80px;border:1px solid rgba(255,255,255,.13);border-radius:24px;background:rgba(255,255,255,.1);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-weight:800;transition:.2s}.friends-real-call-controls button:hover{transform:translateY(-3px);background:rgba(255,255,255,.16)}.friends-real-call-controls button span{font-size:12px}.friends-real-call-controls .is-danger{background:#dc2626}.friends-real-call-controls .is-accept{background:#16a34a}.friends-real-call-controls .is-off{background:rgba(245,158,11,.3)}
+.friends-call-video-stage{position:absolute;inset:0;background:#020806}.friends-call-remote-video{width:100%;height:100%;object-fit:cover}.friends-call-local-video{position:absolute;right:20px;top:20px;width:min(28vw,190px);aspect-ratio:3/4;object-fit:cover;border-radius:20px;border:2px solid rgba(255,255,255,.5);box-shadow:0 12px 35px rgba(0,0,0,.45);background:#111}.friends-real-call-screen.has-video .friends-real-call-person{margin-top:auto;text-shadow:0 2px 12px #000}.friends-real-call-screen.has-video .friends-real-call-controls{margin-top:20px}.friends-real-call-screen.has-video:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.75));pointer-events:none}
+@media(max-width:640px){.friends-real-call-layer{padding:0}.friends-real-call-screen{width:100%;height:100%;min-height:100%;border-radius:0;padding:26px 16px}.friends-real-call-controls{margin-top:38px;gap:10px}.friends-real-call-controls button{width:78px;min-height:72px}.friends-call-local-video{width:115px;right:12px;top:12px}}
+/* Friends Calls – Pack A3-A5 */
+.friends-call-quality {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.friends-call-quality::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.friends-call-quality.is-excellent,
+.friends-call-quality.is-good {
+  color: #72f2ad;
+}
+
+.friends-call-quality.is-fair {
+  color: #ffd76a;
+}
+
+.friends-call-quality.is-poor {
+  color: #ff7d8b;
+}

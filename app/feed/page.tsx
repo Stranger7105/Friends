@@ -11,7 +11,12 @@ import {
   useState,
 } from "react";
 import AuroraComposer from "@/components/aurora/AuroraComposer";
+import StoryBar from "@/components/aurora/StoryBar";
+import FeedReelsStrip from "@/components/aurora/feed/FeedReelsStrip";
 import "@/styles/aurora-feed.css";
+import "@/styles/aurora-feed-print.css";
+import "@/styles/feed-reels-strip.css";
+import "@/styles/aurora-feed-final.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
@@ -648,8 +653,8 @@ export default function FeedPage() {
           <section className="aurora-left-profile-card">
             <div className="aurora-left-orbit" aria-hidden="true" />
             <span className="aurora-sidebar-kicker">SPAȚIUL TĂU</span>
-            <h2>Friends Aurora</h2>
-            <p>Un loc mai calm pentru oameni, idei și momente reale.</p>
+            <h2>Friends</h2>
+            <p>Un loc mai calm pentru prieteni, idei și momente reale.</p>
           </section>
 
           <nav className="aurora-quick-nav" aria-label="Scurtături">
@@ -670,12 +675,13 @@ export default function FeedPage() {
           <section className="aurora-feed-hero">
             <div>
               <span className="aurora-feed-eyebrow">FEED PERSONAL</span>
-              <h1>Momentele oamenilor tăi</h1>
+              <h1>Momentele prietenilor tăi</h1>
               <p>Descoperă ce este nou și lasă un semn acolo unde contează.</p>
             </div>
             <div className="aurora-feed-hero-badge"><span className="aurora-live-dot" aria-hidden="true" />LIVE</div>
           </section>
-
+          <StoryBar currentUserId={currentUserId} />
+          <FeedReelsStrip currentUserId={currentUserId} />
         {errorMessage && (
           <div className="aurora-feed-alert">
             {errorMessage}
@@ -701,8 +707,8 @@ export default function FeedPage() {
   onPublish={handlePublish}
 />
 
-        <section className="aurora-feed-section">
-          <h2 className="aurora-feed-heading">Postări</h2>
+        <section className="aurora-feed-section aurora-feed-section-compact">
+          <h2 className="aurora-feed-heading aurora-feed-heading-hidden">Postări</h2>
 
           {loadingPosts ? (
             <div className="aurora-feed-state">
@@ -732,29 +738,41 @@ export default function FeedPage() {
                 return (
                   <article
                     key={post.id}
-                    className="aurora-post-card"
+                    className="aurora-post-card aurora-premium-post"
                   >
-                    <header className="aurora-post-header">
-                      <div className="flex items-center gap-3">
-                        <div className="aurora-post-avatar">
-                          {post.profiles?.avatar_url ? (
-                            <img
-                              src={post.profiles.avatar_url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            getInitials(post.profiles)
-                          )}
+                    <div className="aurora-post-accent" aria-hidden="true" />
+
+                    <header className="aurora-post-header aurora-premium-post-header">
+                      <div className="aurora-post-identity">
+                        <div className="aurora-post-avatar-ring">
+                          <div className="aurora-post-avatar">
+                            {post.profiles?.avatar_url ? (
+                              <img
+                                src={post.profiles.avatar_url}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              getInitials(post.profiles)
+                            )}
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="aurora-post-author">
-                            {getDisplayName(post.profiles)}
-                          </p>
+                        <div className="aurora-post-author-block">
+                          <div className="aurora-post-author-line">
+                            <p className="aurora-post-author">
+                              {getDisplayName(post.profiles)}
+                            </p>
+                            <span className="aurora-post-verified" title="Membru Friends">
+                              ✦
+                            </span>
+                          </div>
                           <p className="aurora-post-time">
-                            {formatRelativeDate(post.created_at)}
-                            {post.updated_at ? " · editat" : ""}
+                            <span>{formatRelativeDate(post.created_at)}</span>
+                            {post.updated_at ? <span> · editat</span> : null}
+                            <span className="aurora-post-visibility" title="Vizibil prietenilor">
+                              ◉
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -764,99 +782,141 @@ export default function FeedPage() {
                           <button
                             type="button"
                             onClick={() => beginEditing(post)}
-                            className="aurora-text-button aurora-text-button-edit"
+                            className="aurora-owner-action aurora-owner-action-edit"
+                            title="Editează postarea"
                           >
-                            Editează
+                            <span aria-hidden="true">✎</span>
+                            <span>Editează</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => void deletePost(post)}
                             disabled={busyPostId === post.id}
-                            className="aurora-text-button aurora-text-button-delete"
+                            className="aurora-owner-action aurora-owner-action-delete"
+                            title="Șterge postarea"
                           >
-                            Șterge
+                            <span aria-hidden="true">⌫</span>
+                            <span>Șterge</span>
                           </button>
                         </div>
                       )}
                     </header>
 
-                    {editingPostId === post.id ? (
-                      <div className="aurora-comments">
-                        <textarea
-                          value={editingText}
-                          onChange={(event) => setEditingText(event.target.value)}
-                          className="aurora-edit-textarea"
-                        />
-                        <div className="mt-2 flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingPostId(null);
-                              setEditingText("");
-                            }}
-                            className="aurora-secondary-button"
-                          >
-                            Renunță
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void saveEdit(post)}
-                            disabled={busyPostId === post.id}
-                            className="aurora-primary-button"
-                          >
-                            Salvează
-                          </button>
+                    <div className="aurora-post-body">
+                      {editingPostId === post.id ? (
+                        <div className="aurora-edit-panel">
+                          <label className="aurora-edit-label" htmlFor={`edit-post-${post.id}`}>
+                            Editează postarea
+                          </label>
+                          <textarea
+                            id={`edit-post-${post.id}`}
+                            value={editingText}
+                            onChange={(event) => setEditingText(event.target.value)}
+                            className="aurora-edit-textarea"
+                            maxLength={5000}
+                          />
+                          <div className="aurora-edit-actions">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingPostId(null);
+                                setEditingText("");
+                              }}
+                              className="aurora-secondary-button"
+                            >
+                              Renunță
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void saveEdit(post)}
+                              disabled={busyPostId === post.id}
+                              className="aurora-primary-button"
+                            >
+                              {busyPostId === post.id ? "Se salvează..." : "Salvează"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      post.content && (
-                        <p className="aurora-post-content">
-                          {post.content}
-                        </p>
-                      )
-                    )}
+                      ) : (
+                        post.content && (
+                          <p className="aurora-post-content">{post.content}</p>
+                        )
+                      )}
 
-                    {post.image_path && imageUrls[post.image_path] && (
-                      <img
-                        src={imageUrls[post.image_path]}
-                        alt="Fotografie din postare"
-                        className="aurora-post-image"
-                      />
-                    )}
+                      {post.image_path && imageUrls[post.image_path] && (
+                        <div className="aurora-post-media">
+                          <img
+                            src={imageUrls[post.image_path]}
+                            alt="Fotografie din postare"
+                            className="aurora-post-image"
+                            loading="lazy"
+                          />
+                          <div className="aurora-post-media-shine" aria-hidden="true" />
+                        </div>
+                      )}
 
-                    {post.shared_post && (
-                      <div className="aurora-shared-post">
-                        <p className="aurora-post-author">
-                          {getDisplayName(post.shared_post.profiles)}
-                        </p>
-                        <p className="aurora-post-time">
-                          {formatRelativeDate(post.shared_post.created_at)}
-                        </p>
-                        {post.shared_post.content && (
-                          <p className="mt-3 whitespace-pre-wrap break-words text-gray-800">
-                            {post.shared_post.content}
-                          </p>
-                        )}
-                        {post.shared_post.image_path &&
-                          imageUrls[post.shared_post.image_path] && (
-                            <img
-                              src={imageUrls[post.shared_post.image_path]}
-                              alt="Fotografie distribuită"
-                              className="mt-3 max-h-[500px] w-full rounded-lg object-contain"
-                            />
+                      {post.shared_post && (
+                        <div className="aurora-shared-post">
+                          <div className="aurora-shared-label">
+                            <span aria-hidden="true">↗</span>
+                            Postare distribuită
+                          </div>
+
+                          <div className="aurora-shared-header">
+                            <div className="aurora-shared-avatar">
+                              {post.shared_post.profiles?.avatar_url ? (
+                                <img
+                                  src={post.shared_post.profiles.avatar_url}
+                                  alt=""
+                                />
+                              ) : (
+                                getInitials(post.shared_post.profiles)
+                              )}
+                            </div>
+                            <div>
+                              <p className="aurora-post-author">
+                                {getDisplayName(post.shared_post.profiles)}
+                              </p>
+                              <p className="aurora-post-time">
+                                {formatRelativeDate(post.shared_post.created_at)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {post.shared_post.content && (
+                            <p className="aurora-shared-content">
+                              {post.shared_post.content}
+                            </p>
                           )}
-                      </div>
-                    )}
+
+                          {post.shared_post.image_path &&
+                            imageUrls[post.shared_post.image_path] && (
+                              <div className="aurora-shared-media">
+                                <img
+                                  src={imageUrls[post.shared_post.image_path]}
+                                  alt="Fotografie distribuită"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </div>
 
                     {(reactionCounts.length > 0 || postComments.length > 0) && (
                       <div className="aurora-post-meta">
-                        <div className="flex flex-wrap gap-2">
+                        <div className="aurora-reaction-summary">
                           {reactionCounts.map((item) => (
-                            <span key={item.reaction}>
-                              {item.reaction} {item.count}
+                            <span
+                              key={item.reaction}
+                              className="aurora-reaction-count"
+                              title={`${item.count} reacții`}
+                            >
+                              <span aria-hidden="true">{item.reaction}</span>
+                              <strong>{item.count}</strong>
                             </span>
                           ))}
                         </div>
+
                         <button
                           type="button"
                           onClick={() =>
@@ -864,9 +924,9 @@ export default function FeedPage() {
                               current === post.id ? null : post.id
                             )
                           }
-                          className="hover:underline"
+                          className="aurora-comment-count-button"
                         >
-                          {postComments.length}{" "}
+                          <span>{postComments.length}</span>{" "}
                           {postComments.length === 1 ? "comentariu" : "comentarii"}
                         </button>
                       </div>
@@ -883,8 +943,12 @@ export default function FeedPage() {
                         className={`aurora-post-action ${
                           myReaction ? "aurora-post-action-active" : ""
                         }`}
+                        aria-expanded={openReactionPostId === post.id}
                       >
-                        {myReaction?.reaction ?? "👍"} Reacționează
+                        <span className="aurora-action-icon" aria-hidden="true">
+                          {myReaction?.reaction ?? "♡"}
+                        </span>
+                        <span>{myReaction ? "Reacția ta" : "Reacționează"}</span>
                       </button>
 
                       <button
@@ -894,41 +958,74 @@ export default function FeedPage() {
                             current === post.id ? null : post.id
                           )
                         }
-                        className="aurora-post-action"
+                        className={`aurora-post-action ${
+                          openCommentsPostId === post.id
+                            ? "aurora-post-action-active"
+                            : ""
+                        }`}
+                        aria-expanded={openCommentsPostId === post.id}
                       >
-                        💬 Comentează
+                        <span className="aurora-action-icon" aria-hidden="true">◌</span>
+                        <span>Comentează</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => void sharePost(post)}
                         disabled={busyPostId === post.id}
-                        className="aurora-post-action disabled:opacity-50"
+                        className="aurora-post-action"
                       >
-                        🔄 Distribuie
+                        <span className="aurora-action-icon" aria-hidden="true">↗</span>
+                        <span>
+                          {busyPostId === post.id ? "Se distribuie..." : "Distribuie"}
+                        </span>
                       </button>
 
                       {openReactionPostId === post.id && (
                         <div className="aurora-reaction-picker">
-                          {REACTIONS.map((reaction) => (
-                            <button
-                              key={reaction}
-                              type="button"
-                              onClick={() => void toggleReaction(post.id, reaction)}
-                              disabled={busyPostId === post.id}
-                              className="aurora-reaction-option"
-                              title={reaction}
-                            >
-                              {reaction}
-                            </button>
-                          ))}
+                          <span className="aurora-picker-label">Alege o reacție</span>
+                          <div className="aurora-picker-options">
+                            {REACTIONS.map((reaction) => (
+                              <button
+                                key={reaction}
+                                type="button"
+                                onClick={() => void toggleReaction(post.id, reaction)}
+                                disabled={busyPostId === post.id}
+                                className={`aurora-reaction-option ${
+                                  myReaction?.reaction === reaction
+                                    ? "aurora-reaction-option-active"
+                                    : ""
+                                }`}
+                                title={reaction}
+                              >
+                                {reaction}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
 
                     {openCommentsPostId === post.id && (
                       <div className="aurora-comments">
+                        <div className="aurora-comments-heading">
+                          <div>
+                            <span className="aurora-comments-kicker">CONVERSAȚIE</span>
+                            <h3>Comentarii</h3>
+                          </div>
+                          <span className="aurora-comments-total">
+                            {postComments.length}
+                          </span>
+                        </div>
+
                         <div className="aurora-comment-list">
+                          {postComments.length === 0 && (
+                            <div className="aurora-comments-empty">
+                              <span aria-hidden="true">✦</span>
+                              <p>Fii primul care lasă un comentariu.</p>
+                            </div>
+                          )}
+
                           {postComments.map((comment) => (
                             <div key={comment.id} className="aurora-comment-row">
                               <div className="aurora-comment-avatar">
@@ -943,27 +1040,35 @@ export default function FeedPage() {
                                 )}
                               </div>
 
-                              <div className="aurora-comment-bubble">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div>
-                                    <p className="text-sm font-semibold text-gray-900">
+                              <div className="aurora-comment-content">
+                                <div className="aurora-comment-bubble">
+                                  <div className="aurora-comment-topline">
+                                    <p className="aurora-comment-author">
                                       {getDisplayName(comment.profiles)}
                                     </p>
-                                    <p className="whitespace-pre-wrap break-words text-sm text-gray-800">
-                                      {comment.content}
-                                    </p>
+
+                                    {comment.user_id === currentUserId && (
+                                      <button
+                                        type="button"
+                                        onClick={() => void deleteComment(comment)}
+                                        disabled={busyPostId === post.id}
+                                        className="aurora-comment-delete"
+                                        title="Șterge comentariul"
+                                      >
+                                        Șterge
+                                      </button>
+                                    )}
                                   </div>
 
-                                  {comment.user_id === currentUserId && (
-                                    <button
-                                      type="button"
-                                      onClick={() => void deleteComment(comment)}
-                                      className="text-xs text-red-600 hover:underline"
-                                    >
-                                      Șterge
-                                    </button>
-                                  )}
+                                  <p className="aurora-comment-text">
+                                    {comment.content}
+                                  </p>
                                 </div>
+
+                                <span className="aurora-comment-time">
+                                  {formatRelativeDate(comment.created_at)}
+                                  {comment.updated_at ? " · editat" : ""}
+                                </span>
                               </div>
                             </div>
                           ))}
@@ -973,18 +1078,26 @@ export default function FeedPage() {
                           onSubmit={(event) => void addComment(event, post.id)}
                           className="aurora-comment-form"
                         >
-                          <input
-                            value={commentDrafts[post.id] ?? ""}
-                            onChange={(event) =>
-                              setCommentDrafts((current) => ({
-                                ...current,
-                                [post.id]: event.target.value,
-                              }))
-                            }
-                            maxLength={2000}
-                            placeholder="Scrie un comentariu..."
-                            className="aurora-comment-input"
-                          />
+                          <div className="aurora-comment-compose-avatar" aria-hidden="true">
+                            ✦
+                          </div>
+                          <div className="aurora-comment-input-wrap">
+                            <input
+                              value={commentDrafts[post.id] ?? ""}
+                              onChange={(event) =>
+                                setCommentDrafts((current) => ({
+                                  ...current,
+                                  [post.id]: event.target.value,
+                                }))
+                              }
+                              maxLength={2000}
+                              placeholder="Scrie un comentariu..."
+                              className="aurora-comment-input"
+                            />
+                            <span className="aurora-comment-limit">
+                              {(commentDrafts[post.id] ?? "").length}/2000
+                            </span>
+                          </div>
                           <button
                             type="submit"
                             disabled={
@@ -993,7 +1106,8 @@ export default function FeedPage() {
                             }
                             className="aurora-comment-submit"
                           >
-                            Trimite
+                            <span>Trimite</span>
+                            <span aria-hidden="true">→</span>
                           </button>
                         </form>
                       </div>

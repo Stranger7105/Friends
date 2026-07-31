@@ -139,7 +139,7 @@ export default function RequestsPage() {
   if (loading) {
     return (
       <main className="aurora-page min-h-screen px-4 py-8">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow">
+        <div className="mx-auto max-w-4xl rounded-2xl p-6 shadow" style={{ background: "var(--friends-surface)", color: "var(--friends-text)", border: "1px solid var(--friends-border)" }}>
           Se încarcă cererile...
         </div>
       </main>
@@ -149,18 +149,18 @@ export default function RequestsPage() {
   return (
     <main className="aurora-page min-h-screen px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-6 text-3xl font-bold text-gray-900">
+        <h1 className="mb-6 text-3xl font-bold" style={{ color: "var(--friends-text)" }}>
           Cereri de prietenie
         </h1>
 
         {message && (
-          <div className="mb-5 rounded-xl border bg-white p-4">
+          <div className="mb-5 rounded-xl border p-4" style={{ background: "var(--friends-surface)", color: "var(--friends-text)", borderColor: "var(--friends-border)" }}>
             {message}
           </div>
         )}
 
         {requests.length === 0 ? (
-          <div className="rounded-2xl bg-white p-6 text-gray-600 shadow">
+          <div className="rounded-2xl p-6 shadow" style={{ background: "var(--friends-surface)", color: "var(--friends-muted)", border: "1px solid var(--friends-border)" }}>
             Nu ai cereri de prietenie în așteptare.
           </div>
         ) : (
@@ -174,10 +174,12 @@ export default function RequestsPage() {
               return (
                 <article
                   key={request.id}
-                  className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-2xl p-5 shadow sm:flex-row sm:items-center"
+                  style={{ background: "var(--friends-surface)", color: "var(--friends-text)", border: "1px solid var(--friends-border)" }}
                 >
                   <div className="flex flex-1 items-center gap-4">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-xl font-bold text-white">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full text-xl font-bold text-white"
+                      style={{ background: "var(--friends-primary)" }}>
                       {profile?.avatar_url ? (
                         <img
                           src={profile.avatar_url}
@@ -190,18 +192,18 @@ export default function RequestsPage() {
                     </div>
 
                     <div>
-                      <h2 className="text-lg font-bold text-gray-900">
+                      <h2 className="text-lg font-bold" style={{ color: "var(--friends-text)" }}>
                         {profile?.full_name ||
                           profile?.username ||
                           "Utilizator"}
                       </h2>
 
                       {profile?.username && (
-                        <p className="text-gray-500">@{profile.username}</p>
+                        <p style={{ color: "var(--friends-muted)" }}>@{profile.username}</p>
                       )}
 
                       {location && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm" style={{ color: "var(--friends-muted)" }}>
                           📍 {location}
                         </p>
                       )}
@@ -213,7 +215,8 @@ export default function RequestsPage() {
                       type="button"
                       onClick={() => respond(request.id, "accepted")}
                       disabled={processingId === request.id}
-                      className="rounded-lg bg-emerald-600 px-5 py-2.5 font-semibold text-white hover:bg-emerald-500 disabled:opacity-60"
+                      className="rounded-lg px-5 py-2.5 font-semibold text-white transition hover:-translate-y-0.5 disabled:opacity-60"
+                      style={{ background: "var(--friends-primary)" }}
                     >
                       {processingId === request.id ? "Se procesează..." : "Acceptă"}
                     </button>
@@ -222,7 +225,8 @@ export default function RequestsPage() {
                       type="button"
                       onClick={() => respond(request.id, "declined")}
                       disabled={processingId === request.id}
-                      className="rounded-lg border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                      className="rounded-lg border px-5 py-2.5 font-semibold transition hover:-translate-y-0.5 disabled:opacity-60"
+                      style={{ background: "var(--friends-surface-strong)", color: "var(--friends-text)", borderColor: "var(--friends-border)" }}
                     >
                       Refuză
                     </button>

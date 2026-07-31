@@ -1,0 +1,502 @@
+/* FRIENDS — Print Match Pack
+   Importă acest fișier DUPĂ aurora-feed.css.
+   Scop: proporții apropiate de printul trimis, fără schimbarea funcțiilor.
+*/
+
+:root {
+  --friends-panel: rgba(6, 20, 26, 0.72);
+  --friends-panel-strong: rgba(4, 16, 22, 0.86);
+  --friends-border: rgba(192, 255, 218, 0.13);
+  --friends-glow: rgba(104, 255, 120, 0.55);
+}
+
+/* ===== STRUCTURĂ PRINCIPALĂ ===== */
+
+.aurora-feed-page {
+  min-height: 100vh;
+}
+
+.aurora-feed-shell.aurora-feed-layout {
+  width: min(calc(100% - 1rem), 1540px) !important;
+  max-width: 1540px !important;
+  align-items: stretch !important;
+  grid-template-columns: 225px minmax(0, 860px) 225px !important;
+  gap: 14px !important;
+  padding-top: 12px !important;
+}
+
+.aurora-feed-leftbar,
+.aurora-feed-rightbar,
+.aurora-feed-main {
+  min-width: 0;
+}
+
+.aurora-feed-leftbar,
+.aurora-feed-rightbar {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 112px) !important;
+  position: sticky !important;
+  top: 92px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  overflow: visible !important;
+  border: 1px solid var(--friends-border) !important;
+  border-radius: 25px !important;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(72, 255, 134, 0.12), transparent 27%),
+    linear-gradient(155deg, rgba(8, 32, 37, 0.84), rgba(3, 15, 21, 0.78)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 28px 75px -50px rgba(52, 211, 153, 0.78) !important;
+  backdrop-filter: blur(28px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(135%) !important;
+  padding: 14px !important;
+}
+
+.aurora-feed-leftbar > *,
+.aurora-feed-rightbar > * {
+  flex-shrink: 0;
+}
+
+.aurora-left-profile-card,
+.aurora-quick-nav,
+.aurora-left-note,
+.aurora-sidebar-card {
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.aurora-left-profile-card {
+  min-height: 158px !important;
+  padding: 10px 6px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.aurora-quick-nav {
+  padding: 4px 0 !important;
+}
+
+.aurora-left-note {
+  margin-top: auto !important;
+  padding: 13px 8px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.aurora-sidebar-card {
+  padding: 14px 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.aurora-sidebar-card:last-child {
+  border-bottom: 0 !important;
+}
+
+.aurora-feed-rightbar .aurora-sidebar-card:last-child {
+  margin-top: auto !important;
+}
+
+/* ===== CENTRU COMPACT ===== */
+
+.aurora-feed-main {
+  width: 100% !important;
+  max-width: 860px !important;
+}
+
+.aurora-feed-hero {
+  min-height: 118px !important;
+  margin-bottom: 10px !important;
+  padding: 18px 20px !important;
+  border-radius: 23px !important;
+  overflow: hidden !important;
+}
+
+.aurora-feed-hero h1 {
+  margin: 2px 0 2px !important;
+  font-size: clamp(1.55rem, 2vw, 2.15rem) !important;
+  line-height: 1.05 !important;
+}
+
+.aurora-feed-hero p {
+  margin: 0 !important;
+  font-size: 0.82rem !important;
+}
+
+.aurora-feed-hero-badge {
+  align-self: flex-start !important;
+}
+
+/* ===== STORIES MAI JOASE ===== */
+
+.aurora-stories-section,
+.aurora-story-section,
+.aurora-storybar,
+.aurora-story-bar {
+  margin-bottom: 10px !important;
+  border-radius: 23px !important;
+}
+
+.aurora-stories-section {
+  min-height: 150px !important;
+  padding: 14px 16px !important;
+}
+
+.aurora-stories-track,
+.aurora-story-track,
+.aurora-story-list {
+  gap: 9px !important;
+}
+
+.aurora-story-card,
+.aurora-story-item {
+  width: 94px !important;
+  min-width: 94px !important;
+  height: 120px !important;
+  border-radius: 18px !important;
+}
+
+/* ===== COMPOSER EXACT MAI COMPACT ===== */
+
+.aurora-composer-motion.aurora-composer-print {
+  position: relative;
+  margin: 0 0 10px !important;
+  overflow: hidden;
+  border: 1px solid rgba(154, 255, 181, 0.17) !important;
+  border-radius: 23px !important;
+  background:
+    radial-gradient(circle at 7% 10%, rgba(40, 240, 119, 0.12), transparent 28%),
+    linear-gradient(145deg, rgba(2, 17, 24, 0.93), rgba(5, 28, 32, 0.88)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 22px 64px -46px rgba(74, 222, 128, 0.86) !important;
+  backdrop-filter: blur(28px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(130%) !important;
+}
+
+.aurora-composer-print-inner {
+  position: relative;
+  padding: 11px 13px 10px;
+}
+
+.aurora-composer-print-inner.is-dragging {
+  box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.45);
+}
+
+.aurora-composer-print-head {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.aurora-composer-print-avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #179e65, #70db4f);
+  color: white;
+  box-shadow: 0 13px 28px -18px rgba(74, 222, 128, 0.9);
+}
+
+.aurora-composer-print-title {
+  min-width: 0;
+}
+
+.aurora-composer-print-title > span {
+  display: block;
+  color: rgba(190, 242, 100, 0.88);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.aurora-composer-print-title strong {
+  display: block;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aurora-composer-print-title p {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 10px;
+}
+
+.aurora-composer-print-badge {
+  border: 1px solid rgba(190, 242, 100, 0.18);
+  border-radius: 999px;
+  background: rgba(190, 242, 100, 0.07);
+  padding: 5px 9px;
+  color: rgba(217, 249, 157, 0.84);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.aurora-composer-print-input {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+  background: rgba(0, 8, 13, 0.34);
+  transition: 220ms ease;
+}
+
+.aurora-composer-print-input:focus-within {
+  border-color: rgba(134, 239, 172, 0.3);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.065);
+}
+
+.aurora-composer-print-input textarea {
+  display: block;
+  width: 100%;
+  height: 43px;
+  min-height: 43px;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 11px 14px;
+  color: rgba(255, 255, 255, 0.93) !important;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  transition: min-height 220ms ease;
+}
+
+.aurora-composer-print-input.is-expanded textarea {
+  min-height: 78px;
+  padding-bottom: 27px;
+}
+
+.aurora-composer-print-input textarea::placeholder {
+  color: rgba(255, 255, 255, 0.34) !important;
+}
+
+.aurora-composer-print-count {
+  position: absolute;
+  right: 10px;
+  bottom: 7px;
+  color: rgba(255, 255, 255, 0.26);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.aurora-composer-print-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.aurora-composer-print-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.aurora-composer-print-tools button,
+.aurora-composer-print-publish {
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 11px;
+  font-size: 11px;
+  font-weight: 800;
+  transition: 180ms ease;
+}
+
+.aurora-composer-print-tools button {
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.aurora-composer-print-tools button:hover {
+  border-color: rgba(134, 239, 172, 0.2);
+  background: rgba(74, 222, 128, 0.09);
+  color: white;
+}
+
+.aurora-composer-print-publish {
+  min-width: 116px;
+  border: 1px solid rgba(190, 242, 100, 0.28);
+  background: linear-gradient(90deg, rgba(31, 139, 74, 0.92), rgba(112, 211, 61, 0.95));
+  padding: 0 16px;
+  color: white;
+  box-shadow: 0 12px 28px -15px rgba(132, 204, 22, 0.8);
+}
+
+.aurora-composer-print-publish:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.aurora-composer-print-preview {
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px;
+}
+
+.aurora-composer-print-preview img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  border-radius: 11px;
+  object-fit: contain;
+}
+
+.aurora-composer-print-preview button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(2, 6, 23, 0.8);
+  color: white;
+}
+
+.aurora-composer-print-preview > span {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  max-width: 70%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.72);
+  padding: 5px 9px;
+  color: white;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aurora-composer-print-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: inherit;
+  background: rgba(2, 14, 19, 0.92);
+  color: #86efac;
+  backdrop-filter: blur(12px);
+}
+
+/* ===== POSTĂRILE ÎNCEP IMEDIAT ===== */
+
+.aurora-feed-section-compact,
+.aurora-feed-section {
+  margin-top: 0 !important;
+}
+
+.aurora-feed-heading-hidden {
+  display: none !important;
+}
+
+.aurora-post-list {
+  gap: 10px !important;
+}
+
+.aurora-post-card {
+  border-radius: 23px !important;
+}
+
+.aurora-premium-post {
+  margin-top: 0 !important;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1260px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    grid-template-columns: 205px minmax(0, 1fr) !important;
+    max-width: 1120px !important;
+  }
+
+  .aurora-feed-rightbar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    display: block !important;
+    width: min(calc(100% - 1rem), 820px) !important;
+  }
+
+  .aurora-feed-leftbar,
+  .aurora-feed-rightbar {
+    display: none !important;
+  }
+
+  .aurora-feed-main {
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .aurora-feed-hero {
+    min-height: 102px !important;
+    padding: 15px !important;
+  }
+
+  .aurora-composer-print-head {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .aurora-composer-print-badge {
+    display: none;
+  }
+
+  .aurora-composer-print-title strong {
+    font-size: 14px;
+  }
+
+  .aurora-composer-print-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .aurora-composer-print-tools {
+    justify-content: space-between;
+  }
+
+  .aurora-composer-print-tools button {
+    flex: 1;
+    padding: 0 7px;
+  }
+
+  .aurora-composer-print-publish {
+    width: 100%;
+  }
+}

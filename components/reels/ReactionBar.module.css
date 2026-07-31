@@ -1,0 +1,117 @@
+.wrap {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+
+.trigger {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(8,18,22,.58);
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+  backdrop-filter: blur(14px);
+  font-size: 24px;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.trigger:hover .icon,
+.active .icon {
+  transform: scale(1.08);
+  border-color: rgba(190,242,100,.5);
+  box-shadow: 0 0 0 4px rgba(132,204,22,.08), 0 18px 40px rgba(0,0,0,.32);
+}
+
+.trigger small {
+  max-width: 58px;
+  overflow: hidden;
+  color: rgba(255,255,255,.86);
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+}
+
+.summary {
+  display: flex;
+  margin-top: -8px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  background: rgba(2,10,14,.8);
+  box-shadow: 0 8px 22px rgba(0,0,0,.25);
+}
+
+.summary span {
+  margin-left: -2px;
+  font-size: 13px;
+}
+
+.picker {
+  position: absolute;
+  right: 54px;
+  top: 2px;
+  z-index: 60;
+  display: flex;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid rgba(190,242,100,.25);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(132,204,22,.18), transparent 42%),
+    rgba(3,15,20,.96);
+  box-shadow: 0 22px 58px rgba(0,0,0,.55);
+  backdrop-filter: blur(20px);
+}
+
+.picker button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 21px;
+}
+
+.picker button:hover,
+.picker .selected {
+  background: rgba(255,255,255,.09);
+  box-shadow: inset 0 0 0 1px rgba(190,242,100,.2);
+}
+
+@media (max-width: 640px) {
+  .picker {
+    right: 50px;
+    gap: 1px;
+    padding: 6px;
+  }
+
+  .picker button {
+    width: 31px;
+    height: 31px;
+    font-size: 19px;
+  }
+
+  .icon {
+    width: 43px;
+    height: 43px;
+  }
+}

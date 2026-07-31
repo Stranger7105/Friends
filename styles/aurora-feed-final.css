@@ -1,0 +1,96 @@
+/* Friends 6.2 — Feed sincronizat cu motorul global */
+
+.aurora-feed-page {
+  min-height: 100vh !important;
+  color: rgb(var(--friends-text)) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.aurora-feed-page::before,
+.aurora-feed-page::after,
+.aurora-feed-glow,
+.aurora-feed-glow-one,
+.aurora-feed-glow-two,
+.aurora-feed-glow-three {
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.aurora-feed-shell,
+.aurora-feed-layout,
+.aurora-feed-main,
+.aurora-feed-section {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.aurora-feed-hero {
+  color: rgb(var(--friends-text)) !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgb(var(--friends-primary) / 0.18), transparent 34%),
+    radial-gradient(circle at 82% 15%, rgb(var(--friends-secondary) / 0.15), transparent 30%),
+    linear-gradient(
+      125deg,
+      rgb(var(--friends-surface) / 0.82),
+      rgb(var(--friends-surface-strong) / 0.68)
+    ) !important;
+  border: 1px solid rgb(var(--friends-border) / 0.32) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 32px 90px -48px rgb(var(--friends-primary) / 0.42) !important;
+  backdrop-filter: blur(30px) saturate(155%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(155%) !important;
+}
+
+.aurora-feed-hero h1,
+.aurora-feed-hero-badge {
+  color: rgb(var(--friends-text)) !important;
+}
+
+.aurora-feed-hero p {
+  color: rgb(var(--friends-muted)) !important;
+}
+
+.aurora-feed-hero .aurora-feed-eyebrow {
+  color: rgb(var(--friends-primary)) !important;
+}
+
+.aurora-feed-hero-badge {
+  background: rgb(var(--friends-primary) / 0.13) !important;
+  border-color: rgb(var(--friends-border) / 0.45) !important;
+}
+
+.aurora-left-profile-card,
+.aurora-quick-nav,
+.aurora-left-note,
+.aurora-sidebar-card,
+.aurora-feed-state,
+.aurora-feed-alert,
+.aurora-feed-skeleton-card,
+.aurora-post-card,
+.aurora-premium-post {
+  color: rgb(var(--friends-text)) !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-surface) / 0.80),
+      rgb(var(--friends-surface-strong) / 0.62)
+    ) !important;
+  border-color: rgb(var(--friends-border) / 0.30) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 26px 70px -46px rgb(var(--friends-primary) / 0.40) !important;
+  backdrop-filter: blur(26px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(150%) !important;
+}
+
+.aurora-post-content,
+.aurora-comment-text,
+.aurora-sidebar-card p,
+.aurora-left-profile-card p,
+.aurora-left-note p {
+  color: rgb(var(--friends-muted)) !important;
+}

@@ -1,0 +1,444 @@
+/* =========================================================
+   FRIENDS — NAVBAR THEME ENGINE 7.0A
+   ========================================================= */
+
+.friends-navbar-shell {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px 12px 0;
+  pointer-events: auto;
+}
+
+.friends-navbar-shell.is-overlay-open {
+  pointer-events: none;
+}
+
+.friends-navbar {
+  position: relative;
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--friends-border);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--friends-surface-strong) 88%, transparent);
+  box-shadow: 0 26px 80px -42px color-mix(in srgb, var(--friends-primary) 72%, transparent);
+  color: var(--friends-text);
+  backdrop-filter: blur(24px);
+}
+
+.friends-navbar-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--friends-primary) 20%, transparent), transparent 30%),
+    radial-gradient(circle at 78% 0%, color-mix(in srgb, var(--friends-secondary) 12%, transparent), transparent 28%),
+    linear-gradient(110deg, color-mix(in srgb, var(--friends-text) 4%, transparent), transparent 48%);
+}
+
+.friends-navbar-line {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 40px;
+  left: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--friends-accent), transparent);
+  opacity: .72;
+}
+
+.friends-navbar-row {
+  position: relative;
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.friends-brand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  color: var(--friends-text);
+  text-decoration: none;
+}
+
+.friends-logo {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--friends-text) 18%, transparent);
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--friends-primary), var(--friends-secondary));
+  box-shadow: 0 18px 45px -20px color-mix(in srgb, var(--friends-primary) 95%, transparent);
+}
+
+.friends-logo-ring {
+  position: absolute;
+  inset: 6px;
+  border: 1px solid color-mix(in srgb, var(--friends-text) 22%, transparent);
+  border-radius: 13px;
+}
+
+.friends-logo-dot {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--friends-text);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--friends-text) 95%, transparent);
+}
+
+.friends-brand-name {
+  display: block;
+  max-width: 160px;
+  overflow: hidden;
+  color: var(--friends-text);
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: -.055em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-desktop-nav {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.friends-nav-motion {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.friends-nav-link {
+  position: relative;
+  display: flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 0 12px;
+  color: var(--friends-muted);
+  text-decoration: none;
+  transition: 180ms ease;
+}
+
+.friends-nav-link:hover {
+  border-color: var(--friends-border);
+  background: color-mix(in srgb, var(--friends-surface) 80%, transparent);
+  color: var(--friends-text);
+}
+
+.friends-nav-link.is-active {
+  border-color: color-mix(in srgb, var(--friends-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--friends-primary) 15%, var(--friends-surface));
+  color: var(--friends-text);
+  box-shadow: 0 12px 30px -18px color-mix(in srgb, var(--friends-primary) 90%, transparent);
+}
+
+.friends-nav-label {
+  display: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.friends-active-line {
+  position: absolute;
+  right: 12px;
+  bottom: -2px;
+  left: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--friends-primary), var(--friends-secondary));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--friends-accent) 80%, transparent);
+}
+
+.friends-navbar-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.friends-messages-button,
+.friends-icon-button,
+.friends-logout-button {
+  position: relative;
+  display: flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  transition: 180ms ease;
+}
+
+.friends-messages-button {
+  min-width: 118px;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid var(--friends-border);
+  background: color-mix(in srgb, var(--friends-surface) 88%, transparent);
+  padding: 0 16px;
+  color: var(--friends-text);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.friends-messages-button:hover,
+.friends-messages-button.has-unread,
+.friends-messages-button.is-active {
+  border-color: color-mix(in srgb, var(--friends-accent) 32%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--friends-primary) 26%, var(--friends-surface)),
+    color-mix(in srgb, var(--friends-secondary) 18%, var(--friends-surface))
+  );
+  box-shadow: 0 15px 36px -18px color-mix(in srgb, var(--friends-primary) 95%, transparent);
+}
+
+.friends-button-shine {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--friends-text) 12%, transparent), transparent);
+  transition: transform 700ms ease;
+}
+
+.friends-messages-button:hover .friends-button-shine {
+  transform: translateX(120%);
+}
+
+.friends-messages-label {
+  font-size: 12px;
+  letter-spacing: .03em;
+}
+
+.friends-count-badge,
+.friends-notification-badge,
+.friends-mobile-badge {
+  display: flex;
+  min-width: 22px;
+  min-height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f43f5e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.friends-count-badge {
+  border: 1px solid color-mix(in srgb, #fff 25%, transparent);
+  padding: 0 6px;
+}
+
+.friends-icon-button {
+  width: 44px;
+  border: 1px solid var(--friends-border);
+  background: color-mix(in srgb, var(--friends-surface) 88%, transparent);
+  color: var(--friends-muted);
+  text-decoration: none;
+}
+
+.friends-icon-button:hover,
+.friends-icon-button.is-active {
+  border-color: color-mix(in srgb, var(--friends-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--friends-primary) 15%, var(--friends-surface));
+  color: var(--friends-text);
+}
+
+.friends-action-wrap {
+  position: relative;
+}
+
+.friends-notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  border: 1px solid var(--friends-surface-strong);
+  padding: 0 5px;
+}
+
+.friends-menu-button {
+  display: none;
+}
+
+.friends-logout-button {
+  width: 44px;
+  border: 1px solid rgba(251, 113, 133, .16);
+  background: rgba(244, 63, 94, .09);
+  color: #fda4af;
+}
+
+.friends-logout-button:hover {
+  border-color: rgba(251, 113, 133, .28);
+  background: rgba(244, 63, 94, .16);
+}
+
+.friends-search-panel {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--friends-border);
+}
+
+.friends-search-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  color: var(--friends-accent);
+}
+
+.friends-search-form input {
+  min-width: 0;
+  flex: 1;
+  outline: none;
+  border: 0;
+  background: transparent;
+  color: var(--friends-text);
+  font-size: 14px;
+}
+
+.friends-search-form input::placeholder {
+  color: var(--friends-muted);
+}
+
+.friends-search-form button {
+  border: 1px solid color-mix(in srgb, var(--friends-accent) 22%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--friends-primary) 18%, transparent);
+  padding: 8px 16px;
+  color: var(--friends-text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.friends-mobile-nav {
+  display: none;
+}
+
+.friends-navbar-spacer {
+  height: 12px;
+}
+
+@media (min-width: 1536px) {
+  .friends-nav-link {
+    min-width: 106px;
+  }
+
+  .friends-nav-label {
+    display: inline;
+  }
+}
+
+@media (max-width: 1023px) {
+  .friends-desktop-nav,
+  .friends-logout-button {
+    display: none;
+  }
+
+  .friends-menu-button {
+    display: flex;
+  }
+
+  .friends-mobile-nav {
+    display: grid;
+    width: min(calc(100% - 24px), 1600px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 8px auto 0;
+    border: 1px solid var(--friends-border);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--friends-surface-strong) 96%, transparent);
+    padding: 12px;
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .65);
+    backdrop-filter: blur(24px);
+  }
+
+  .friends-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--friends-border);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--friends-surface) 86%, transparent);
+    padding: 12px;
+    color: var(--friends-muted);
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .friends-mobile-link:hover,
+  .friends-mobile-link.is-active,
+  .friends-mobile-link.has-unread {
+    border-color: color-mix(in srgb, var(--friends-accent) 24%, transparent);
+    background: color-mix(in srgb, var(--friends-primary) 14%, var(--friends-surface));
+    color: var(--friends-text);
+  }
+
+  .friends-mobile-messages,
+  .friends-mobile-logout {
+    grid-column: 1 / -1;
+  }
+
+  .friends-mobile-badge {
+    margin-left: auto;
+    padding: 0 7px;
+  }
+
+  .friends-mobile-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(251, 113, 133, .16);
+    border-radius: 16px;
+    background: rgba(244, 63, 94, .10);
+    padding: 12px;
+    color: #fecdd3;
+    font-size: 14px;
+    font-weight: 900;
+  }
+}
+
+@media (max-width: 639px) {
+  .friends-navbar-shell {
+    padding: 10px 8px 0;
+  }
+
+  .friends-navbar-row {
+    padding: 10px;
+  }
+
+  .friends-brand-copy,
+  .friends-messages-wrap,
+  .friends-profile-wrap {
+    display: none;
+  }
+
+  .friends-navbar-actions {
+    gap: 6px;
+  }
+
+  .friends-navbar {
+    border-radius: 22px;
+  }
+}

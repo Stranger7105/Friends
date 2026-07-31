@@ -3,11 +3,8 @@
   min-height: 100vh;
   overflow-x: hidden;
   padding: 2rem 1rem 8rem;
-  color: #172033;
-  background:
-    radial-gradient(circle at 8% 10%, rgba(52, 211, 153, .18), transparent 27rem),
-    radial-gradient(circle at 92% 20%, rgba(34, 211, 238, .16), transparent 30rem),
-    linear-gradient(145deg, #f7fffc 0%, #f5fbff 48%, #f8fff4 100%);
+  color: rgb(var(--friends-text));
+  background: transparent;
 }
 
 .aurora-gallery-glow {
@@ -24,13 +21,13 @@
 .aurora-gallery-glow-one {
   top: 7rem;
   left: -10rem;
-  background: #10b981;
+  background: rgb(var(--friends-primary));
 }
 
 .aurora-gallery-glow-two {
   right: -10rem;
   bottom: 3rem;
-  background: #22d3ee;
+  background: rgb(var(--friends-secondary));
 }
 
 .aurora-gallery-shell {
@@ -46,11 +43,11 @@
   justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255,255,255,.82);
+  border: 1px solid rgb(var(--friends-border) / .28);
   border-radius: 2rem;
-  background: rgba(255,255,255,.72);
+  background: linear-gradient(145deg, rgb(var(--friends-surface) / .82), rgb(var(--friends-surface-strong) / .68));
   padding: 1.25rem;
-  box-shadow: 0 30px 80px -52px rgba(6,95,70,.5);
+  box-shadow: 0 30px 80px -52px rgb(var(--friends-primary) / .5);
   backdrop-filter: blur(24px);
 }
 
@@ -67,13 +64,13 @@
   flex: 0 0 auto;
   place-items: center;
   overflow: hidden;
-  border: 3px solid rgba(255,255,255,.9);
+  border: 3px solid rgb(var(--friends-border) / .55);
   border-radius: 1.45rem;
-  background: linear-gradient(145deg, #059669, #65a30d);
+  background: linear-gradient(145deg, rgb(var(--friends-primary)), rgb(var(--friends-secondary)));
   color: white;
   font-size: 1.25rem;
   font-weight: 900;
-  box-shadow: 0 18px 38px -20px rgba(5,150,105,.85);
+  box-shadow: 0 18px 38px -20px rgb(var(--friends-primary) / .85);
 }
 
 .aurora-gallery-avatar img {
@@ -84,7 +81,7 @@
 
 .aurora-gallery-kicker {
   margin: 0 0 .3rem;
-  color: #059669;
+  color: rgb(var(--friends-primary));
   font-size: .68rem;
   font-weight: 900;
   letter-spacing: .2em;
@@ -99,7 +96,7 @@
 
 .aurora-gallery-header p {
   margin: .4rem 0 0;
-  color: #64748b;
+  color: rgb(var(--friends-muted));
 }
 
 .aurora-gallery-actions {
@@ -111,7 +108,7 @@
 .aurora-gallery-button {
   border: 0;
   border-radius: 1rem;
-  background: linear-gradient(90deg, #059669, #65a30d);
+  background: linear-gradient(90deg, rgb(var(--friends-primary)), rgb(var(--friends-secondary)));
   padding: .8rem 1rem;
   color: white;
   font-weight: 800;
@@ -120,24 +117,24 @@
 }
 
 .aurora-gallery-button.secondary {
-  border: 1px solid rgba(148,163,184,.3);
-  background: rgba(255,255,255,.8);
-  color: #475569;
+  border: 1px solid rgb(var(--friends-border) / .3);
+  background: rgb(var(--friends-surface) / .78);
+  color: rgb(var(--friends-text));
 }
 
 .aurora-gallery-button:hover {
   transform: translateY(-2px) scale(1.025);
-  box-shadow: 0 15px 35px -22px rgba(5,150,105,.8);
+  box-shadow: 0 15px 35px -22px rgb(var(--friends-primary) / .8);
 }
 
 .aurora-gallery-alert,
 .aurora-gallery-state,
 .aurora-gallery-empty {
-  border: 1px solid rgba(255,255,255,.88);
+  border: 1px solid rgb(var(--friends-border) / .28);
   border-radius: 1.7rem;
-  background: rgba(255,255,255,.78);
+  background: linear-gradient(145deg, rgb(var(--friends-surface) / .82), rgb(var(--friends-surface-strong) / .68));
   padding: 1.25rem;
-  box-shadow: 0 25px 70px -50px rgba(15,23,42,.5);
+  box-shadow: 0 25px 70px -50px rgb(var(--friends-primary) / .35);
   backdrop-filter: blur(22px);
 }
 
@@ -169,7 +166,7 @@
 
 .aurora-gallery-empty p {
   margin: 0;
-  color: #64748b;
+  color: rgb(var(--friends-muted));
 }
 
 .aurora-masonry {
@@ -186,16 +183,16 @@
   overflow: hidden;
   border: 0;
   border-radius: 1.5rem;
-  background: #e2e8f0;
+  background: rgb(var(--friends-surface-strong));
   padding: 0;
   cursor: zoom-in;
-  box-shadow: 0 22px 55px -38px rgba(15,23,42,.65);
+  box-shadow: 0 22px 55px -38px rgb(var(--friends-bg-1) / .65);
   transition: transform .24s ease, box-shadow .24s ease;
 }
 
 .aurora-gallery-card:hover {
   transform: translateY(-5px) scale(1.012);
-  box-shadow: 0 30px 70px -38px rgba(5,150,105,.65);
+  box-shadow: 0 30px 70px -38px rgb(var(--friends-primary) / .65);
 }
 
 .aurora-gallery-card > img {
@@ -310,7 +307,7 @@
 .aurora-viewer-close:hover,
 .aurora-viewer-nav:hover {
   transform: scale(1.1);
-  background: rgba(5,150,105,.85);
+  background: rgb(var(--friends-primary) / .85);
 }
 
 .aurora-viewer-close {

@@ -1,0 +1,362 @@
+.aurora-chat-shell {
+  --theme-a: 16 185 129;
+  --theme-b: 132 204 22;
+  --theme-c: 14 116 144;
+  --chat-blur: 16px;
+  background: rgb(248 250 252 / 0.82);
+  border: 1px solid rgb(255 255 255 / 0.42);
+  isolation: isolate;
+}
+
+.aurora-chat-shell[data-chat-theme="forest"] { --theme-a: 22 163 74; --theme-b: 101 163 13; --theme-c: 21 128 61; }
+.aurora-chat-shell[data-chat-theme="ocean"] { --theme-a: 14 165 233; --theme-b: 6 182 212; --theme-c: 37 99 235; }
+.aurora-chat-shell[data-chat-theme="sunset"] { --theme-a: 249 115 22; --theme-b: 236 72 153; --theme-c: 168 85 247; }
+.aurora-chat-shell[data-chat-theme="midnight"] { --theme-a: 79 70 229; --theme-b: 30 64 175; --theme-c: 15 23 42; }
+.aurora-chat-shell[data-chat-theme="ice"] { --theme-a: 34 211 238; --theme-b: 186 230 253; --theme-c: 59 130 246; }
+
+.aurora-chat-header,
+.aurora-chat-composer {
+  position: relative;
+  z-index: 3;
+  background: rgb(255 255 255 / 0.76);
+  backdrop-filter: blur(var(--chat-blur));
+  border-color: rgb(var(--theme-a) / 0.18);
+}
+
+.aurora-chat-messages {
+  position: relative;
+  z-index: 1;
+  background-color: rgb(241 245 249 / 0.72);
+  background-size: cover;
+  background-position: center;
+}
+
+.aurora-chat-messages::before,
+.aurora-chat-messages::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.58;
+  filter: blur(45px);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+.aurora-chat-messages::before {
+  background:
+    radial-gradient(circle at 18% 24%, rgb(var(--theme-a) / 0.42), transparent 32%),
+    radial-gradient(circle at 78% 34%, rgb(var(--theme-b) / 0.34), transparent 34%),
+    radial-gradient(circle at 52% 88%, rgb(var(--theme-c) / 0.30), transparent 36%);
+}
+
+.aurora-chat-messages::after {
+  animation-delay: -8s;
+  background: radial-gradient(ellipse at 50% 50%, rgb(255 255 255 / 0.38), transparent 58%);
+}
+
+.aurora-chat-shell[data-chat-wallpaper="waves"] .aurora-chat-messages {
+  background-image: repeating-radial-gradient(circle at 10% 20%, rgb(var(--theme-a) / 0.12) 0 2px, transparent 3px 28px);
+}
+.aurora-chat-shell[data-chat-wallpaper="forest"] .aurora-chat-messages {
+  background-image: linear-gradient(145deg, rgb(6 78 59 / 0.13), transparent 48%), repeating-linear-gradient(115deg, transparent 0 26px, rgb(34 197 94 / 0.07) 27px 29px);
+}
+.aurora-chat-shell[data-chat-wallpaper="sunset"] .aurora-chat-messages {
+  background-image: linear-gradient(135deg, rgb(251 146 60 / 0.18), rgb(244 114 182 / 0.12), rgb(139 92 246 / 0.12));
+}
+.aurora-chat-shell[data-chat-wallpaper="minimal"] .aurora-chat-messages {
+  background-image: radial-gradient(circle at 1px 1px, rgb(var(--theme-a) / 0.16) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+.aurora-chat-shell[data-chat-wallpaper="none"] .aurora-chat-messages::before,
+.aurora-chat-shell[data-chat-wallpaper="none"] .aurora-chat-messages::after { display: none; }
+
+.aurora-message-bubble {
+  border: 1px solid rgb(255 255 255 / 0.48);
+  box-shadow: 0 10px 28px rgb(15 23 42 / 0.10);
+  backdrop-filter: blur(calc(var(--chat-blur) * 0.65));
+  animation: aurora-message-in 240ms ease-out both;
+}
+.aurora-message-bubble.is-mine {
+  background: linear-gradient(135deg, rgb(var(--theme-a) / 0.96), rgb(var(--theme-c) / 0.92));
+  border-bottom-right-radius: 0.45rem;
+}
+.aurora-message-bubble.is-theirs {
+  background: rgb(255 255 255 / 0.78);
+  border-bottom-left-radius: 0.45rem;
+}
+
+.aurora-toolbar-button {
+  color: rgb(var(--theme-c));
+  border-color: rgb(var(--theme-a) / 0.30);
+  background: rgb(var(--theme-a) / 0.08);
+}
+.aurora-toolbar-button:hover { background: rgb(var(--theme-a) / 0.16); }
+
+.aurora-presence-dot.is-online {
+  background: rgb(34 197 94);
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.18), 0 0 16px rgb(132 204 22 / 0.95);
+  animation: aurora-presence 1.8s ease-in-out infinite;
+}
+.aurora-presence-dot.is-offline { background: rgb(156 163 175); }
+
+.aurora-theme-card,
+.aurora-wallpaper-card { background: linear-gradient(135deg, rgb(248 250 252), rgb(255 255 255)); }
+.aurora-theme-card.is-selected,
+.aurora-wallpaper-card.is-selected { border-color: rgb(16 185 129); }
+.aurora-theme-card[data-preview-theme="aurora"] { background: linear-gradient(135deg, #064e3b, #65a30d); color: white; }
+.aurora-theme-card[data-preview-theme="forest"] { background: linear-gradient(135deg, #14532d, #4d7c0f); color: white; }
+.aurora-theme-card[data-preview-theme="ocean"] { background: linear-gradient(135deg, #0369a1, #0e7490); color: white; }
+.aurora-theme-card[data-preview-theme="sunset"] { background: linear-gradient(135deg, #ea580c, #db2777); color: white; }
+.aurora-theme-card[data-preview-theme="midnight"] { background: linear-gradient(135deg, #0f172a, #4338ca); color: white; }
+.aurora-theme-card[data-preview-theme="ice"] { background: linear-gradient(135deg, #e0f2fe, #67e8f9); color: #0f172a; }
+
+.aurora-wallpaper-card[data-preview-wallpaper="aurora"] { background: linear-gradient(135deg, #052e16, #0f766e, #84cc16); color: white; }
+.aurora-wallpaper-card[data-preview-wallpaper="waves"] { background: repeating-radial-gradient(circle, #bae6fd 0 3px, #f0f9ff 4px 18px); }
+.aurora-wallpaper-card[data-preview-wallpaper="forest"] { background: linear-gradient(145deg, #14532d, #86efac); color: white; }
+.aurora-wallpaper-card[data-preview-wallpaper="sunset"] { background: linear-gradient(135deg, #fb923c, #f472b6, #a78bfa); color: white; }
+.aurora-wallpaper-card[data-preview-wallpaper="minimal"] { background-image: radial-gradient(circle at 1px 1px, #94a3b8 1px, white 0); background-size: 14px 14px; }
+
+@keyframes aurora-message-in { from { opacity: 0; transform: translateY(7px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes aurora-drift { from { transform: translate3d(-2%, -1%, 0) rotate(-2deg); } to { transform: translate3d(3%, 2%, 0) rotate(3deg); } }
+@keyframes aurora-presence { 50% { box-shadow: 0 0 0 6px rgb(34 197 94 / 0.08), 0 0 22px rgb(132 204 22 / 0.95); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-chat-messages::before,
+  .aurora-chat-messages::after,
+  .aurora-message-bubble,
+  .aurora-presence-dot.is-online { animation: none; }
+}
+
+
+/* FIX 5.0A.1: chat theme must override global Friends theme utilities */
+.aurora-chat-shell[data-chat-theme] {
+  background: linear-gradient(145deg, rgb(var(--theme-c) / 0.18), rgb(255 255 255 / 0.88)) !important;
+}
+
+.aurora-chat-shell[data-chat-theme] .aurora-chat-header,
+.aurora-chat-shell[data-chat-theme] .aurora-chat-composer {
+  background: rgb(255 255 255 / 0.78) !important;
+  border-color: rgb(var(--theme-a) / 0.28) !important;
+}
+
+.aurora-chat-shell[data-chat-theme] .aurora-chat-messages {
+  background-color: rgb(var(--theme-c) / 0.10) !important;
+}
+
+.aurora-chat-shell[data-chat-theme="ocean"] .aurora-chat-messages {
+  background-color: rgb(224 242 254 / 0.88) !important;
+}
+.aurora-chat-shell[data-chat-theme="sunset"] .aurora-chat-messages {
+  background-color: rgb(255 237 213 / 0.88) !important;
+}
+.aurora-chat-shell[data-chat-theme="midnight"] .aurora-chat-messages {
+  background-color: rgb(15 23 42 / 0.94) !important;
+}
+.aurora-chat-shell[data-chat-theme="ice"] .aurora-chat-messages {
+  background-color: rgb(240 249 255 / 0.92) !important;
+}
+.aurora-chat-shell[data-chat-theme="forest"] .aurora-chat-messages {
+  background-color: rgb(220 252 231 / 0.88) !important;
+}
+
+.aurora-chat-shell[data-chat-theme] .aurora-message-bubble.is-mine {
+  background: linear-gradient(135deg, rgb(var(--theme-a) / 0.98), rgb(var(--theme-c) / 0.94)) !important;
+}
+
+.aurora-chat-shell[data-chat-theme] .aurora-toolbar-button {
+  color: rgb(var(--theme-c)) !important;
+  border-color: rgb(var(--theme-a) / 0.34) !important;
+  background: rgb(var(--theme-a) / 0.12) !important;
+}
+
+/* FIX 5.0A.2: the page background and wallpaper now follow the selected chat theme. */
+.chat-theme-page {
+  --theme-a: 16 185 129;
+  --theme-b: 132 204 22;
+  --theme-c: 14 116 144;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 18%, rgb(var(--theme-a) / 0.20), transparent 34%),
+    radial-gradient(circle at 86% 78%, rgb(var(--theme-c) / 0.18), transparent 38%),
+    linear-gradient(145deg, rgb(248 250 252), rgb(var(--theme-c) / 0.10));
+  transition: background 280ms ease;
+}
+
+.chat-theme-page[data-chat-theme="forest"] { --theme-a: 22 163 74; --theme-b: 101 163 13; --theme-c: 21 128 61; }
+.chat-theme-page[data-chat-theme="ocean"] { --theme-a: 14 165 233; --theme-b: 6 182 212; --theme-c: 37 99 235; }
+.chat-theme-page[data-chat-theme="sunset"] { --theme-a: 249 115 22; --theme-b: 236 72 153; --theme-c: 168 85 247; }
+.chat-theme-page[data-chat-theme="midnight"] { --theme-a: 79 70 229; --theme-b: 30 64 175; --theme-c: 15 23 42; }
+.chat-theme-page[data-chat-theme="ice"] { --theme-a: 34 211 238; --theme-b: 186 230 253; --theme-c: 59 130 246; }
+
+.chat-theme-page[data-chat-theme="midnight"] {
+  background:
+    radial-gradient(circle at 16% 18%, rgb(79 70 229 / 0.28), transparent 36%),
+    radial-gradient(circle at 84% 80%, rgb(37 99 235 / 0.20), transparent 40%),
+    linear-gradient(145deg, rgb(2 6 23), rgb(15 23 42));
+}
+
+/* Aurora motion belongs only to the Aurora wallpaper. */
+.aurora-chat-shell:not([data-chat-wallpaper="aurora"]) .aurora-chat-messages::before,
+.aurora-chat-shell:not([data-chat-wallpaper="aurora"]) .aurora-chat-messages::after {
+  display: none !important;
+}
+
+.aurora-chat-shell[data-chat-wallpaper="waves"] .aurora-chat-messages {
+  background-color: rgb(224 242 254 / 0.94) !important;
+  background-image:
+    repeating-radial-gradient(circle at 8% 18%, rgb(var(--theme-a) / 0.18) 0 2px, transparent 3px 30px),
+    linear-gradient(145deg, rgb(240 249 255 / 0.95), rgb(var(--theme-c) / 0.13)) !important;
+}
+
+.aurora-chat-shell[data-chat-wallpaper="forest"] .aurora-chat-messages {
+  background-color: rgb(220 252 231 / 0.94) !important;
+  background-image:
+    linear-gradient(145deg, rgb(20 83 45 / 0.14), transparent 48%),
+    repeating-linear-gradient(115deg, transparent 0 26px, rgb(34 197 94 / 0.10) 27px 29px) !important;
+}
+
+.aurora-chat-shell[data-chat-wallpaper="sunset"] .aurora-chat-messages {
+  background-color: rgb(255 237 213 / 0.94) !important;
+  background-image: linear-gradient(135deg, rgb(251 146 60 / 0.24), rgb(244 114 182 / 0.18), rgb(139 92 246 / 0.16)) !important;
+}
+
+.aurora-chat-shell[data-chat-wallpaper="minimal"] .aurora-chat-messages {
+  background-color: rgb(248 250 252 / 0.96) !important;
+  background-image: radial-gradient(circle at 1px 1px, rgb(var(--theme-a) / 0.20) 1px, transparent 0) !important;
+  background-size: 24px 24px !important;
+}
+
+.aurora-chat-shell[data-chat-wallpaper="none"] .aurora-chat-messages {
+  background-color: rgb(248 250 252 / 0.98) !important;
+  background-image: none !important;
+}
+
+.aurora-chat-shell[data-chat-theme="midnight"][data-chat-wallpaper="minimal"] .aurora-chat-messages,
+.aurora-chat-shell[data-chat-theme="midnight"][data-chat-wallpaper="none"] .aurora-chat-messages {
+  background-color: rgb(15 23 42 / 0.98) !important;
+}
+
+/* =========================================================
+   FRIENDS 6.1 — FINAL CHAT THEME AUTHORITY
+   This block intentionally overrides legacy local backgrounds.
+   ========================================================= */
+
+html[data-friends-theme] body .chat-theme-page {
+  min-height: 100vh !important;
+  color: rgb(var(--friends-text)) !important;
+  background:
+    radial-gradient(circle at 10% 8%, rgb(var(--friends-primary) / 0.22), transparent 34rem),
+    radial-gradient(circle at 88% 18%, rgb(var(--friends-secondary) / 0.17), transparent 34rem),
+    linear-gradient(
+      150deg,
+      rgb(var(--friends-bg-1)),
+      rgb(var(--friends-bg-2)) 52%,
+      rgb(var(--friends-bg-3))
+    ) !important;
+}
+
+html[data-friends-theme] body .aurora-chat-shell {
+  color: rgb(var(--friends-text)) !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-surface) / 0.91),
+      rgb(var(--friends-surface-strong) / 0.82)
+    ) !important;
+  border-color: rgb(var(--friends-border) / 0.30) !important;
+}
+
+html[data-friends-theme] body .aurora-chat-header,
+html[data-friends-theme] body .aurora-chat-composer {
+  color: rgb(var(--friends-text)) !important;
+  background: rgb(var(--friends-surface) / 0.84) !important;
+  border-color: rgb(var(--friends-border) / 0.25) !important;
+}
+
+html[data-friends-theme] body .aurora-chat-messages {
+  color: rgb(var(--friends-text)) !important;
+  background-color: rgb(var(--friends-bg-1)) !important;
+  background-image:
+    radial-gradient(circle at 15% 18%, rgb(var(--friends-primary) / 0.15), transparent 33%),
+    radial-gradient(circle at 84% 82%, rgb(var(--friends-secondary) / 0.12), transparent 38%),
+    linear-gradient(
+      145deg,
+      rgb(var(--friends-bg-1)),
+      rgb(var(--friends-bg-2))
+    ) !important;
+}
+
+/* A local wallpaper may add texture, never a different black/green base. */
+html[data-friends-theme] body
+.aurora-chat-shell[data-chat-wallpaper="waves"]
+.aurora-chat-messages {
+  background-image:
+    repeating-radial-gradient(
+      circle at 8% 18%,
+      rgb(var(--friends-primary) / 0.18) 0 2px,
+      transparent 3px 30px
+    ),
+    linear-gradient(145deg, rgb(var(--friends-bg-1)), rgb(var(--friends-bg-2))) !important;
+}
+
+html[data-friends-theme] body
+.aurora-chat-shell[data-chat-wallpaper="forest"]
+.aurora-chat-messages {
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 26px,
+      rgb(var(--friends-secondary) / 0.09) 27px 29px
+    ),
+    linear-gradient(145deg, rgb(var(--friends-bg-1)), rgb(var(--friends-bg-2))) !important;
+}
+
+html[data-friends-theme] body
+.aurora-chat-shell[data-chat-wallpaper="sunset"]
+.aurora-chat-messages {
+  background-image:
+    linear-gradient(
+      135deg,
+      rgb(var(--friends-primary) / 0.16),
+      rgb(var(--friends-secondary) / 0.13),
+      rgb(var(--friends-accent) / 0.12)
+    ),
+    linear-gradient(145deg, rgb(var(--friends-bg-1)), rgb(var(--friends-bg-2))) !important;
+}
+
+html[data-friends-theme] body
+.aurora-chat-shell[data-chat-wallpaper="minimal"]
+.aurora-chat-messages {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgb(var(--friends-primary) / 0.18) 1px, transparent 0),
+    linear-gradient(145deg, rgb(var(--friends-bg-1)), rgb(var(--friends-bg-2))) !important;
+  background-size: 24px 24px, cover !important;
+}
+
+html[data-friends-theme] body
+.aurora-chat-shell[data-chat-wallpaper="none"]
+.aurora-chat-messages {
+  background: linear-gradient(
+    145deg,
+    rgb(var(--friends-bg-1)),
+    rgb(var(--friends-bg-2))
+  ) !important;
+}
+
+html[data-friends-theme]:not([data-friends-theme="aurora"]) body
+.aurora-chat-messages::before,
+html[data-friends-theme]:not([data-friends-theme="aurora"]) body
+.aurora-chat-messages::after {
+  display: none !important;
+}
+
+/* Only Space is intentionally dark. */
+html[data-friends-theme="space"] body .aurora-chat-messages {
+  color: rgb(226 232 240) !important;
+  background:
+    radial-gradient(circle at 16% 20%, rgb(99 102 241 / 0.18), transparent 34%),
+    radial-gradient(circle at 84% 80%, rgb(59 130 246 / 0.14), transparent 38%),
+    linear-gradient(145deg, rgb(15 23 42), rgb(30 41 59)) !important;
+}
+
