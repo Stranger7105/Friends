@@ -28,16 +28,20 @@ import GlobalCallOverlay from "@/components/calls/GlobalCallOverlay";
 import { useGlobalCallManager } from "@/components/calls/useGlobalCallManager";
 import {
   FRIENDS_START_CALL_EVENT,
+  FRIENDS_START_CONFERENCE_EVENT,
   type GlobalCallRequest,
+  type GlobalConferenceRequest,
 } from "@/components/calls/globalCallEvents";
 import "@/styles/navbar-theme.css";
 import "@/styles/friends-real-calls.css";
+import "@/styles/friends-groups.css";
 
 const navigationLinks = [
   { href: "/feed", label: "Feed", icon: Home },
   { href: "/reels", label: "Reels", icon: Clapperboard },
   { href: "/people", label: "Persoane", icon: UsersRound },
   { href: "/friends", label: "Prieteni", icon: Users },
+  { href: "/groups", label: "Grupuri", icon: UsersRound },
   { href: "/requests", label: "Cereri", icon: UserRoundPlus },
   { href: "/gallery", label: "Galerie", icon: GalleryIcon },
   { href: "/appearance", label: "Aspect", icon: Palette },
@@ -87,6 +91,36 @@ export default function Navbar() {
       );
     };
   }, [callManager.startCall]);
+
+  useEffect(() => {
+    function handleGlobalConferenceRequest(event: Event) {
+      const request = (event as CustomEvent<GlobalConferenceRequest>).detail;
+
+      if (
+        !request ||
+        !Number.isFinite(request.conversationId) ||
+        request.conversationId <= 0 ||
+        request.invitees.length === 0
+      ) {
+        console.error("Cererea de apel de grup este incompletă.");
+        return;
+      }
+
+      void callManager.startConference(request);
+    }
+
+    window.addEventListener(
+      FRIENDS_START_CONFERENCE_EVENT,
+      handleGlobalConferenceRequest as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        FRIENDS_START_CONFERENCE_EVENT,
+        handleGlobalConferenceRequest as EventListener,
+      );
+    };
+  }, [callManager.startConference]);
 
 
   const loadUnreadCount = useCallback(async (id: string) => {
@@ -488,6 +522,7 @@ export default function Navbar() {
       <GlobalCallOverlay
         open={callManager.open}
         status={callManager.status}
+        mode={callManager.mode}
         kind={callManager.kind}
         contact={callManager.contact}
         isIncoming={callManager.isIncoming}
@@ -497,9 +532,12 @@ export default function Navbar() {
         error={callManager.error}
         localStream={callManager.localStream}
         remoteStream={callManager.remoteStream}
+        conferenceInvite={callManager.conferenceInvite}
+        conferenceParticipants={callManager.conferenceParticipants}
+        conferenceRemoteStreams={callManager.conferenceRemoteStreams}
         connectionQuality={callManager.connectionQuality}
-        onAccept={() => void callManager.acceptCall()}
-        onReject={() => void callManager.rejectCall()}
+        onAccept={() => void (callManager.mode === "conference" ? callManager.acceptConference() : callManager.acceptCall())}
+        onReject={() => void (callManager.mode === "conference" ? callManager.rejectConference() : callManager.rejectCall())}
         onEnd={() => void callManager.endCall()}
         onToggleMute={callManager.toggleMute}
         onToggleCamera={callManager.toggleCamera}

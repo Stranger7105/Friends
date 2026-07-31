@@ -3,12 +3,32 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import type { CallContact, CallKind, CallSignal, CallStatus } from "./callTypes";
+import type {
+  CallContact,
+  CallKind,
+  CallMode,
+  CallSignal,
+  CallStatus,
+  ConferenceInvite,
+  ConferenceParticipant,
+  ConferenceSignal,
+} from "./callTypes";
+import { ConferenceSessionController } from "./conferenceSessionController";
+import {
+  ConferencePeerRegistry,
+  createConferenceParticipant,
+} from "./conferencePeerRegistry";
 
 type StartCallInput = {
   contact: CallContact;
   conversationId: number;
   kind: CallKind;
+};
+
+type StartConferenceInput = {
+  conversationId: number;
+  kind: CallKind;
+  invitees: CallContact[];
 };
 
 export type ConnectionQuality = "unknown" | "excellent" | "good" | "fair" | "poor";
@@ -19,6 +39,7 @@ const RTC_CONFIGURATION: RTCConfiguration = {
 
 export function useGlobalCallManager(currentUserId: string) {
   const [status, setStatus] = useState<CallStatus>("idle");
+  const [mode, setMode] = useState<CallMode>("direct");
   const [kind, setKind] = useState<CallKind>("audio");
   const [contact, setContact] = useState<CallContact | null>(null);
   const [isIncoming, setIsIncoming] = useState(false);
@@ -28,10 +49,15 @@ export function useGlobalCallManager(currentUserId: string) {
   const [error, setError] = useState("");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
   const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality>("unknown");
+  const [conferenceInvite, setConferenceInvite] = useState<ConferenceInvite | null>(null);
+  const [conferenceParticipants, setConferenceParticipants] = useState<ConferenceParticipant[]>([]);
+  const [conferenceRemoteStreams, setConferenceRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
 
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const peerRef = useRef<RTCPeerConnection | null>(null);
+  const conferenceControllerRef = useRef<ConferenceSessionController | null>(null);
+  const peerRegistryRef = useRef(new ConferencePeerRegistry());
   const localStreamRef = useRef<MediaStream | null>(null);
   const callIdRef = useRef("");
   const remoteUserIdRef = useRef("");
@@ -43,6 +69,7 @@ export function useGlobalCallManager(currentUserId: string) {
   const reconnectTimerRef = useRef<number | null>(null);
   const statusRef = useRef<CallStatus>("idle");
   const channelReadyRef = useRef(false);
+  const resetCallRef = useRef<() => void>(() => undefined);
 
   useEffect(() => {
     statusRef.current = status;
@@ -85,21 +112,76 @@ export function useGlobalCallManager(currentUserId: string) {
     }
   }, [waitForChannel]);
 
+  useEffect(() => {
+    if (!currentUserId) {
+      conferenceControllerRef.current = null;
+      return;
+    }
+
+    const controller = new ConferenceSessionController({
+      currentUserId,
+      currentUser: {
+        id: currentUserId,
+        name: "Prieten Friends",
+        avatarUrl: null,
+      },
+      configuration: RTC_CONFIGURATION,
+      sendSignal: async (signal) => sendSignal(signal),
+      callbacks: {
+        onInvite: (invite) => {
+          if (statusRef.current !== "idle") {
+            void sendSignal({
+              type: "conference-reject",
+              callId: invite.callId,
+              senderId: currentUserId,
+              recipientId: invite.host.id,
+              createdAt: new Date().toISOString(),
+            }).catch(console.error);
+            return;
+          }
+
+          setConferenceInvite(invite);
+          setMode("conference");
+          setKind(invite.kind);
+          setContact(invite.host);
+          setIsIncoming(true);
+          statusRef.current = "ringing";
+          setStatus("ringing");
+          setError("");
+        },
+        onParticipantsChange: setConferenceParticipants,
+        onRemoteStreamsChange: setConferenceRemoteStreams,
+        onEnded: () => resetCallRef.current(),
+        onError: setError,
+      },
+    });
+
+    conferenceControllerRef.current = controller;
+    return () => {
+      controller.reset(false);
+      if (conferenceControllerRef.current === controller) {
+        conferenceControllerRef.current = null;
+      }
+    };
+  }, [currentUserId, sendSignal]);
+
   const stopTracks = useCallback(() => {
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
     localStreamRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
+    setRemoteStreams(new Map());
+  }, []);
+
+  const getDirectPeer = useCallback(() => {
+    const remoteUserId = remoteUserIdRef.current;
+    if (!remoteUserId) return null;
+    return peerRegistryRef.current.get(remoteUserId)?.peer ?? null;
   }, []);
 
   const closePeer = useCallback(() => {
-    if (peerRef.current) {
-      peerRef.current.onicecandidate = null;
-      peerRef.current.ontrack = null;
-      peerRef.current.onconnectionstatechange = null;
-      peerRef.current.close();
-      peerRef.current = null;
-    }
+    peerRegistryRef.current.closeAll();
+    setRemoteStreams(new Map());
   }, []);
 
   const resetCall = useCallback(() => {
@@ -110,6 +192,11 @@ export function useGlobalCallManager(currentUserId: string) {
     if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
     reconnectTimerRef.current = null;
     setConnectionQuality("unknown");
+    conferenceControllerRef.current?.reset(false);
+    setConferenceInvite(null);
+    setConferenceParticipants([]);
+    setConferenceRemoteStreams(new Map());
+    setMode("direct");
     closePeer();
     stopTracks();
     callIdRef.current = "";
@@ -125,6 +212,10 @@ export function useGlobalCallManager(currentUserId: string) {
     setIsCameraOff(false);
     setDurationSeconds(0);
   }, [closePeer, stopTracks]);
+
+  useEffect(() => {
+    resetCallRef.current = resetCall;
+  }, [resetCall]);
 
   const mediaErrorMessage = useCallback((caught: unknown, device: "audio" | "video" | "both") => {
     if (!(caught instanceof DOMException)) {
@@ -263,88 +354,133 @@ export function useGlobalCallManager(currentUserId: string) {
 
   const createPeer = useCallback((remoteUserId: string) => {
     closePeer();
-    const peer = new RTCPeerConnection(RTC_CONFIGURATION);
-    const incomingStream = new MediaStream();
-    setRemoteStream(incomingStream);
 
-    peer.ontrack = (event) => {
-      for (const track of event.streams[0]?.getTracks() ?? [event.track]) {
-        if (!incomingStream.getTracks().some((item) => item.id === track.id)) incomingStream.addTrack(track);
-      }
-      setRemoteStream(new MediaStream(incomingStream.getTracks()));
-    };
+    const entry = peerRegistryRef.current.create({
+      participant: createConferenceParticipant({
+        id: remoteUserId,
+        name: contact?.name ?? "Prieten Friends",
+        avatarUrl: contact?.avatarUrl ?? null,
+        status: "joining",
+      }),
+      configuration: RTC_CONFIGURATION,
+      // Păstrăm addLocalTracks() ca adaptor pentru apelurile 1-la-1.
+      // În următorul pas registry-ul va sincroniza direct toate pistele.
+      localStream: null,
+      onIceCandidate: async (participantId, candidate) => {
+        if (!callIdRef.current || !currentUserId) return;
+        await sendSignal({
+          type: "call-ice",
+          callId: callIdRef.current,
+          senderId: currentUserId,
+          recipientId: participantId,
+          candidate,
+          createdAt: new Date().toISOString(),
+        });
+      },
+      onRemoteStream: (participantId, stream) => {
+        setRemoteStreams((current) => {
+          const next = new Map(current);
+          next.set(participantId, stream);
+          return next;
+        });
 
-    peer.onicecandidate = (event) => {
-      if (!event.candidate || !callIdRef.current || !currentUserId) return;
-      void sendSignal({
-        type: "call-ice",
-        callId: callIdRef.current,
-        senderId: currentUserId,
-        recipientId: remoteUserId,
-        candidate: event.candidate.toJSON(),
-        createdAt: new Date().toISOString(),
-      }).catch(console.error);
-    };
-
-    peer.onconnectionstatechange = () => {
-      if (peer.connectionState === "connected") {
-        if (reconnectTimerRef.current) {
-          window.clearTimeout(reconnectTimerRef.current);
-          reconnectTimerRef.current = null;
+        // API-ul actual al overlay-ului rămâne neschimbat.
+        if (participantId === remoteUserIdRef.current) {
+          setRemoteStream(stream);
         }
+      },
+      onConnectionStateChange: (participantId, connectionState) => {
+        const peer = peerRegistryRef.current.get(participantId)?.peer;
+        if (!peer) return;
 
-        setError((currentError) =>
-          currentError === "Se reconectează…" ? "" : currentError
-        );
-        statusRef.current = "active";
-        setStatus("active");
-        return;
-      }
+        if (connectionState === "connected") {
+          peerRegistryRef.current.updateParticipant(participantId, {
+            status: "connected",
+          });
 
-      if (peer.connectionState === "disconnected") {
-        setError("Se reconectează…");
-
-        if (!reconnectTimerRef.current) {
-          reconnectTimerRef.current = window.setTimeout(() => {
+          if (reconnectTimerRef.current) {
+            window.clearTimeout(reconnectTimerRef.current);
             reconnectTimerRef.current = null;
+          }
 
-            if (peer.connectionState === "connected" || peerRef.current !== peer) return;
-
-            setError("Conexiunea nu a putut fi restabilită.");
-            statusRef.current = "failed";
-            setStatus("failed");
-            window.setTimeout(resetCall, 1800);
-          }, 15000);
-        }
-        return;
-      }
-
-      if (peer.connectionState === "failed") {
-        if (reconnectTimerRef.current) {
-          window.clearTimeout(reconnectTimerRef.current);
-          reconnectTimerRef.current = null;
+          setError((currentError) =>
+            currentError === "Se reconectează…" ? "" : currentError
+          );
+          statusRef.current = "active";
+          setStatus("active");
+          return;
         }
 
-        setError("Conexiunea apelului s-a întrerupt.");
-        statusRef.current = "failed";
-        setStatus("failed");
-        window.setTimeout(resetCall, 1800);
-      }
-    };
+        if (connectionState === "disconnected") {
+          setError("Se reconectează…");
 
-    peerRef.current = peer;
-    return peer;
-  }, [closePeer, currentUserId, resetCall, sendSignal]);
+          if (!reconnectTimerRef.current) {
+            reconnectTimerRef.current = window.setTimeout(() => {
+              reconnectTimerRef.current = null;
+
+              const currentPeer = peerRegistryRef.current.get(participantId)?.peer;
+              if (
+                currentPeer?.connectionState === "connected" ||
+                currentPeer !== peer
+              ) {
+                return;
+              }
+
+              peerRegistryRef.current.updateParticipant(participantId, {
+                status: "failed",
+              });
+              setError("Conexiunea nu a putut fi restabilită.");
+              statusRef.current = "failed";
+              setStatus("failed");
+              window.setTimeout(resetCall, 1800);
+            }, 15000);
+          }
+          return;
+        }
+
+        if (connectionState === "failed") {
+          peerRegistryRef.current.updateParticipant(participantId, {
+            status: "failed",
+          });
+
+          if (reconnectTimerRef.current) {
+            window.clearTimeout(reconnectTimerRef.current);
+            reconnectTimerRef.current = null;
+          }
+
+          setError("Conexiunea apelului s-a întrerupt.");
+          statusRef.current = "failed";
+          setStatus("failed");
+          window.setTimeout(resetCall, 1800);
+        }
+      },
+    });
+
+    return entry.peer;
+  }, [closePeer, contact?.avatarUrl, contact?.name, currentUserId, resetCall, sendSignal]);
 
   const addQueuedIce = useCallback(async () => {
-    const peer = peerRef.current;
-    if (!peer?.remoteDescription) return;
+    const remoteUserId = remoteUserIdRef.current;
+    const peer = getDirectPeer();
+    if (!remoteUserId || !peer?.remoteDescription) return;
+
     const queued = [...queuedIceRef.current];
     queuedIceRef.current = [];
+
     for (const candidate of queued) {
-      try { await peer.addIceCandidate(candidate); } catch (iceError) { console.error(iceError); }
+      try {
+        await peerRegistryRef.current.addIce(remoteUserId, candidate);
+      } catch (iceError) {
+        console.error(iceError);
+      }
     }
-  }, []);
+
+    try {
+      await peerRegistryRef.current.flushIce(remoteUserId);
+    } catch (iceError) {
+      console.error(iceError);
+    }
+  }, [getDirectPeer]);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -360,6 +496,13 @@ export function useGlobalCallManager(currentUserId: string) {
       .on("broadcast", { event: "call-signal" }, async ({ payload }) => {
         const signal = payload as CallSignal;
         if (!signal) return;
+
+        if (signal.type.startsWith("conference-")) {
+          const handled = await conferenceControllerRef.current?.handleSignal(
+            signal as ConferenceSignal
+          );
+          if (handled) return;
+        }
 
         if (signal.type === "call-invite") {
           if (signal.calleeId !== currentUserId) return;
@@ -402,7 +545,7 @@ export function useGlobalCallManager(currentUserId: string) {
 
         try {
           if (signal.type === "call-answer") {
-            const peer = peerRef.current;
+            const peer = getDirectPeer();
             if (!peer) return;
 
             await peer.setRemoteDescription(signal.answer);
@@ -413,12 +556,16 @@ export function useGlobalCallManager(currentUserId: string) {
           }
 
           if (signal.type === "call-ice") {
-            const peer = peerRef.current;
+            const peer = getDirectPeer();
 
-            if (!peer?.remoteDescription) {
+            if (!peer) {
+              // ICE poate ajunge înainte ca utilizatorul să accepte apelul.
               queuedIceRef.current.push(signal.candidate);
             } else {
-              await peer.addIceCandidate(signal.candidate);
+              await peerRegistryRef.current.addIce(
+                signal.senderId,
+                signal.candidate
+              );
             }
             return;
           }
@@ -461,7 +608,7 @@ export function useGlobalCallManager(currentUserId: string) {
       void supabase.removeChannel(channel);
       resetCall();
     };
-  }, [addQueuedIce, currentUserId, resetCall, sendSignal]);
+  }, [addQueuedIce, currentUserId, getDirectPeer, resetCall, sendSignal]);
 
   useEffect(() => {
     if (status !== "active") return;
@@ -479,7 +626,7 @@ export function useGlobalCallManager(currentUserId: string) {
     }
 
     const measureQuality = async () => {
-      const peer = peerRef.current;
+      const peer = getDirectPeer();
       if (!peer || peer.connectionState !== "connected") return;
 
       try {
@@ -530,7 +677,7 @@ export function useGlobalCallManager(currentUserId: string) {
       if (qualityTimerRef.current) window.clearInterval(qualityTimerRef.current);
       qualityTimerRef.current = null;
     };
-  }, [status]);
+  }, [getDirectPeer, status]);
 
   // Pack A.1: închide automat apelul dacă nu primește răspuns în 30 de secunde.
   // Timerul există numai cât timp starea este "calling", deci este oprit automat
@@ -570,6 +717,70 @@ export function useGlobalCallManager(currentUserId: string) {
 
     return () => window.clearTimeout(unansweredTimer);
   }, [currentUserId, resetCall, safeUpdateCall, sendSignal, status]);
+
+  async function startConference({ conversationId, kind: nextKind, invitees }: StartConferenceInput) {
+    if (!currentUserId || status !== "idle" || invitees.length === 0) return;
+    const controller = conferenceControllerRef.current;
+    if (!controller) {
+      setError("Motorul conferinței nu este pregătit.");
+      return;
+    }
+
+    setError("");
+    try {
+      const stream = await getMedia(nextKind);
+      const effectiveKind: CallKind =
+        nextKind === "video" && stream.getVideoTracks().length === 0 ? "audio" : nextKind;
+
+      controller.setLocalStream(stream);
+      setMode("conference");
+      setKind(effectiveKind);
+      setIsIncoming(false);
+      setContact(invitees[0] ?? null);
+      statusRef.current = "calling";
+      setStatus("calling");
+      await controller.start({ conversationId, kind: effectiveKind, invitees });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Conferința nu a putut fi pornită.");
+      statusRef.current = "failed";
+      setStatus("failed");
+      window.setTimeout(resetCall, 1800);
+    }
+  }
+
+  async function acceptConference() {
+    const controller = conferenceControllerRef.current;
+    if (!controller || !conferenceInvite || !currentUserId) return;
+    setError("");
+    try {
+      statusRef.current = "connecting";
+      setStatus("connecting");
+      const stream = await getMedia(conferenceInvite.kind);
+      controller.setLocalStream(stream);
+      await controller.accept(conferenceInvite);
+      setConferenceInvite(null);
+      setIsIncoming(false);
+      statusRef.current = "active";
+      setStatus("active");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Conferința nu a putut fi acceptată.");
+      statusRef.current = "failed";
+      setStatus("failed");
+      window.setTimeout(resetCall, 1800);
+    }
+  }
+
+  async function rejectConference() {
+    const controller = conferenceControllerRef.current;
+    if (controller && conferenceInvite) {
+      await controller.reject(conferenceInvite).catch(console.error);
+    }
+    resetCall();
+  }
+
+  async function inviteToConference(nextContact: CallContact) {
+    await conferenceControllerRef.current?.invite(nextContact);
+  }
 
   async function startCall({ contact: nextContact, conversationId, kind: nextKind }: StartCallInput) {
     if (!currentUserId || status !== "idle") return;
@@ -671,6 +882,12 @@ export function useGlobalCallManager(currentUserId: string) {
   }
 
   async function endCall() {
+    if (mode === "conference") {
+      await conferenceControllerRef.current?.leave(false).catch(console.error);
+      resetCall();
+      return;
+    }
+
     if (!contact || !currentUserId || !callIdRef.current) return resetCall();
     const type = status === "calling" ? "call-cancel" : "call-end";
     await safeUpdateCall({ status: "ended", ended_at: new Date().toISOString(), duration_seconds: durationSeconds });
@@ -688,17 +905,24 @@ export function useGlobalCallManager(currentUserId: string) {
     const next = !isMuted;
     localStreamRef.current?.getAudioTracks().forEach((track) => { track.enabled = !next; });
     setIsMuted(next);
+    if (mode === "conference") {
+      void conferenceControllerRef.current?.broadcastMediaState(next, isCameraOff);
+    }
   }
 
   function toggleCamera() {
     const next = !isCameraOff;
     localStreamRef.current?.getVideoTracks().forEach((track) => { track.enabled = !next; });
     setIsCameraOff(next);
+    if (mode === "conference") {
+      void conferenceControllerRef.current?.broadcastMediaState(isMuted, next);
+    }
   }
 
   return {
     open: status !== "idle",
     status,
+    mode,
     kind,
     contact,
     isIncoming,
@@ -708,10 +932,18 @@ export function useGlobalCallManager(currentUserId: string) {
     error,
     localStream,
     remoteStream,
+    remoteStreams,
+    conferenceInvite,
+    conferenceParticipants,
+    conferenceRemoteStreams,
     connectionQuality,
     startCall,
+    startConference,
     acceptCall,
+    acceptConference,
     rejectCall,
+    rejectConference,
+    inviteToConference,
     endCall,
     toggleMute,
     toggleCamera,
