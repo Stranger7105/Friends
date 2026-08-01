@@ -1,0 +1,289 @@
+/* =========================================================
+   FRIENDS MAP 2.0 — MAPLIBRE + OPENSTREETMAP
+   ========================================================= */
+
+.friends-maplibre-card {
+  padding: 16px !important;
+}
+
+.friends-maplibre-shell {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 18px;
+  isolation: isolate;
+}
+
+.friends-maplibre-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+}
+
+.friends-maplibre-state {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px;
+  background: rgba(3, 13, 18, 0.38);
+  color: rgba(255, 255, 255, 0.76);
+  text-align: center;
+  pointer-events: none;
+  backdrop-filter: blur(5px);
+}
+
+.friends-maplibre-state strong {
+  color: white;
+  font-size: 13px;
+}
+
+.friends-maplibre-state span {
+  max-width: 250px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.friends-maplibre-caption {
+  position: absolute;
+  z-index: 5;
+  right: 9px;
+  bottom: 9px;
+  left: 9px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(4, 15, 20, 0.64);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 10px;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+}
+
+.friends-maplibre-caption span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #7df7c5;
+}
+
+.friends-maplibre-sharing {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.friends-maplibre-sharing button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgba(125, 247, 197, 0.34);
+  border-radius: 12px;
+  background: rgba(125, 247, 197, 0.12);
+  color: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.friends-maplibre-sharing p,
+.friends-maplibre-sharing span {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.friends-maplibre-sharing span {
+  color: #7df7c5;
+}
+
+/* Marker verde Friends */
+.friends-map-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.friends-map-marker-dot {
+  position: absolute;
+  inset: 6px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #42ff9a;
+  box-shadow:
+    0 0 0 5px rgba(66, 255, 154, 0.16),
+    0 0 18px rgba(66, 255, 154, 0.94);
+}
+
+.friends-map-marker::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(66, 255, 154, 0.85);
+  border-radius: 50%;
+  animation: friends-map-marker-pulse 2s infinite;
+}
+
+.friends-map-marker-label {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  display: flex;
+  min-width: max-content;
+  transform: translateX(-50%) translateY(3px);
+  align-items: center;
+  flex-direction: column;
+  padding: 6px 9px;
+  border: 1px solid rgba(125, 247, 197, 0.30);
+  border-radius: 10px;
+  background: rgba(3, 14, 19, 0.86);
+  color: white;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  transition:
+    opacity 0.17s ease,
+    transform 0.17s ease;
+}
+
+.friends-map-marker:hover .friends-map-marker-label,
+.friends-map-marker:focus-visible .friends-map-marker-label {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.friends-map-marker-label strong {
+  max-width: 160px;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-map-marker-label small {
+  margin-top: 1px;
+  color: #7df7c5;
+  font-size: 10px;
+}
+
+/* MapLibre controls */
+.friends-maplibre-shell .maplibregl-ctrl-group,
+.friends-maplibre-modal-map .maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 12px;
+  background: rgba(4, 15, 20, 0.70);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.friends-maplibre-shell .maplibregl-ctrl button,
+.friends-maplibre-modal-map .maplibregl-ctrl button {
+  background-color: transparent;
+  filter: invert(1);
+}
+
+.friends-maplibre-shell .maplibregl-ctrl-attrib,
+.friends-maplibre-modal-map .maplibregl-ctrl-attrib {
+  background: rgba(255, 255, 255, 0.74);
+  font-size: 9px;
+}
+
+/* Full-screen */
+.friends-maplibre-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10080;
+  display: flex;
+  flex-direction: column;
+  background: rgba(2, 9, 13, 0.96);
+  backdrop-filter: blur(20px);
+}
+
+.friends-maplibre-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(4, 18, 24, 0.82);
+}
+
+.friends-maplibre-modal-header span {
+  color: #7df7c5;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.friends-maplibre-modal-header h2 {
+  margin: 4px 0 0;
+  color: white;
+  font-size: clamp(20px, 3vw, 34px);
+}
+
+.friends-maplibre-modal-header button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+  cursor: pointer;
+}
+
+.friends-maplibre-modal-map {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+}
+
+.friends-maplibre-modal-map .friends-maplibre-canvas {
+  min-height: 100%;
+}
+
+@keyframes friends-map-marker-pulse {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.7);
+  }
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@media (max-width: 760px) {
+  .friends-maplibre-modal-header {
+    padding: 13px;
+  }
+
+  .friends-maplibre-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .friends-maplibre-caption {
+    font-size: 9px;
+  }
+}

@@ -1,0 +1,366 @@
+/* =========================================================
+   FRIENDS — FEED 3.1
+   Carduri laterale aliniate sus, mai late, centru compact
+   Înlocuiește styles/feed-dashboard-v2.css
+   ========================================================= */
+
+:root {
+  --friends-feed-edge: clamp(8px, 0.65vw, 14px);
+  --friends-feed-gap: 10px;
+  --friends-navbar-offset: 92px;
+  --friends-side-width: clamp(300px, 22vw, 360px);
+}
+
+/* Layout principal pe toată lățimea */
+.aurora-feed-page {
+  width: 100% !important;
+  max-width: none !important;
+  overflow-x: hidden !important;
+}
+
+.aurora-feed-shell.aurora-feed-layout {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding:
+    10px
+    var(--friends-feed-edge)
+    6rem !important;
+
+  display: grid !important;
+  grid-template-columns:
+    var(--friends-side-width)
+    minmax(0, 1fr)
+    var(--friends-side-width) !important;
+  gap: var(--friends-feed-gap) !important;
+  align-items: start !important;
+  justify-content: stretch !important;
+  box-sizing: border-box !important;
+}
+
+/* Toate cele trei coloane pornesc de pe aceeași linie */
+.aurora-feed-leftbar,
+.aurora-feed-main,
+.aurora-feed-rightbar,
+.friends-feed-side-column,
+.friends-feed-center-column {
+  margin-top: 0 !important;
+  align-self: start !important;
+}
+
+/* Coloane laterale mai late și aliniate imediat sub navbar */
+.aurora-feed-leftbar,
+.aurora-feed-rightbar,
+.friends-feed-side-column {
+  position: sticky !important;
+  top: var(--friends-navbar-offset) !important;
+
+  width: 100% !important;
+  max-width: none !important;
+  height: calc(100dvh - var(--friends-navbar-offset) - 10px) !important;
+  min-height: 620px !important;
+
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  gap: var(--friends-feed-gap) !important;
+
+  padding: 0 !important;
+  overflow: hidden !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.friends-feed-side-column > * {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Cardurile laterale păstrează aspectul */
+.friends-dashboard-card {
+  display: flex !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  flex-direction: column !important;
+  padding: 16px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  border: 1px solid rgba(125, 247, 197, 0.22) !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 85% 5%, rgba(54, 255, 167, 0.09), transparent 34%),
+    linear-gradient(145deg, rgba(5, 24, 31, 0.90), rgba(4, 17, 24, 0.82)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 18px 48px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(22px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(130%) !important;
+}
+
+/* Centrul ocupă tot spațiul rămas */
+.aurora-feed-main,
+.friends-feed-center-column {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+/* Composer compact */
+.friends-feed-composer-slot {
+  width: 100% !important;
+  min-height: 68px !important;
+  margin: 0 !important;
+}
+
+.friends-feed-composer-slot .aurora-composer-motion,
+.friends-feed-composer-slot .aurora-composer-print,
+.friends-feed-composer-slot .aurora-composer,
+.friends-feed-composer-slot .aurora-composer-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.friends-feed-composer-slot .aurora-composer-print-inner {
+  padding: 8px 12px !important;
+  border-radius: 16px !important;
+}
+
+.friends-feed-composer-slot .aurora-composer-print-head {
+  display: none !important;
+}
+
+.friends-feed-composer-slot .aurora-composer-print-input textarea {
+  min-height: 32px !important;
+  max-height: 42px !important;
+  padding: 7px 10px !important;
+  resize: none !important;
+}
+
+.friends-feed-composer-slot .aurora-composer-print-actions {
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+  gap: 6px !important;
+}
+
+/* Stories și Reels egale și mai apropiate */
+.friends-feed-stories-slot,
+.friends-feed-reels-slot {
+  width: 100% !important;
+  height: 170px !important;
+  min-height: 170px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.friends-feed-stories-slot > *,
+.friends-feed-reels-slot > * {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-section,
+.friends-feed-reels-slot .feed-reels-strip {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Postările mai compacte pe verticală */
+.friends-feed-posts-slot,
+.aurora-feed-section.friends-feed-posts-slot {
+  width: 100% !important;
+  max-width: none !important;
+  margin-top: 0 !important;
+}
+
+.aurora-post-list {
+  width: 100% !important;
+  max-width: none !important;
+  gap: 10px !important;
+}
+
+.aurora-post-card,
+.aurora-premium-post,
+.aurora-v2-post-card {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 14px !important;
+  border-radius: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.aurora-post-header,
+.aurora-premium-post-header,
+.aurora-v2-post-header {
+  margin-bottom: 6px !important;
+}
+
+.aurora-post-content,
+.aurora-v2-post-content {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+  line-height: 1.52 !important;
+}
+
+.aurora-post-body {
+  margin: 0 !important;
+}
+
+.aurora-post-media,
+.aurora-shared-post,
+.aurora-v2-shared-post {
+  margin-top: 8px !important;
+}
+
+.aurora-post-meta,
+.aurora-v2-post-meta {
+  margin-top: 8px !important;
+  padding-bottom: 6px !important;
+}
+
+.aurora-post-actions,
+.aurora-v2-post-actions {
+  margin-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.aurora-post-action,
+.aurora-v2-action {
+  min-height: 38px !important;
+  padding: 0.5rem !important;
+}
+
+.aurora-post-image,
+.aurora-v2-post-image {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: min(72dvh, 860px) !important;
+  object-fit: contain !important;
+}
+
+/* Harta și meteo folosesc mai bine lățimea */
+.friends-location-card .friends-location-map {
+  min-height: 0 !important;
+  height: auto !important;
+  flex: 1 !important;
+}
+
+.friends-weather-temperature {
+  font-size: clamp(54px, 4vw, 78px) !important;
+}
+
+/* 2K / 4K */
+@media (min-width: 2200px) {
+  :root {
+    --friends-side-width: clamp(360px, 20vw, 440px);
+    --friends-feed-gap: 14px;
+  }
+
+  .friends-feed-stories-slot,
+  .friends-feed-reels-slot {
+    height: 190px !important;
+    min-height: 190px !important;
+  }
+}
+
+/* Laptopuri Full HD mai înguste */
+@media (max-width: 1500px) and (min-width: 1121px) {
+  :root {
+    --friends-side-width: clamp(260px, 21vw, 315px);
+    --friends-feed-edge: 8px;
+    --friends-feed-gap: 9px;
+  }
+
+  .friends-feed-stories-slot,
+  .friends-feed-reels-slot {
+    height: 160px !important;
+    min-height: 160px !important;
+  }
+}
+
+/* Tabletă mare */
+@media (max-width: 1120px) and (min-width: 821px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    grid-template-columns: minmax(230px, 30fr) minmax(0, 70fr) !important;
+  }
+
+  .aurora-feed-rightbar {
+    position: static !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+    height: 360px !important;
+    min-height: 360px !important;
+  }
+}
+
+/* Tabletă */
+@media (max-width: 820px) {
+  .aurora-feed-shell.aurora-feed-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding-inline: 10px !important;
+  }
+
+  .friends-feed-center-column {
+    order: -1 !important;
+  }
+
+  .aurora-feed-leftbar,
+  .aurora-feed-rightbar,
+  .friends-feed-side-column {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 310px !important;
+    overflow: visible !important;
+  }
+}
+
+/* Telefon */
+@media (max-width: 560px) {
+  .aurora-feed-leftbar,
+  .aurora-feed-rightbar,
+  .friends-feed-side-column {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .friends-feed-side-column > * {
+    min-height: 300px !important;
+  }
+
+  .friends-feed-stories-slot,
+  .friends-feed-reels-slot {
+    height: 148px !important;
+    min-height: 148px !important;
+  }
+}

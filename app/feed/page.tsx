@@ -13,10 +13,15 @@ import {
 import AuroraComposer from "@/components/aurora/AuroraComposer";
 import StoryBar from "@/components/aurora/StoryBar";
 import FeedReelsStrip from "@/components/aurora/feed/FeedReelsStrip";
+import FriendsLocationMap from "@/components/feed/FriendsLocationMap";
+import PersonalizedNewsCard from "@/components/feed/PersonalizedNewsCard";
+import WeatherCard from "@/components/feed/WeatherCard";
+import OnlineFriendsCard from "@/components/feed/OnlineFriendsCard";
+import FeedLayout from "@/components/feed/FeedLayout";
 import "@/styles/aurora-feed.css";
-import "@/styles/aurora-feed-print.css";
 import "@/styles/feed-reels-strip.css";
-import "@/styles/aurora-feed-final.css";
+import "@/styles/friends-location-map.css";
+import "@/styles/friends-global-theme-glass.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
@@ -648,40 +653,22 @@ export default function FeedPage() {
       <div className="aurora-feed-glow aurora-feed-glow-two" aria-hidden="true" />
       <div className="aurora-feed-glow aurora-feed-glow-three" aria-hidden="true" />
 
-      <main className="aurora-feed-shell aurora-feed-layout">
-        <aside className="aurora-feed-leftbar" aria-label="Navigare rapidă">
-          <section className="aurora-left-profile-card">
-            <div className="aurora-left-orbit" aria-hidden="true" />
-            <span className="aurora-sidebar-kicker">SPAȚIUL TĂU</span>
-            <h2>Friends</h2>
-            <p>Un loc mai calm pentru prieteni, idei și momente reale.</p>
-          </section>
-
-          <nav className="aurora-quick-nav" aria-label="Scurtături">
-            <Link href="/feed" className="aurora-quick-link aurora-quick-link-active"><span>⌂</span><strong>Feed</strong></Link>
-            <Link href="/people" className="aurora-quick-link"><span>✦</span><strong>Descoperă</strong></Link>
-            <Link href="/friends" className="aurora-quick-link"><span>◉</span><strong>Prieteni</strong></Link>
-            <Link href="/messages" className="aurora-quick-link"><span>◌</span><strong>Conversații</strong></Link>
-            <Link href="/notifications" className="aurora-quick-link"><span>◇</span><strong>Noutăți</strong></Link>
-          </nav>
-
-          <section className="aurora-left-note">
-            <span className="aurora-left-note-icon">✺</span>
-            <div><strong>Mod Aurora</strong><p>Mai puțin zgomot. Mai multă apropiere.</p></div>
-          </section>
-        </aside>
-
-        <div className="aurora-feed-main">
-          <section className="aurora-feed-hero">
-            <div>
-              <span className="aurora-feed-eyebrow">FEED PERSONAL</span>
-              <h1>Momentele prietenilor tăi</h1>
-              <p>Descoperă ce este nou și lasă un semn acolo unde contează.</p>
-            </div>
-            <div className="aurora-feed-hero-badge"><span className="aurora-live-dot" aria-hidden="true" />LIVE</div>
-          </section>
-          <StoryBar currentUserId={currentUserId} />
-          <FeedReelsStrip currentUserId={currentUserId} />
+      <FeedLayout
+        left={
+          <>
+            <PersonalizedNewsCard />
+            <WeatherCard />
+          </>
+        }
+        right={
+          <>
+            <FriendsLocationMap />
+            <OnlineFriendsCard />
+          </>
+        }
+      >
+        <div className="aurora-feed-main friends-feed-center-column">
+          <section className="friends-feed-composer-slot">
         {errorMessage && (
           <div className="aurora-feed-alert">
             {errorMessage}
@@ -706,8 +693,17 @@ export default function FeedPage() {
   }}
   onPublish={handlePublish}
 />
+          </section>
 
-        <section className="aurora-feed-section aurora-feed-section-compact">
+          <section className="friends-feed-stories-slot" aria-label="Stories">
+            <StoryBar currentUserId={currentUserId} />
+          </section>
+
+          <section className="friends-feed-reels-slot" aria-label="Reels">
+            <FeedReelsStrip currentUserId={currentUserId} />
+          </section>
+
+        <section className="aurora-feed-section aurora-feed-section-compact friends-feed-posts-slot">
           <h2 className="aurora-feed-heading aurora-feed-heading-hidden">Postări</h2>
 
           {loadingPosts ? (
@@ -1119,31 +1115,7 @@ export default function FeedPage() {
           )}
         </section>
         </div>
-
-        <aside className="aurora-feed-rightbar" aria-label="Rezumat feed">
-          <section className="aurora-sidebar-card aurora-sidebar-welcome">
-            <span className="aurora-sidebar-kicker">ACUM ÎN FRIENDS</span>
-            <h3>Comunitatea ta respiră</h3>
-            <p>Vezi activitatea din feed fără să pierzi ceea ce contează.</p>
-          </section>
-          <section className="aurora-sidebar-card">
-            <div className="aurora-sidebar-title-row"><h3>Activitate</h3><span className="aurora-live-dot" /></div>
-            <div className="aurora-sidebar-stats">
-              <div><strong>{posts.length}</strong><span>Postări</span></div>
-              <div><strong>{reactions.length}</strong><span>Reacții</span></div>
-              <div><strong>{comments.length}</strong><span>Comentarii</span></div>
-            </div>
-          </section>
-          <section className="aurora-sidebar-card">
-            <h3>Scurtături</h3>
-            <div className="aurora-sidebar-links">
-              <Link href="/people">Descoperă persoane <span>→</span></Link>
-              <Link href="/requests">Vezi cererile <span>→</span></Link>
-              <Link href="/messages">Deschide mesajele <span>→</span></Link>
-            </div>
-          </section>
-        </aside>
-      </main>
+      </FeedLayout>
     </div>
   );
 }
