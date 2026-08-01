@@ -4,8 +4,13 @@ import Link from "next/link";
 import {
   ChevronDown,
   ChevronUp,
+  Check,
+  Edit3,
   Expand,
   FolderPlus,
+  MapPinned,
+  Pencil,
+  Trash2,
   X,
   MessageCircle,
   Minimize2,
@@ -48,6 +53,7 @@ type FriendGroup = {
 
 type FriendGroupMember = {
   group_id: string;
+  friend_id?: string;
 };
 
 function nameOf(profile: Profile) {
@@ -75,6 +81,7 @@ export default function OnlineFriendsCard() {
   const [groups, setGroups] = useState<FriendGroup[]>([]);
   const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
   const [groupsOpen, setGroupsOpen] = useState(true);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -86,6 +93,12 @@ export default function OnlineFriendsCard() {
   const [newGroupName, setNewGroupName] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [memberIds, setMemberIds] = useState<Set<string>>(new Set());
+  const [membersError, setMembersError] = useState("");
+  const [savingMembers, setSavingMembers] = useState(false);
+  const [membersSuccess, setMembersSuccess] = useState("");
 
   const loadGroups = useCallback(async (userId: string) => {
     setGroupsLoading(true);
@@ -330,6 +343,129 @@ export default function OnlineFriendsCard() {
     setCreatingGroup(false);
   }
 
+  async function openMembersPreview() {
+    if (!selectedGroup || membersLoading) return;
+
+    setMembersOpen(true);
+    setMembersLoading(true);
+    setMembersError("");
+    setMembersSuccess("");
+    setMemberIds(new Set());
+
+    const result = await supabase
+      .from("friend_group_members")
+      .select("friend_id")
+      .eq("group_id", selectedGroup.id);
+
+    if (result.error) {
+      setMembersError(
+        `Membrii grupului nu au putut fi încărcați: ${result.error.message}`,
+      );
+      setMembersLoading(false);
+      return;
+    }
+
+    setMemberIds(
+      new Set(
+        ((result.data || []) as FriendGroupMember[])
+          .map((member) => member.friend_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+    setMembersLoading(false);
+  }
+
+  function toggleMemberPreview(friendId: string) {
+    setMemberIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(friendId)) {
+        next.delete(friendId);
+      } else {
+        next.add(friendId);
+      }
+
+      return next;
+    });
+  }
+
+  async function saveGroupMembers() {
+    if (!selectedGroup || savingMembers) return;
+
+    setSavingMembers(true);
+    setMembersError("");
+    setMembersSuccess("");
+
+    const existingResult = await supabase
+      .from("friend_group_members")
+      .select("friend_id")
+      .eq("group_id", selectedGroup.id);
+
+    if (existingResult.error) {
+      setMembersError(
+        `Membrii existenți nu au putut fi citiți: ${existingResult.error.message}`,
+      );
+      setSavingMembers(false);
+      return;
+    }
+
+    const existingIds = new Set(
+      ((existingResult.data || []) as FriendGroupMember[])
+        .map((member) => member.friend_id)
+        .filter((id): id is string => Boolean(id)),
+    );
+
+    const selectedIds = new Set(memberIds);
+
+    const idsToInsert = [...selectedIds].filter((id) => !existingIds.has(id));
+    const idsToDelete = [...existingIds].filter((id) => !selectedIds.has(id));
+
+    if (idsToInsert.length > 0) {
+      const insertResult = await supabase
+        .from("friend_group_members")
+        .insert(
+          idsToInsert.map((friendId) => ({
+            group_id: selectedGroup.id,
+            friend_id: friendId,
+          })),
+        );
+
+      if (insertResult.error) {
+        setMembersError(
+          `Membrii noi nu au putut fi adăugați: ${insertResult.error.message}`,
+        );
+        setSavingMembers(false);
+        return;
+      }
+    }
+
+    if (idsToDelete.length > 0) {
+      const deleteResult = await supabase
+        .from("friend_group_members")
+        .delete()
+        .eq("group_id", selectedGroup.id)
+        .in("friend_id", idsToDelete);
+
+      if (deleteResult.error) {
+        setMembersError(
+          `Membrii eliminați nu au putut fi șterși: ${deleteResult.error.message}`,
+        );
+        setSavingMembers(false);
+        return;
+      }
+    }
+
+    await loadGroups(currentUserId);
+
+    setMembersSuccess("Grupul a fost actualizat.");
+    setSavingMembers(false);
+
+    window.setTimeout(() => {
+      setMembersOpen(false);
+      setMembersSuccess("");
+    }, 700);
+  }
+
   const filteredFriends = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ro");
 
@@ -355,6 +491,11 @@ export default function OnlineFriendsCard() {
   const onlineCount = useMemo(
     () => friends.filter((friend) => onlineIds.has(friend.id)).length,
     [friends, onlineIds],
+  );
+
+  const selectedGroup = useMemo(
+    () => groups.find((group) => group.id === selectedGroupId) || null,
+    [groups, selectedGroupId],
   );
 
   return (
@@ -435,12 +576,61 @@ export default function OnlineFriendsCard() {
               </p>
             ) : (
               <div className="friends-g11-list">
-                {groups.map((group) => (
-                  <div key={group.id} className="friends-g11-row">
-                    <span>{group.name}</span>
-                    <strong>{groupCounts[group.id] || 0}</strong>
-                  </div>
-                ))}
+                {groups.map((group) => {
+                  const selected = selectedGroupId === group.id;
+
+                  return (
+                    <button
+                      key={group.id}
+                      type="button"
+                      className={`friends-g11-row ${selected ? "is-selected" : ""}`}
+                      onClick={() =>
+                        setSelectedGroupId((current) =>
+                          current === group.id ? null : group.id,
+                        )
+                      }
+                      aria-pressed={selected}
+                    >
+                      <span>
+                        {selected && <Check size={14} />}
+                        {group.name}
+                      </span>
+                      <strong>{groupCounts[group.id] || 0}</strong>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {selectedGroup && (
+              <div className="friends-g13-selected">
+                <div className="friends-g13-selected-head">
+                  <span>Grup selectat</span>
+                  <strong>{selectedGroup.name}</strong>
+                </div>
+
+                <div className="friends-g13-actions">
+                  <button
+                    type="button"
+                    onClick={() => void openMembersPreview()}
+                    title="Vezi și selectează membrii grupului"
+                  >
+                    <Edit3 size={15} />
+                    Editează membrii
+                  </button>
+                  <button type="button" title="Disponibil în pasul următor">
+                    <MapPinned size={15} />
+                    Vezi pe hartă
+                  </button>
+                  <button type="button" title="Disponibil în G1.4">
+                    <Pencil size={15} />
+                    Redenumește
+                  </button>
+                  <button type="button" className="is-danger" title="Disponibil în G1.4">
+                    <Trash2 size={15} />
+                    Șterge grup
+                  </button>
+                </div>
               </div>
             )}
 
@@ -527,6 +717,141 @@ export default function OnlineFriendsCard() {
           <span aria-hidden="true">→</span>
         </Link>
       </footer>
+
+      {membersOpen && selectedGroup && (
+        <div
+          className="friends-g13-members-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !membersLoading &&
+              !savingMembers
+            ) {
+              setMembersOpen(false);
+            }
+          }}
+        >
+          <section
+            className="friends-g13-members-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="friends-g13-members-title"
+          >
+            <header>
+              <div>
+                <span>MEMBRII GRUPULUI</span>
+                <h2 id="friends-g13-members-title">{selectedGroup.name}</h2>
+                <p>
+                  Membrii existenți sunt deja bifați. În acest pas verificăm
+                  doar încărcarea și selecția.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMembersOpen(false)}
+                disabled={membersLoading || savingMembers}
+                aria-label="Închide"
+              >
+                <X size={20} />
+              </button>
+            </header>
+
+            <div className="friends-g13-members-summary">
+              <span>Prieteni selectați</span>
+              <strong>
+                {memberIds.size} din {friends.length}
+              </strong>
+            </div>
+
+            <div className="friends-g13-members-list">
+              {membersLoading ? (
+                <div className="friends-g13-members-state">
+                  Se încarcă membrii grupului…
+                </div>
+              ) : membersError ? (
+                <div className="friends-g13-members-state is-error">
+                  {membersError}
+                </div>
+              ) : membersSuccess ? (
+                <div className="friends-g13-members-state is-success">
+                  {membersSuccess}
+                </div>
+              ) : friends.length === 0 ? (
+                <div className="friends-g13-members-state">
+                  Nu ai încă prieteni pe care să-i adaugi.
+                </div>
+              ) : (
+                friends
+                  .slice()
+                  .sort((a, b) => nameOf(a).localeCompare(nameOf(b), "ro"))
+                  .map((friend) => {
+                    const checked = memberIds.has(friend.id);
+                    const online = onlineIds.has(friend.id);
+
+                    return (
+                      <label
+                        key={friend.id}
+                        className={`friends-g13-member-row ${
+                          checked ? "is-selected" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleMemberPreview(friend.id)}
+                          disabled={savingMembers}
+                        />
+
+                        <div className="friends-g13-member-avatar">
+                          {friend.avatar_url ? (
+                            <img src={friend.avatar_url} alt="" />
+                          ) : (
+                            <span>{initials(friend)}</span>
+                          )}
+                          <i className={online ? "is-online" : ""} />
+                        </div>
+
+                        <div className="friends-g13-member-details">
+                          <strong>{nameOf(friend)}</strong>
+                          <span>
+                            {online ? "Online acum" : "Offline"}
+                            {cityOf(friend) ? ` • ${cityOf(friend)}` : ""}
+                          </span>
+                        </div>
+
+                        <span className="friends-g13-member-check">
+                          {checked && <Check size={16} />}
+                        </span>
+                      </label>
+                    );
+                  })
+              )}
+            </div>
+
+            <footer>
+              <button
+                type="button"
+                className="is-secondary"
+                onClick={() => setMembersOpen(false)}
+                disabled={savingMembers}
+              >
+                Închide
+              </button>
+
+              <button
+                type="button"
+                className="is-primary"
+                onClick={() => void saveGroupMembers()}
+                disabled={savingMembers || membersLoading}
+              >
+                {savingMembers ? "Se salvează…" : "Salvează"}
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
 
       {createOpen && (
         <div
