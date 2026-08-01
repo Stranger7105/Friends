@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Expand, LocateFixed, MapPin, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import FriendsMapCanvas, { type FriendMapPoint } from "@/components/location/FriendsMapCanvas";
 
 type FriendshipRow = {
   user_id: string;
@@ -22,39 +22,6 @@ type LocationProfile = {
   location_longitude: number | null;
   location_visible: boolean | null;
 };
-
-type FriendPoint = {
-  id: string;
-  name: string;
-  city: string;
-  avatarUrl: string | null;
-  x: number;
-  y: number;
-};
-
-const EUROPE_BOUNDS = {
-  minLat: 32,
-  maxLat: 72,
-  minLng: -25,
-  maxLng: 45,
-};
-
-function projectPoint(latitude: number, longitude: number) {
-  const x =
-    ((longitude - EUROPE_BOUNDS.minLng) /
-      (EUROPE_BOUNDS.maxLng - EUROPE_BOUNDS.minLng)) *
-    100;
-  const y =
-    (1 -
-      (latitude - EUROPE_BOUNDS.minLat) /
-        (EUROPE_BOUNDS.maxLat - EUROPE_BOUNDS.minLat)) *
-    100;
-
-  return {
-    x: Math.min(97, Math.max(3, x)),
-    y: Math.min(94, Math.max(6, y)),
-  };
-}
 
 function displayName(profile: LocationProfile) {
   return profile.full_name || profile.username || "Prieten Friends";
@@ -75,7 +42,7 @@ function roundToCityLevel(value: number) {
 
 export default function FriendsLocationMap() {
   const [currentUserId, setCurrentUserId] = useState("");
-  const [points, setPoints] = useState<FriendPoint[]>([]);
+  const [points, setPoints] = useState<FriendMapPoint[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
@@ -157,20 +124,13 @@ export default function FriendsLocationMap() {
           typeof profile.location_latitude === "number" &&
           typeof profile.location_longitude === "number",
       )
-      .map((profile) => {
-        const projected = projectPoint(
-          profile.location_latitude as number,
-          profile.location_longitude as number,
-        );
-
-        return {
-          id: profile.id,
-          name: displayName(profile),
-          city: profile.location_city || profile.city || "Oraș neprecizat",
-          avatarUrl: profile.avatar_url,
-          ...projected,
-        };
-      });
+      .map((profile) => ({
+        id: profile.id,
+        name: displayName(profile),
+        city: profile.location_city || profile.city || "Oraș neprecizat",
+        latitude: profile.location_latitude as number,
+        longitude: profile.location_longitude as number,
+      }));
 
     setPoints(nextPoints);
     setLoading(false);
@@ -291,93 +251,42 @@ export default function FriendsLocationMap() {
     [points.length],
   );
 
-  const map = (
-    <div
-      className={`friends-location-map ${isFullscreen ? "is-fullscreen" : ""}`}
-      onClick={() => {
-        if (!isFullscreen) setIsFullscreen(true);
-      }}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (!isFullscreen && (event.key === "Enter" || event.key === " ")) {
-          setIsFullscreen(true);
-        }
-      }}
-      aria-label="Deschide harta prietenilor pe tot ecranul"
-    >
-      <svg
-        className="friends-location-map-art"
-        viewBox="0 0 800 520"
-        preserveAspectRatio="none"
-        aria-hidden="true"
+  function renderMap(fullscreen: boolean) {
+    return (
+      <div
+        className={`friends-location-map ${fullscreen ? "is-fullscreen" : ""}`}
       >
-        <defs>
-          <linearGradient id="mapSea" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#06151d" />
-            <stop offset="1" stopColor="#0a2630" />
-          </linearGradient>
-          <linearGradient id="mapLand" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#153b3c" />
-            <stop offset="1" stopColor="#102c32" />
-          </linearGradient>
-        </defs>
-        <rect width="800" height="520" fill="url(#mapSea)" />
-        <g fill="url(#mapLand)" stroke="#2b5b59" strokeWidth="2">
-          <path d="M128 95 205 57 282 70 319 112 298 154 245 174 219 213 167 205 126 165Z" />
-          <path d="M278 91 363 65 448 82 487 123 469 163 411 181 390 222 341 205 315 163Z" />
-          <path d="M426 164 514 139 588 160 626 209 605 263 547 278 506 253 475 218Z" />
-          <path d="M326 220 387 199 438 229 450 286 417 327 369 314 346 274Z" />
-          <path d="M473 274 548 264 598 305 588 359 531 389 477 360 455 318Z" />
-          <path d="M582 90 630 78 675 104 664 144 616 153 591 129Z" />
-          <path d="M232 239 280 221 311 250 298 294 257 310 228 281Z" />
-        </g>
-        <g stroke="#2a4b52" strokeWidth="1" opacity=".65">
-          <path d="M0 104H800M0 208H800M0 312H800M0 416H800" />
-          <path d="M133 0V520M266 0V520M399 0V520M532 0V520M665 0V520" />
-        </g>
-      </svg>
+        <FriendsMapCanvas
+          points={points}
+          fullscreen={fullscreen}
+          onMapClick={fullscreen ? undefined : () => setIsFullscreen(true)}
+        />
 
-      <div className="friends-location-map-overlay" aria-hidden="true" />
+        {loading ? (
+          <div className="friends-location-map-state">Se încarcă harta…</div>
+        ) : points.length === 0 ? (
+          <div className="friends-location-map-state">
+            <MapPin size={28} />
+            <strong>Niciun prieten nu și-a activat încă locația.</strong>
+            <span>Pe hartă se afișează doar orașul ales de utilizator.</span>
+          </div>
+        ) : null}
 
-      {loading ? (
-        <div className="friends-location-map-state">Se încarcă harta…</div>
-      ) : points.length === 0 ? (
-        <div className="friends-location-map-state">
-          <MapPin size={28} />
-          <strong>Niciun prieten nu și-a activat încă locația.</strong>
-          <span>Pe hartă se afișează doar orașul ales de utilizator.</span>
+        <div className="friends-location-map-caption">
+          <span>{mapLabel}</span>
+          {!fullscreen && (
+            <button
+              type="button"
+              className="friends-location-map-expand"
+              onClick={() => setIsFullscreen(true)}
+            >
+              <Expand size={15} /> Full-screen
+            </button>
+          )}
         </div>
-      ) : (
-        points.map((point) => (
-          <Link
-            key={point.id}
-            href={`/profile/${point.id}`}
-            className="friends-location-point"
-            style={{ left: `${point.x}%`, top: `${point.y}%` }}
-            onClick={(event) => event.stopPropagation()}
-            aria-label={`${point.name}, ${point.city}. Deschide profilul.`}
-          >
-            <span className="friends-location-point-label">
-              <strong>{point.name}</strong>
-              <small>{point.city}</small>
-            </span>
-            <span className="friends-location-point-dot" />
-            <span className="friends-location-point-pulse" />
-          </Link>
-        ))
-      )}
-
-      <div className="friends-location-map-caption">
-        <span>{mapLabel}</span>
-        {!isFullscreen && (
-          <span className="friends-location-map-expand">
-            <Expand size={15} /> Full-screen
-          </span>
-        )}
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <>
@@ -390,7 +299,7 @@ export default function FriendsLocationMap() {
           <LocateFixed size={20} />
         </div>
 
-        {map}
+        {renderMap(false)}
 
         <div className="friends-location-sharing">
           <button
@@ -426,7 +335,7 @@ export default function FriendsLocationMap() {
               <X size={24} />
             </button>
           </div>
-          <div className="friends-location-modal-map">{map}</div>
+          <div className="friends-location-modal-map">{renderMap(true)}</div>
         </div>
       )}
     </>

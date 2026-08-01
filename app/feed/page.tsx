@@ -14,14 +14,13 @@ import AuroraComposer from "@/components/aurora/AuroraComposer";
 import StoryBar from "@/components/aurora/StoryBar";
 import FeedReelsStrip from "@/components/aurora/feed/FeedReelsStrip";
 import FriendsLocationMap from "@/components/feed/FriendsLocationMap";
-import PersonalizedNewsCard from "@/components/feed/PersonalizedNewsCard";
-import WeatherCard from "@/components/feed/WeatherCard";
 import OnlineFriendsCard from "@/components/feed/OnlineFriendsCard";
 import FeedLayout from "@/components/feed/FeedLayout";
 import "@/styles/aurora-feed.css";
 import "@/styles/feed-reels-strip.css";
 import "@/styles/friends-location-map.css";
 import "@/styles/friends-global-theme-glass.css";
+import "@/styles/feed-single-side-cards.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
@@ -654,18 +653,8 @@ export default function FeedPage() {
       <div className="aurora-feed-glow aurora-feed-glow-three" aria-hidden="true" />
 
       <FeedLayout
-        left={
-          <>
-            <PersonalizedNewsCard />
-            <WeatherCard />
-          </>
-        }
-        right={
-          <>
-            <FriendsLocationMap />
-            <OnlineFriendsCard />
-          </>
-        }
+        left={<FriendsLocationMap />}
+        right={<OnlineFriendsCard />}
       >
         <div className="aurora-feed-main friends-feed-center-column">
           <section className="friends-feed-composer-slot">
