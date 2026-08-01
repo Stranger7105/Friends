@@ -1,1 +1,64 @@
 .friends-location-card{padding:16px!important}.friends-location-card .aurora-sidebar-title-row{align-items:flex-start;margin-bottom:12px}.friends-location-card .aurora-sidebar-title-row h3{margin:4px 0 0}.friends-location-map{position:relative;width:100%;height:clamp(330px,43vh,520px);overflow:hidden;border-radius:22px;border:1px solid rgba(125,247,197,.22);background:#07171f;cursor:zoom-in;isolation:isolate}.friends-location-map.is-fullscreen{height:100%;min-height:0;border:0;border-radius:0;cursor:default}.friends-map-canvas,.friends-map-canvas.maplibregl-map{position:absolute;inset:0;width:100%;height:100%;min-height:260px;overflow:hidden}.friends-map-canvas .maplibregl-canvas-container,.friends-map-canvas .maplibregl-canvas{position:absolute;inset:0;width:100%!important;height:100%!important}.friends-map-canvas .maplibregl-canvas-container.maplibregl-interactive{cursor:grab}.friends-map-canvas .maplibregl-canvas-container.maplibregl-interactive:active{cursor:grabbing}.friends-map-canvas .maplibregl-control-container{position:absolute;inset:0;pointer-events:none}.friends-map-canvas .maplibregl-ctrl-top-right{position:absolute;top:10px;right:10px;pointer-events:auto}.friends-map-canvas .maplibregl-ctrl-bottom-right{position:absolute;right:8px;bottom:8px;pointer-events:auto}.friends-map-canvas .maplibregl-ctrl-group{overflow:hidden;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:rgba(3,14,19,.72);box-shadow:none;backdrop-filter:blur(12px)}.friends-map-canvas .maplibregl-ctrl-group button{display:grid;width:30px;height:30px;place-items:center;border:0;background:transparent;color:#fff;cursor:pointer}.friends-map-canvas .maplibregl-ctrl-group button+button{border-top:1px solid rgba(255,255,255,.12)}.friends-map-canvas .maplibregl-ctrl-icon{filter:invert(1)}.friends-map-canvas .maplibregl-ctrl-attrib{padding:2px 5px;border-radius:6px;background:rgba(255,255,255,.78);font-size:9px;color:#111}.friends-map-canvas .maplibregl-ctrl-attrib a{color:#111}.friends-location-map-overlay{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(70,255,178,.08),transparent 42%),linear-gradient(180deg,rgba(1,9,14,.08),rgba(1,9,14,.35));pointer-events:none}.friends-location-map-state{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;padding:28px;text-align:center;color:rgba(239,255,249,.7)}.friends-location-map-state strong{color:#f5fffb;font-size:14px}.friends-location-map-state span{max-width:260px;font-size:12px;line-height:1.5}.friends-map-marker{position:absolute;z-index:5;position:relative;width:24px;height:24px;padding:0;border:0;background:transparent;cursor:pointer}.friends-map-marker-dot{position:absolute;inset:4px;border-radius:50%;background:#42ff9a;border:2px solid #e6fff0;box-shadow:0 0 12px rgba(66,255,154,.95),0 0 30px rgba(66,255,154,.5)}.friends-map-marker-pulse{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(66,255,154,.75);animation:friends-location-pulse 2s infinite}.friends-map-marker-label{position:absolute;left:50%;bottom:30px;display:flex;min-width:max-content;transform:translateX(-50%) translateY(3px);align-items:center;flex-direction:column;padding:6px 9px;border-radius:10px;background:rgba(2,13,18,.86);border:1px solid rgba(125,247,197,.25);box-shadow:0 9px 24px rgba(0,0,0,.36);backdrop-filter:blur(12px);pointer-events:none;opacity:0;transition:opacity .18s,transform .18s}.friends-map-marker-label strong{max-width:145px;overflow:hidden;text-overflow:ellipsis;font-size:11px;white-space:nowrap;color:#f5fffb}.friends-map-marker-label small{margin-top:1px;font-size:10px;color:#7df7c5}.friends-location-point:hover .friends-location-point-label,.friends-location-point:focus-visible .friends-map-marker-label{opacity:1;transform:translateX(-50%) translateY(0)}.friends-location-map-caption{position:absolute;z-index:4;right:10px;bottom:10px;left:10px;display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(2,12,17,.68);border:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(239,255,249,.68);pointer-events:none}.friends-location-map-expand{display:flex;align-items:center;gap:5px;padding:0;border:0;background:transparent;color:#7df7c5;font:inherit;cursor:pointer;pointer-events:auto}.friends-location-sharing{display:grid;gap:7px;margin-top:12px}.friends-location-sharing button{width:100%;padding:10px 12px;border:1px solid rgba(125,247,197,.3);border-radius:13px;background:rgba(125,247,197,.12);color:#f5fffb;font-weight:800;cursor:pointer}.friends-location-sharing button:hover:not(:disabled){background:rgba(125,247,197,.2)}.friends-location-sharing button:disabled{opacity:.55;cursor:wait}.friends-location-sharing p,.friends-location-sharing span{margin:0;font-size:11px;line-height:1.45;color:rgba(239,255,249,.56)}.friends-location-sharing span{color:#7df7c5}.friends-location-modal{position:fixed;inset:0;z-index:10050;display:flex;flex-direction:column;background:rgba(1,8,12,.97);backdrop-filter:blur(20px)}.friends-location-modal-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(4,18,24,.9)}.friends-location-modal-header span{font-size:11px;letter-spacing:.18em;color:#7df7c5}.friends-location-modal-header h2{margin:4px 0 0;font-size:clamp(20px,3vw,34px);color:#f8fafc}.friends-location-modal-header button{display:grid;place-items:center;width:46px;height:46px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer}.friends-location-modal-map{min-height:0;flex:1}.friends-location-modal-map>.friends-location-map{height:100%}.friends-online-preview{min-height:220px}.friends-online-preview p{color:rgba(239,255,249,.62);line-height:1.55}.friends-online-preview>a{display:flex;justify-content:space-between;margin-top:14px;color:#7df7c5;text-decoration:none;font-weight:800}@keyframes friends-location-pulse{0%{opacity:.8;transform:scale(.7)}70%,100%{opacity:0;transform:scale(2)}}@media(max-width:1100px){.friends-location-map{height:360px}}@media(max-width:760px){.friends-location-map{height:330px}.friends-map-marker-label{bottom:20px}.friends-location-modal-header{padding:14px}.friends-location-modal-header h2{font-size:19px}}
+
+/* Fix portal/fullscreen + un singur card vizual în coloana stângă */
+.friends-feed-v4-left .friends-location-card{
+  position:relative!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+.friends-feed-v4-left .friends-location-card>.aurora-sidebar-title-row{
+  position:absolute!important;
+  z-index:12!important;
+  top:14px!important;
+  left:14px!important;
+  right:14px!important;
+  margin:0!important;
+  padding:10px 12px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:14px!important;
+  background:rgba(3,14,19,.58)!important;
+  backdrop-filter:blur(14px)!important;
+  pointer-events:none!important;
+}
+.friends-feed-v4-left .friends-location-map{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+}
+.friends-feed-v4-left .friends-location-sharing{
+  position:absolute!important;
+  z-index:12!important;
+  left:14px!important;
+  right:14px!important;
+  bottom:14px!important;
+  margin:0!important;
+  padding:10px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:14px!important;
+  background:rgba(3,14,19,.62)!important;
+  backdrop-filter:blur(14px)!important;
+}
+.friends-location-modal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483000!important;
+  width:100vw!important;
+  height:100dvh!important;
+  overflow:hidden!important;
+}
+.friends-location-modal-map{
+  position:relative!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  overflow:hidden!important;
+}
+.friends-location-modal-map>.friends-location-map{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+}

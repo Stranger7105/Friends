@@ -1,9 +1,17 @@
 "use client";
 
-import { Expand, LocateFixed, MapPin, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Expand, LocateFixed, MapPin, Minimize2 } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supabase } from "@/lib/supabase";
-import FriendsMapCanvas, { type FriendMapPoint } from "@/components/location/FriendsMapCanvas";
+import FriendsMapCanvas, {
+  type FriendMapPoint,
+} from "@/components/location/FriendsMapCanvas";
 
 type FriendshipRow = {
   user_id: string;
@@ -27,20 +35,13 @@ function displayName(profile: LocationProfile) {
   return profile.full_name || profile.username || "Prieten Friends";
 }
 
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 function roundToCityLevel(value: number) {
   return Math.round(value * 10) / 10;
 }
 
 export default function FriendsLocationMap() {
+  const cardRef = useRef<HTMLElement | null>(null);
+
   const [currentUserId, setCurrentUserId] = useState("");
   const [points, setPoints] = useState<FriendMapPoint[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -154,22 +155,39 @@ export default function FriendsLocationMap() {
   }, [loadLocations]);
 
   useEffect(() => {
-    if (!isFullscreen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsFullscreen(false);
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === cardRef.current);
     };
 
-    window.addEventListener("keydown", onEscape);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onEscape);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-  }, [isFullscreen]);
+  }, []);
+
+  async function openFullscreen() {
+    const card = cardRef.current;
+
+    if (!card || document.fullscreenElement === card) return;
+
+    try {
+      await card.requestFullscreen();
+    } catch (error) {
+      console.error("Harta nu a putut intra în full-screen:", error);
+      setMessage("Browserul nu a permis deschiderea hărții pe tot ecranul.");
+    }
+  }
+
+  async function closeFullscreen() {
+    if (!document.fullscreenElement) return;
+
+    try {
+      await document.exitFullscreen();
+    } catch (error) {
+      console.error("Harta nu a putut ieși din full-screen:", error);
+    }
+  }
 
   async function enableLocation() {
     if (!currentUserId || sharing) return;
@@ -191,6 +209,7 @@ export default function FriendsLocationMap() {
           .maybeSingle();
 
         const city = profileResult.data?.city || null;
+
         const { error } = await supabase
           .from("profiles")
           .update({
@@ -220,7 +239,11 @@ export default function FriendsLocationMap() {
         );
         setSharing(false);
       },
-      { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 },
+      {
+        enableHighAccuracy: false,
+        timeout: 12000,
+        maximumAge: 600000,
+      },
     );
   }
 
@@ -228,6 +251,7 @@ export default function FriendsLocationMap() {
     if (!currentUserId || sharing) return;
 
     setSharing(true);
+
     const { error } = await supabase
       .from("profiles")
       .update({ location_visible: false })
@@ -251,19 +275,87 @@ export default function FriendsLocationMap() {
     [points.length],
   );
 
-  function renderMap(fullscreen: boolean) {
-    return (
+  return (
+    <section
+      ref={cardRef}
+      className="aurora-sidebar-card friends-location-card"
+      style={
+        isFullscreen
+          ? {
+              width: "100vw",
+              height: "100vh",
+              maxWidth: "none",
+              maxHeight: "none",
+              margin: 0,
+              padding: 18,
+              borderRadius: 0,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              background: "#07171f",
+            }
+          : undefined
+      }
+    >
       <div
-        className={`friends-location-map ${fullscreen ? "is-fullscreen" : ""}`}
+        className="aurora-sidebar-title-row"
+        style={{ flex: "0 0 auto" }}
+      >
+        <div>
+          <span className="aurora-sidebar-kicker">PRIETENI APROAPE</span>
+          <h3>Harta Friends</h3>
+        </div>
+
+        {isFullscreen ? (
+          <button
+            type="button"
+            onClick={() => void closeFullscreen()}
+            aria-label="Închide harta pe tot ecranul"
+            title="Ieși din full-screen"
+            style={{
+              display: "grid",
+              placeItems: "center",
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,.18)",
+              background: "rgba(255,255,255,.08)",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            <Minimize2 size={20} />
+          </button>
+        ) : (
+          <LocateFixed size={20} />
+        )}
+      </div>
+
+      <div
+        className={`friends-location-map ${isFullscreen ? "is-fullscreen" : ""}`}
+        style={
+          isFullscreen
+            ? {
+                flex: "1 1 auto",
+                width: "100%",
+                height: "auto",
+                minHeight: 0,
+                borderRadius: 16,
+                overflow: "hidden",
+              }
+            : undefined
+        }
       >
         <FriendsMapCanvas
           points={points}
-          fullscreen={fullscreen}
-          onMapClick={fullscreen ? undefined : () => setIsFullscreen(true)}
+          fullscreen={isFullscreen}
+          onMapClick={isFullscreen ? undefined : () => void openFullscreen()}
         />
 
         {loading ? (
-          <div className="friends-location-map-state">Se încarcă harta…</div>
+          <div className="friends-location-map-state">
+            Se încarcă harta…
+          </div>
         ) : points.length === 0 ? (
           <div className="friends-location-map-state">
             <MapPin size={28} />
@@ -274,70 +366,46 @@ export default function FriendsLocationMap() {
 
         <div className="friends-location-map-caption">
           <span>{mapLabel}</span>
-          {!fullscreen && (
+
+          {!isFullscreen && (
             <button
               type="button"
               className="friends-location-map-expand"
-              onClick={() => setIsFullscreen(true)}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void openFullscreen();
+              }}
             >
-              <Expand size={15} /> Full-screen
+              <Expand size={15} />
+              Full-screen
             </button>
           )}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <>
-      <section className="aurora-sidebar-card friends-location-card">
-        <div className="aurora-sidebar-title-row">
-          <div>
-            <span className="aurora-sidebar-kicker">PRIETENI APROAPE</span>
-            <h3>Harta Friends</h3>
-          </div>
-          <LocateFixed size={20} />
-        </div>
+      <div
+        className="friends-location-sharing"
+        style={{ flex: "0 0 auto" }}
+      >
+        <button
+          type="button"
+          onClick={() =>
+            void (locationVisible ? disableLocation() : enableLocation())
+          }
+          disabled={sharing}
+        >
+          {sharing
+            ? "Se actualizează…"
+            : locationVisible
+              ? "Oprește locația"
+              : "Activează locația"}
+        </button>
 
-        {renderMap(false)}
+        <p>Se salvează o poziție aproximativă și se afișează doar orașul.</p>
 
-        <div className="friends-location-sharing">
-          <button
-            type="button"
-            onClick={() =>
-              void (locationVisible ? disableLocation() : enableLocation())
-            }
-            disabled={sharing}
-          >
-            {sharing
-              ? "Se actualizează…"
-              : locationVisible
-                ? "Oprește locația"
-                : "Activează locația"}
-          </button>
-          <p>Se salvează o poziție aproximativă și se afișează doar orașul.</p>
-          {message && <span>{message}</span>}
-        </div>
-      </section>
-
-      {isFullscreen && (
-        <div className="friends-location-modal" role="dialog" aria-modal="true">
-          <div className="friends-location-modal-header">
-            <div>
-              <span>HARTA FRIENDS</span>
-              <h2>Prietenii care și-au activat locația</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(false)}
-              aria-label="Închide harta"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          <div className="friends-location-modal-map">{renderMap(true)}</div>
-        </div>
-      )}
-    </>
+        {message && <span>{message}</span>}
+      </div>
+    </section>
   );
 }
