@@ -1,0 +1,46 @@
+/* FRIENDS — MapLibre marker positioning fix
+   The existing .friends-map-marker rule sets position: relative,
+   overriding MapLibre's absolute marker positioning.
+*/
+
+.friends-map-marker.maplibregl-marker,
+.maplibregl-marker.friends-map-marker {
+  position: absolute !important;
+  display: block !important;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  z-index: 20 !important;
+  overflow: visible !important;
+}
+
+.friends-map-marker-dot {
+  position: absolute !important;
+  inset: 5px !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: #42ff9a !important;
+  border: 2px solid #e6fff0 !important;
+  box-shadow:
+    0 0 12px rgba(66,255,154,.95),
+    0 0 30px rgba(66,255,154,.5) !important;
+}
+
+.friends-map-marker-pulse {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(66,255,154,.75) !important;
+  animation: friends-location-pulse 2s infinite !important;
+}
+
+.friends-map-marker:hover .friends-map-marker-label,
+.friends-map-marker:focus-visible .friends-map-marker-label {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
+}

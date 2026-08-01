@@ -1,0 +1,74 @@
+/* FRIENDS — markere albastre pentru contrast cu harta verde */
+
+.friends-map-marker.maplibregl-marker,
+.maplibregl-marker.friends-map-marker {
+  position: absolute !important;
+  display: block !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+  cursor: pointer !important;
+  z-index: 30 !important;
+}
+
+.friends-map-marker-dot {
+  position: absolute !important;
+  inset: 5px !important;
+  display: block !important;
+  border-radius: 999px !important;
+  background: #168cff !important;
+  border: 3px solid #ffffff !important;
+  box-shadow:
+    0 0 0 2px rgba(22,140,255,.35),
+    0 0 16px rgba(22,140,255,1),
+    0 0 34px rgba(22,140,255,.8) !important;
+}
+
+.friends-map-marker-pulse {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  border-radius: 999px !important;
+  border: 2px solid rgba(22,140,255,.9) !important;
+  animation: friends-blue-location-pulse 1.8s infinite !important;
+}
+
+.friends-map-marker-label {
+  border-color: rgba(22,140,255,.55) !important;
+}
+
+.friends-map-marker-label small {
+  color: #63b6ff !important;
+}
+
+.friends-location-sharing button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+}
+
+.friends-location-disable-button {
+  border-color: rgba(255,110,110,.35) !important;
+  background: rgba(255,110,110,.12) !important;
+}
+
+.friends-location-disable-button:hover:not(:disabled) {
+  background: rgba(255,110,110,.2) !important;
+}
+
+@keyframes friends-blue-location-pulse {
+  0% {
+    opacity: .95;
+    transform: scale(.65);
+  }
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(2.25);
+  }
+}

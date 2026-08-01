@@ -19,8 +19,11 @@ import FeedLayout from "@/components/feed/FeedLayout";
 import "@/styles/aurora-feed.css";
 import "@/styles/feed-reels-strip.css";
 import "@/styles/friends-location-map.css";
+import "@/styles/friends-location-fullscreen-audit-fix.css";
+import "@/styles/friends-map-marker-position-fix.css";
 import "@/styles/friends-global-theme-glass.css";
 import "@/styles/feed-single-side-cards.css";
+import "@/styles/friends-map-blue-exact-location.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;

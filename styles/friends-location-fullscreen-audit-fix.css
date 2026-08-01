@@ -1,0 +1,104 @@
+/* =========================================================
+   FRIENDS MAP — FULLSCREEN AUDIT FIX
+   Cauze identificate:
+   1. starea "niciun prieten" intercepta clickurile pe hartă;
+   2. butonul vechi era acoperit de overlay-ul de locație;
+   3. regulile laterale cu !important anulau dimensiunile inline în fullscreen.
+   ========================================================= */
+
+.friends-location-map-state {
+  pointer-events: none !important;
+}
+
+.friends-location-header {
+  pointer-events: none !important;
+}
+
+.friends-location-header-expand {
+  position: relative !important;
+  z-index: 30 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 12px !important;
+  background: rgba(2,13,18,.78) !important;
+  color: #f5fffb !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.friends-location-header-expand:hover {
+  border-color: rgba(125,247,197,.75) !important;
+  background: rgba(125,247,197,.18) !important;
+}
+
+.friends-location-map-hint {
+  color: #7df7c5;
+}
+
+/* Fullscreen nativ: aceste reguli trebuie să câștige peste layout-ul lateral. */
+.friends-location-card:fullscreen,
+.friends-location-card.is-native-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: #07171f !important;
+}
+
+.friends-location-card:fullscreen > .friends-location-header,
+.friends-location-card.is-native-fullscreen > .friends-location-header {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 0 12px !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+}
+
+.friends-location-card:fullscreen > .friends-location-map,
+.friends-location-card.is-native-fullscreen > .friends-location-map {
+  position: relative !important;
+  inset: auto !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  border-radius: 16px !important;
+}
+
+.friends-location-card:fullscreen > .friends-location-sharing,
+.friends-location-card.is-native-fullscreen > .friends-location-sharing {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  margin: 12px 0 0 !important;
+  padding: 10px !important;
+}
+
+.friends-location-card:fullscreen .friends-map-canvas,
+.friends-location-card.is-native-fullscreen .friends-map-canvas,
+.friends-location-card:fullscreen .friends-map-canvas.maplibregl-map,
+.friends-location-card.is-native-fullscreen .friends-map-canvas.maplibregl-map {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}

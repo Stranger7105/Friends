@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Map as MapLibreMap, Marker } from "maplibre-gl";
 
@@ -18,11 +18,16 @@ type Props = {
   onMapClick?: () => void;
 };
 
-export default function FriendsMapCanvas({ points, fullscreen = false, onMapClick }: Props) {
+export default function FriendsMapCanvas({
+  points,
+  fullscreen = false,
+  onMapClick,
+}: Props) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +44,8 @@ export default function FriendsMapCanvas({ points, fullscreen = false, onMapClic
               type: "raster",
               tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
               tileSize: 256,
-              attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>',
+              attribution:
+                '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>',
             },
           },
           layers: [{ id: "osm", type: "raster", source: "osm" }],
@@ -50,16 +56,31 @@ export default function FriendsMapCanvas({ points, fullscreen = false, onMapClic
         maxZoom: 16,
       });
 
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "top-right",
+      );
+
       map.on("click", (event) => {
         const target = event.originalEvent.target as HTMLElement | null;
-        if (!target?.closest(".friends-map-marker")) onMapClick?.();
+        if (!target?.closest(".friends-map-marker")) {
+          onMapClick?.();
+        }
       });
+
+      map.on("load", () => {
+        if (!cancelled) {
+          map.resize();
+          setMapReady(true);
+        }
+      });
+
       mapRef.current = map;
     });
 
     return () => {
       cancelled = true;
+      setMapReady(false);
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
       mapRef.current?.remove();
@@ -68,12 +89,16 @@ export default function FriendsMapCanvas({ points, fullscreen = false, onMapClic
   }, [fullscreen, onMapClick]);
 
   useEffect(() => {
+    if (!mapReady) return;
+
     const map = mapRef.current;
     if (!map) return;
+
     let cancelled = false;
 
     void import("maplibre-gl").then((maplibregl) => {
-      if (cancelled) return;
+      if (cancelled || !mapRef.current) return;
+
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
 
@@ -81,50 +106,85 @@ export default function FriendsMapCanvas({ points, fullscreen = false, onMapClic
         const element = document.createElement("button");
         element.type = "button";
         element.className = "friends-map-marker";
-        element.setAttribute("aria-label", `${point.name}, ${point.city}. Deschide profilul.`);
+        element.setAttribute(
+          "aria-label",
+          `${point.name}, ${point.city}. Deschide profilul.`,
+        );
 
         const label = document.createElement("span");
         label.className = "friends-map-marker-label";
+
         const strong = document.createElement("strong");
         strong.textContent = point.name;
+
         const small = document.createElement("small");
         small.textContent = point.city;
+
         label.append(strong, small);
 
         const dot = document.createElement("span");
         dot.className = "friends-map-marker-dot";
+
         const pulse = document.createElement("span");
         pulse.className = "friends-map-marker-pulse";
+
         element.append(label, dot, pulse);
+
         element.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
           router.push(`/profile/${point.id}`);
         });
 
-        markersRef.current.push(
-          new maplibregl.Marker({ element, anchor: "center" })
-            .setLngLat([point.longitude, point.latitude])
-            .addTo(map),
-        );
+        const marker = new maplibregl.Marker({
+          element,
+          anchor: "center",
+        })
+          .setLngLat([point.longitude, point.latitude])
+          .addTo(map);
+
+        markersRef.current.push(marker);
       });
 
       if (points.length === 1) {
-        map.easeTo({ center: [points[0].longitude, points[0].latitude], zoom: fullscreen ? 7 : 5 });
+        map.easeTo({
+          center: [points[0].longitude, points[0].latitude],
+          zoom: fullscreen ? 7 : 5,
+          duration: 500,
+        });
       } else if (points.length > 1) {
         const bounds = new maplibregl.LngLatBounds();
-        points.forEach((point) => bounds.extend([point.longitude, point.latitude]));
-        map.fitBounds(bounds, { padding: fullscreen ? 100 : 42, maxZoom: fullscreen ? 8 : 6 });
+
+        points.forEach((point) => {
+          bounds.extend([point.longitude, point.latitude]);
+        });
+
+        map.fitBounds(bounds, {
+          padding: fullscreen ? 100 : 42,
+          maxZoom: fullscreen ? 8 : 6,
+          duration: 500,
+        });
       }
     });
 
-    return () => { cancelled = true; };
-  }, [fullscreen, points, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [fullscreen, mapReady, points, router]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => mapRef.current?.resize(), 120);
-    return () => window.clearTimeout(timer);
-  }, [fullscreen]);
+    const timer = window.setTimeout(() => {
+      mapRef.current?.resize();
+    }, 160);
 
-  return <div ref={containerRef} className="friends-map-canvas" aria-label="Hartă interactivă cu locațiile prietenilor" />;
+    return () => window.clearTimeout(timer);
+  }, [fullscreen, mapReady]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="friends-map-canvas"
+      aria-label="Hartă interactivă cu locațiile prietenilor"
+    />
+  );
 }
