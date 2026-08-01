@@ -1,0 +1,251 @@
+/* =========================================================
+   FRIENDS — G1.1 LISTA GRUPURILOR
+   ========================================================= */
+
+.friends-g11 {
+  flex: 0 0 auto;
+  margin-top: 10px;
+}
+
+.friends-g11-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 13px;
+  background: rgba(2,13,18,.38);
+  color: rgba(255,255,255,.94);
+  cursor: pointer;
+}
+
+.friends-g11-toggle > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.friends-g11-toggle:hover {
+  border-color: rgba(125,247,197,.55);
+  background: rgba(125,247,197,.1);
+}
+
+.friends-g11-panel {
+  margin-top: 7px;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 14px;
+  background: rgba(2,13,18,.28);
+}
+
+.friends-g11-all,
+.friends-g11-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  color: rgba(255,255,255,.9);
+  font-size: 12px;
+}
+
+.friends-g11-all {
+  background: rgba(125,247,197,.1);
+  color: #bfffe2;
+  font-weight: 800;
+}
+
+.friends-g11-all strong,
+.friends-g11-row strong {
+  display: grid;
+  min-width: 25px;
+  height: 22px;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.09);
+  color: rgba(255,255,255,.75);
+  font-size: 10px;
+}
+
+.friends-g11-list {
+  margin-top: 4px;
+}
+
+.friends-g11-row:hover {
+  background: rgba(255,255,255,.055);
+}
+
+.friends-g11-state {
+  margin: 6px 0 2px;
+  padding: 9px;
+  text-align: center;
+  color: rgba(239,255,249,.52);
+  font-size: 11px;
+}
+
+.friends-g11-state.is-error {
+  color: #ffb4b4;
+}
+
+.friends-g11-create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 7px;
+  padding: 9px 10px;
+  border: 1px dashed rgba(125,247,197,.4);
+  border-radius: 11px;
+  background: rgba(125,247,197,.07);
+  color: #7df7c5;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.friends-g11-create:hover {
+  background: rgba(125,247,197,.14);
+}
+
+.friends-card-p1:fullscreen .friends-g11,
+.friends-card-p1.is-native-fullscreen .friends-g11 {
+  width: min(900px, 100%);
+  align-self: center;
+}
+
+
+/* =========================================================
+   FRIENDS — G1.2 CREARE GRUP
+   ========================================================= */
+
+.friends-g12-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(2, 8, 12, .72);
+  backdrop-filter: blur(16px);
+}
+
+.friends-g12-modal {
+  width: min(430px, 100%);
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(125,247,197,.14), transparent 36%),
+    linear-gradient(145deg, rgba(42,28,67,.98), rgba(10,25,31,.98));
+  box-shadow: 0 28px 90px rgba(0,0,0,.48);
+  color: white;
+}
+
+.friends-g12-modal > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.friends-g12-modal > header span {
+  color: #7df7c5;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.friends-g12-modal h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+
+.friends-g12-modal > header button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,.07);
+  color: white;
+  cursor: pointer;
+}
+
+.friends-g12-modal > label {
+  display: grid;
+  gap: 7px;
+  margin-top: 20px;
+}
+
+.friends-g12-modal > label > span {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.friends-g12-modal input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 13px;
+  outline: 0;
+  background: rgba(2,13,18,.42);
+  color: white;
+  font: inherit;
+}
+
+.friends-g12-modal input:focus {
+  border-color: rgba(125,247,197,.72);
+  box-shadow: 0 0 0 3px rgba(125,247,197,.1);
+}
+
+.friends-g12-modal small {
+  justify-self: end;
+  color: rgba(255,255,255,.46);
+}
+
+.friends-g12-error {
+  margin: 12px 0 0;
+  color: #ffb4b4;
+  font-size: 12px;
+}
+
+.friends-g12-modal > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.friends-g12-modal > footer button {
+  min-width: 104px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.friends-g12-modal > footer button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.friends-g12-modal .is-secondary {
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color: white;
+}
+
+.friends-g12-modal .is-primary {
+  border: 1px solid rgba(125,247,197,.55);
+  background: rgba(125,247,197,.18);
+  color: #bfffe2;
+}

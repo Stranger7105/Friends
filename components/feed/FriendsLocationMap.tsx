@@ -1,23 +1,13 @@
 "use client";
 
-import { Expand, LocateFixed, MapPin, Minimize2, RefreshCw } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Expand, MapPin, Minimize2, RefreshCw, UsersRound } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import FriendsMapCanvas, {
-  type FriendMapPoint,
-} from "@/components/location/FriendsMapCanvas";
+import FriendsMapCanvas, { type FriendMapPoint } from "@/components/location/FriendsMapCanvas";
 
-type FriendshipRow = {
-  user_id: string;
-  friend_id: string;
-};
-
+type FriendshipRow = { user_id: string; friend_id: string };
+type FriendGroup = { id: string; name: string };
+type FriendGroupMember = { friend_id: string };
 type LocationProfile = {
   id: string;
   username: string | null;
@@ -37,8 +27,9 @@ function displayName(profile: LocationProfile) {
 
 export default function FriendsLocationMap() {
   const cardRef = useRef<HTMLElement | null>(null);
-
   const [currentUserId, setCurrentUserId] = useState("");
+  const [groups, setGroups] = useState<FriendGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState("all");
   const [points, setPoints] = useState<FriendMapPoint[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,13 +37,31 @@ export default function FriendsLocationMap() {
   const [locationVisible, setLocationVisible] = useState(false);
   const [message, setMessage] = useState("");
 
+  const loadGroups = useCallback(async (userId: string) => {
+    const result = await supabase
+      .from("friend_groups")
+      .select("id, name")
+      .eq("owner_id", userId)
+      .order("name", { ascending: true });
+
+    if (result.error) {
+      setMessage(`Grupurile nu au putut fi încărcate: ${result.error.message}`);
+      return;
+    }
+
+    const nextGroups = (result.data || []) as FriendGroup[];
+    setGroups(nextGroups);
+    setSelectedGroupId((current) =>
+      current === "all" || nextGroups.some((group) => group.id === current)
+        ? current
+        : "all",
+    );
+  }, []);
+
   const loadLocations = useCallback(async () => {
     setLoading(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
       return;
@@ -67,16 +76,12 @@ export default function FriendsLocationMap() {
         .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`),
       supabase
         .from("profiles")
-        .select(
-          "id, username, full_name, avatar_url, city, country, location_city, location_latitude, location_longitude, location_visible",
-        )
+        .select("location_visible")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
 
-    if (ownProfileResult.error) {
-      setMessage(`Profilul tău nu a putut fi citit: ${ownProfileResult.error.message}`);
-    } else {
+    if (!ownProfileResult.error) {
       setLocationVisible(Boolean(ownProfileResult.data?.location_visible));
     }
 
@@ -86,23 +91,40 @@ export default function FriendsLocationMap() {
       return;
     }
 
-    const friendIds = [
+    const allFriendIds = [
       ...new Set(
-        ((friendshipsResult.data || []) as FriendshipRow[]).map((friendship) =>
-          friendship.user_id === user.id
-            ? friendship.friend_id
-            : friendship.user_id,
+        ((friendshipsResult.data || []) as FriendshipRow[]).map((item) =>
+          item.user_id === user.id ? item.friend_id : item.user_id,
         ),
       ),
     ];
 
-    const profileIds = [...new Set([user.id, ...friendIds])];
+    let visibleFriendIds = allFriendIds;
+
+    if (selectedGroupId !== "all") {
+      const membersResult = await supabase
+        .from("friend_group_members")
+        .select("friend_id")
+        .eq("group_id", selectedGroupId);
+
+      if (membersResult.error) {
+        setMessage(`Membrii grupului nu au putut fi încărcați: ${membersResult.error.message}`);
+        setPoints([]);
+        setLoading(false);
+        return;
+      }
+
+      const memberIds = new Set(
+        ((membersResult.data || []) as FriendGroupMember[]).map((member) => member.friend_id),
+      );
+      visibleFriendIds = allFriendIds.filter((id) => memberIds.has(id));
+    }
+
+    const profileIds = [...new Set([user.id, ...visibleFriendIds])];
 
     const profilesResult = await supabase
       .from("profiles")
-      .select(
-        "id, username, full_name, avatar_url, city, country, location_city, location_latitude, location_longitude, location_visible",
-      )
+      .select("id, username, full_name, avatar_url, city, country, location_city, location_latitude, location_longitude, location_visible")
       .in("id", profileIds)
       .eq("location_visible", true)
       .not("location_latitude", "is", null)
@@ -114,79 +136,73 @@ export default function FriendsLocationMap() {
       return;
     }
 
-    const nextPoints = ((profilesResult.data || []) as LocationProfile[])
-      .filter(
-        (profile) =>
+    setPoints(
+      ((profilesResult.data || []) as LocationProfile[])
+        .filter((profile) =>
           Number.isFinite(profile.location_latitude) &&
           Number.isFinite(profile.location_longitude),
-      )
-      .map((profile) => ({
-        id: profile.id,
-        name:
-          profile.id === user.id
-            ? `${displayName(profile)} (Tu)`
-            : displayName(profile),
-        city: profile.location_city || profile.city || "Locație activă",
-        latitude: Number(profile.location_latitude),
-        longitude: Number(profile.location_longitude),
-      }));
+        )
+        .map((profile) => ({
+          id: profile.id,
+          name: profile.id === user.id ? `${displayName(profile)} (Tu)` : displayName(profile),
+          city: profile.location_city || profile.city || "Locație activă",
+          latitude: Number(profile.location_latitude),
+          longitude: Number(profile.location_longitude),
+        })),
+    );
 
-    setPoints(nextPoints);
     setLoading(false);
-  }, []);
+  }, [selectedGroupId]);
+
+  useEffect(() => {
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await loadGroups(user.id);
+    })();
+  }, [loadGroups]);
 
   useEffect(() => {
     void loadLocations();
 
     const channel = supabase
       .channel("friends-location-map")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles" },
-        () => void loadLocations(),
-      )
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => void loadLocations())
+      .on("postgres_changes", { event: "*", schema: "public", table: "friend_group_members" }, () => void loadLocations())
+      .on("postgres_changes", { event: "*", schema: "public", table: "friend_groups" }, async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) await loadGroups(user.id);
+      })
       .subscribe();
 
-    return () => {
-      void supabase.removeChannel(channel);
-    };
-  }, [loadLocations]);
+    return () => { void supabase.removeChannel(channel); };
+  }, [loadGroups, loadLocations]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement === cardRef.current);
     };
-
     document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  async function openFullscreen() {
+  async function toggleFullscreen() {
     const card = cardRef.current;
-    if (!card || document.fullscreenElement === card) return;
+    if (!card) return;
 
     try {
-      await card.requestFullscreen({ navigationUI: "hide" });
+      if (document.fullscreenElement === card) {
+        await document.exitFullscreen();
+      } else {
+        await card.requestFullscreen({ navigationUI: "hide" });
+      }
     } catch (error) {
-      console.error("Harta nu a putut intra în full-screen:", error);
-      setMessage("Browserul nu a permis deschiderea hărții pe tot ecranul.");
-    }
-  }
-
-  async function closeFullscreen() {
-    if (!document.fullscreenElement) return;
-
-    try {
-      await document.exitFullscreen();
-    } catch (error) {
-      console.error("Harta nu a putut ieși din full-screen:", error);
+      console.error("Harta nu a putut schimba modul full-screen:", error);
+      setMessage("Browserul nu a permis schimbarea modului full-screen.");
     }
   }
 
   async function saveExactLocation() {
     if (!currentUserId || sharing) return;
-
     if (!navigator.geolocation) {
       setMessage("Browserul nu permite accesul la locație.");
       return;
@@ -203,13 +219,11 @@ export default function FriendsLocationMap() {
           .eq("id", currentUserId)
           .maybeSingle();
 
-        const city = profileResult.data?.city || null;
-
         const { error } = await supabase
           .from("profiles")
           .update({
             location_visible: true,
-            location_city: city,
+            location_city: profileResult.data?.city || null,
             location_latitude: coords.latitude,
             location_longitude: coords.longitude,
             location_updated_at: new Date().toISOString(),
@@ -220,11 +234,7 @@ export default function FriendsLocationMap() {
           setMessage(`Locația nu a putut fi salvată: ${error.message}`);
         } else {
           setLocationVisible(true);
-          setMessage(
-            `Locația exactă a fost actualizată (precizie aproximativă: ${Math.round(
-              coords.accuracy,
-            )} m).`,
-          );
+          setMessage(`Locația exactă a fost actualizată (precizie aproximativă: ${Math.round(coords.accuracy)} m).`);
           await loadLocations();
         }
 
@@ -240,17 +250,12 @@ export default function FriendsLocationMap() {
         );
         setSharing(false);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 25000,
-        maximumAge: 0,
-      },
+      { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 },
     );
   }
 
   async function disableLocation() {
     if (!currentUserId || sharing) return;
-
     setSharing(true);
 
     const { error } = await supabase
@@ -269,25 +274,18 @@ export default function FriendsLocationMap() {
     setSharing(false);
   }
 
-  const mapLabel = useMemo(
+  const selectedGroupName = useMemo(
     () =>
-      points.length === 1
-        ? "1 utilizator are locația activă"
-        : `${points.length} utilizatori au locația activă`,
-    [points.length],
-  );
-
-  const ownPointVisible = useMemo(
-    () => points.some((point) => point.id === currentUserId),
-    [currentUserId, points],
+      selectedGroupId === "all"
+        ? "Toți prietenii"
+        : groups.find((group) => group.id === selectedGroupId)?.name || "Grup selectat",
+    [groups, selectedGroupId],
   );
 
   return (
     <section
       ref={cardRef}
-      className={`aurora-sidebar-card friends-location-card ${
-        isFullscreen ? "is-native-fullscreen" : ""
-      }`}
+      className={`aurora-sidebar-card friends-location-card ${isFullscreen ? "is-native-fullscreen" : ""}`}
     >
       <div className="aurora-sidebar-title-row friends-location-header">
         <div>
@@ -301,56 +299,52 @@ export default function FriendsLocationMap() {
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
-            void (isFullscreen ? closeFullscreen() : openFullscreen());
+            void toggleFullscreen();
           }}
-          aria-label={
-            isFullscreen
-              ? "Ieși din harta pe tot ecranul"
-              : "Deschide harta pe tot ecranul"
-          }
-          title={isFullscreen ? "Ieși din full-screen" : "Full-screen"}
+          aria-label={isFullscreen ? "Ieși din full-screen" : "Deschide full-screen"}
         >
           {isFullscreen ? <Minimize2 size={20} /> : <Expand size={20} />}
         </button>
       </div>
 
-      <div
-        className={`friends-location-map ${
-          isFullscreen ? "is-fullscreen" : ""
-        }`}
-      >
-        <FriendsMapCanvas
-          points={points}
-          fullscreen={isFullscreen}
-          onMapClick={undefined}
-        />
+      <label className="friends-map-group-filter">
+        <UsersRound size={16} />
+        <span>Arată:</span>
+        <select
+          value={selectedGroupId}
+          onChange={(event) => setSelectedGroupId(event.target.value)}
+          aria-label="Alege grupul afișat pe hartă"
+        >
+          <option value="all">Toți prietenii</option>
+          {groups.map((group) => (
+            <option key={group.id} value={group.id}>{group.name}</option>
+          ))}
+        </select>
+      </label>
+
+      <div className={`friends-location-map ${isFullscreen ? "is-fullscreen" : ""}`}>
+        <FriendsMapCanvas points={points} fullscreen={isFullscreen} onMapClick={undefined} />
 
         {loading ? (
           <div className="friends-location-map-state">Se încarcă harta…</div>
         ) : points.length === 0 ? (
           <div className="friends-location-map-state">
             <MapPin size={28} />
-            <strong>Nicio locație activă nu este disponibilă.</strong>
-            <span>Activează sau actualizează locația exactă.</span>
+            <strong>Nicio locație activă în această selecție.</strong>
+            <span>Alege alt grup sau verifică dacă membrii și-au activat locația.</span>
           </div>
         ) : null}
 
         <div className="friends-location-map-caption">
-          <span>{mapLabel}</span>
-          <span className="friends-location-map-hint">
-            {locationVisible && !ownPointVisible
-              ? "Locația ta trebuie actualizată"
-              : "Marker albastru = locație activă"}
+          <span>
+            {selectedGroupName} • {points.length} {points.length === 1 ? "locație" : "locații"}
           </span>
+          <span className="friends-location-map-hint">Marker albastru = locație activă</span>
         </div>
       </div>
 
       <div className="friends-location-sharing">
-        <button
-          type="button"
-          onClick={() => void saveExactLocation()}
-          disabled={sharing}
-        >
+        <button type="button" onClick={() => void saveExactLocation()} disabled={sharing}>
           <RefreshCw size={15} />
           {sharing
             ? "Se actualizează…"
@@ -370,11 +364,7 @@ export default function FriendsLocationMap() {
           </button>
         )}
 
-        <p>
-          Poziția exactă este salvată și reprezentată pe hartă. Eticheta afișează
-          în continuare doar numele și orașul.
-        </p>
-
+        <p>Poziția exactă este salvată și reprezentată pe hartă.</p>
         {message && <span>{message}</span>}
       </div>
     </section>

@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import {
+  ChevronDown,
+  ChevronUp,
   Expand,
+  FolderPlus,
+  X,
   MessageCircle,
   Minimize2,
   Search,
   Users,
+  UsersRound,
 } from "lucide-react";
 import {
   useCallback,
@@ -36,6 +41,15 @@ type PresencePayload = {
   online_at: string;
 };
 
+type FriendGroup = {
+  id: string;
+  name: string;
+};
+
+type FriendGroupMember = {
+  group_id: string;
+};
+
 function nameOf(profile: Profile) {
   return profile.full_name || profile.username || "Prieten Friends";
 }
@@ -58,11 +72,69 @@ export default function OnlineFriendsCard() {
 
   const [currentUserId, setCurrentUserId] = useState("");
   const [friends, setFriends] = useState<Profile[]>([]);
+  const [groups, setGroups] = useState<FriendGroup[]>([]);
+  const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
+  const [groupsOpen, setGroupsOpen] = useState(true);
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [groupsLoading, setGroupsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [groupsError, setGroupsError] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [createError, setCreateError] = useState("");
+
+  const loadGroups = useCallback(async (userId: string) => {
+    setGroupsLoading(true);
+    setGroupsError("");
+
+    const groupsResult = await supabase
+      .from("friend_groups")
+      .select("id, name")
+      .eq("owner_id", userId)
+      .order("name", { ascending: true });
+
+    if (groupsResult.error) {
+      setGroupsError("Grupurile nu au putut fi încărcate.");
+      setGroupsLoading(false);
+      return;
+    }
+
+    const nextGroups = (groupsResult.data || []) as FriendGroup[];
+    setGroups(nextGroups);
+
+    if (nextGroups.length === 0) {
+      setGroupCounts({});
+      setGroupsLoading(false);
+      return;
+    }
+
+    const membersResult = await supabase
+      .from("friend_group_members")
+      .select("group_id")
+      .in(
+        "group_id",
+        nextGroups.map((group) => group.id),
+      );
+
+    if (membersResult.error) {
+      setGroupsError("Numărul membrilor nu a putut fi încărcat.");
+      setGroupCounts({});
+    } else {
+      const counts: Record<string, number> = {};
+
+      ((membersResult.data || []) as FriendGroupMember[]).forEach((member) => {
+        counts[member.group_id] = (counts[member.group_id] || 0) + 1;
+      });
+
+      setGroupCounts(counts);
+    }
+
+    setGroupsLoading(false);
+  }, []);
 
   const loadFriends = useCallback(async () => {
     setLoading(true);
@@ -80,6 +152,7 @@ export default function OnlineFriendsCard() {
     }
 
     setCurrentUserId(user.id);
+    void loadGroups(user.id);
 
     const friendshipsResult = await supabase
       .from("friends")
@@ -108,9 +181,7 @@ export default function OnlineFriendsCard() {
 
     const profilesResult = await supabase
       .from("profiles")
-      .select(
-        "id, username, full_name, avatar_url, city, location_city",
-      )
+      .select("id, username, full_name, avatar_url, city, location_city")
       .in("id", ids);
 
     if (profilesResult.error) {
@@ -120,7 +191,7 @@ export default function OnlineFriendsCard() {
     }
 
     setLoading(false);
-  }, []);
+  }, [loadGroups]);
 
   useEffect(() => {
     void loadFriends();
@@ -137,22 +208,32 @@ export default function OnlineFriendsCard() {
         { event: "UPDATE", schema: "public", table: "profiles" },
         () => void loadFriends(),
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "friend_groups" },
+        () => {
+          if (currentUserId) void loadGroups(currentUserId);
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "friend_group_members" },
+        () => {
+          if (currentUserId) void loadGroups(currentUserId);
+        },
+      )
       .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [loadFriends]);
+  }, [currentUserId, loadFriends, loadGroups]);
 
   useEffect(() => {
     if (!currentUserId) return;
 
     const channel = supabase.channel("friends-feed-presence", {
-      config: {
-        presence: {
-          key: currentUserId,
-        },
-      },
+      config: { presence: { key: currentUserId } },
     });
 
     channel
@@ -206,8 +287,47 @@ export default function OnlineFriendsCard() {
         await card.requestFullscreen({ navigationUI: "hide" });
       }
     } catch (error) {
-      console.error("Cardul Prieteni nu a putut schimba modul full-screen:", error);
+      console.error(
+        "Cardul Prieteni nu a putut schimba modul full-screen:",
+        error,
+      );
     }
+  }
+
+
+  async function createGroup() {
+    const name = newGroupName.trim();
+
+    if (!currentUserId || creatingGroup) return;
+
+    if (!name) {
+      setCreateError("Scrie un nume pentru grup.");
+      return;
+    }
+
+    if (name.length > 50) {
+      setCreateError("Numele grupului poate avea maximum 50 de caractere.");
+      return;
+    }
+
+    setCreatingGroup(true);
+    setCreateError("");
+
+    const { error } = await supabase.from("friend_groups").insert({
+      owner_id: currentUserId,
+      name,
+    });
+
+    if (error) {
+      setCreateError(`Grupul nu a putut fi creat: ${error.message}`);
+      setCreatingGroup(false);
+      return;
+    }
+
+    await loadGroups(currentUserId);
+    setNewGroupName("");
+    setCreateOpen(false);
+    setCreatingGroup(false);
   }
 
   const filteredFriends = useMemo(() => {
@@ -284,6 +404,62 @@ export default function OnlineFriendsCard() {
         />
       </label>
 
+      <section className="friends-g11">
+        <button
+          type="button"
+          className="friends-g11-toggle"
+          onClick={() => setGroupsOpen((value) => !value)}
+          aria-expanded={groupsOpen}
+        >
+          <span>
+            <UsersRound size={17} />
+            Grupurile mele
+          </span>
+          {groupsOpen ? <ChevronUp size={17} /> : <ChevronDown size={17} />}
+        </button>
+
+        {groupsOpen && (
+          <div className="friends-g11-panel">
+            <div className="friends-g11-all">
+              <span>Toți prietenii</span>
+              <strong>{friends.length}</strong>
+            </div>
+
+            {groupsLoading ? (
+              <p className="friends-g11-state">Se încarcă grupurile…</p>
+            ) : groupsError ? (
+              <p className="friends-g11-state is-error">{groupsError}</p>
+            ) : groups.length === 0 ? (
+              <p className="friends-g11-state">
+                Nu ai creat încă niciun grup.
+              </p>
+            ) : (
+              <div className="friends-g11-list">
+                {groups.map((group) => (
+                  <div key={group.id} className="friends-g11-row">
+                    <span>{group.name}</span>
+                    <strong>{groupCounts[group.id] || 0}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="friends-g11-create"
+              onClick={() => {
+                setCreateError("");
+                setNewGroupName("");
+                setCreateOpen(true);
+              }}
+            >
+              <FolderPlus size={16} />
+              Creează grup
+            </button>
+          </div>
+        )}
+      </section>
+
       <div className="friends-card-p1-list">
         {loading ? (
           <div className="friends-card-p1-state">Se încarcă prietenii…</div>
@@ -351,6 +527,84 @@ export default function OnlineFriendsCard() {
           <span aria-hidden="true">→</span>
         </Link>
       </footer>
+
+      {createOpen && (
+        <div
+          className="friends-g12-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !creatingGroup) {
+              setCreateOpen(false);
+            }
+          }}
+        >
+          <section
+            className="friends-g12-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="friends-g12-title"
+          >
+            <header>
+              <div>
+                <span>GRUP NOU</span>
+                <h2 id="friends-g12-title">Creează grup</h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCreateOpen(false)}
+                disabled={creatingGroup}
+                aria-label="Închide"
+              >
+                <X size={20} />
+              </button>
+            </header>
+
+            <label>
+              <span>Numele grupului</span>
+              <input
+                autoFocus
+                value={newGroupName}
+                onChange={(event) => {
+                  setNewGroupName(event.target.value);
+                  if (createError) setCreateError("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void createGroup();
+                  }
+                }}
+                maxLength={50}
+                placeholder="Exemplu: Familie"
+                disabled={creatingGroup}
+              />
+              <small>{newGroupName.trim().length}/50</small>
+            </label>
+
+            {createError && <p className="friends-g12-error">{createError}</p>}
+
+            <footer>
+              <button
+                type="button"
+                className="is-secondary"
+                onClick={() => setCreateOpen(false)}
+                disabled={creatingGroup}
+              >
+                Anulează
+              </button>
+              <button
+                type="button"
+                className="is-primary"
+                onClick={() => void createGroup()}
+                disabled={creatingGroup || !newGroupName.trim()}
+              >
+                {creatingGroup ? "Se creează…" : "Creează"}
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
     </section>
   );
 }

@@ -25,6 +25,8 @@ import "@/styles/friends-global-theme-glass.css";
 import "@/styles/feed-single-side-cards.css";
 import "@/styles/friends-map-blue-exact-location.css";
 import "@/styles/friends-card-p1.css";
+import "@/styles/friends-map-group-filter.css";
+import "@/styles/friends-groups-g11.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;

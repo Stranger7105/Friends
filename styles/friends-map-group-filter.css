@@ -1,0 +1,56 @@
+.friends-map-group-filter {
+  position: relative !important;
+  z-index: 20 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex: 0 0 auto !important;
+  margin: 0 0 10px !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  border-radius: 13px !important;
+  background: rgba(2,13,18,.62) !important;
+  color: rgba(239,255,249,.72) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.friends-map-group-filter > span {
+  flex: 0 0 auto !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+}
+
+.friends-map-group-filter select {
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+}
+
+.friends-map-group-filter select option {
+  background: #09221e !important;
+  color: #fff !important;
+}
+
+.friends-feed-v4-left .friends-map-group-filter {
+  position: absolute !important;
+  top: 82px !important;
+  left: 14px !important;
+  right: 14px !important;
+  margin: 0 !important;
+}
+
+.friends-location-card:fullscreen > .friends-map-group-filter,
+.friends-location-card.is-native-fullscreen > .friends-map-group-filter {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  margin: 0 0 10px !important;
+  box-sizing: border-box !important;
+}
