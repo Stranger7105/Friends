@@ -1,0 +1,301 @@
+/* =========================================================
+   FRIENDS — COMPOSER C1: BARĂ COMPACTĂ "CE AI ÎN MINTE?"
+   ========================================================= */
+
+.aurora-composer-c1 {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.aurora-composer-c1-inner {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.38);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.09));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 18px 42px rgba(0,0,0,.16);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.aurora-composer-c1.is-expanded .aurora-composer-c1-inner,
+.aurora-composer-c1-inner:focus-within {
+  border-color: rgba(125,247,197,.58);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(125,247,197,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.10));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.15),
+    0 22px 54px rgba(0,0,0,.2),
+    0 0 0 3px rgba(125,247,197,.06);
+}
+
+.aurora-composer-c1-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.aurora-composer-c1-avatar {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,.86) 0 5%, transparent 6%),
+    linear-gradient(145deg, rgba(22,140,255,.95), rgba(66,255,154,.78));
+  color: white;
+  box-shadow:
+    0 0 0 3px rgba(22,140,255,.10),
+    0 10px 24px rgba(0,0,0,.2);
+}
+
+.aurora-composer-c1-field {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.aurora-composer-c1-field textarea {
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  max-height: 180px;
+  box-sizing: border-box;
+  padding: 9px 42px 9px 4px;
+  resize: none;
+  overflow-y: auto;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(255,255,255,.97);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.aurora-composer-c1.is-expanded .aurora-composer-c1-field textarea {
+  min-height: 88px;
+  padding: 8px 58px 8px 4px;
+}
+
+.aurora-composer-c1-field textarea::placeholder {
+  color: rgba(245,255,251,.62);
+  font-weight: 700;
+}
+
+.aurora-composer-c1-count {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  color: rgba(239,255,249,.40);
+  font-size: 10px;
+}
+
+.aurora-composer-c1-quick {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.aurora-composer-c1-quick button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 11px;
+  background: rgba(2,13,18,.25);
+  color: rgba(239,255,249,.68);
+  cursor: pointer;
+}
+
+.aurora-composer-c1-quick button:hover {
+  border-color: rgba(125,247,197,.5);
+  background: rgba(125,247,197,.12);
+  color: #bfffe2;
+}
+
+.aurora-composer-c1-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+.aurora-composer-c1-tools {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.aurora-composer-c1-tools button,
+.aurora-composer-c1-publish {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 35px;
+  padding: 7px 10px;
+  border-radius: 11px;
+  font-size: 11px;
+  font-weight: 820;
+  cursor: pointer;
+}
+
+.aurora-composer-c1-tools button {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(2,13,18,.26);
+  color: rgba(239,255,249,.74);
+}
+
+.aurora-composer-c1-tools button:hover {
+  border-color: rgba(125,247,197,.46);
+  background: rgba(125,247,197,.10);
+  color: #bfffe2;
+}
+
+.aurora-composer-c1-publish {
+  flex: 0 0 auto;
+  min-width: 105px;
+  border: 1px solid rgba(125,247,197,.52);
+  background:
+    linear-gradient(135deg, rgba(22,140,255,.82), rgba(66,255,154,.74));
+  color: white;
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+}
+
+.aurora-composer-c1-publish:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+  box-shadow: none;
+}
+
+.aurora-composer-c1-preview {
+  position: relative;
+  margin-top: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 15px;
+  background: rgba(2,13,18,.32);
+}
+
+.aurora-composer-c1-preview img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  background: rgba(0,0,0,.15);
+}
+
+.aurora-composer-c1-preview > button {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 11px;
+  background: rgba(2,13,18,.72);
+  color: white;
+  cursor: pointer;
+}
+
+.aurora-composer-c1-preview > span {
+  display: block;
+  padding: 7px 10px;
+  overflow: hidden;
+  color: rgba(239,255,249,.58);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aurora-composer-c1-drop {
+  position: absolute;
+  inset: 6px;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 2px dashed rgba(125,247,197,.68);
+  border-radius: 16px;
+  background: rgba(4,22,27,.93);
+  color: #bfffe2;
+  text-align: center;
+}
+
+.aurora-composer-c1-drop span {
+  color: rgba(239,255,249,.58);
+  font-size: 11px;
+}
+
+.aurora-composer-c1-inner.is-dragging {
+  border-color: rgba(125,247,197,.78);
+}
+
+@media (max-width: 650px) {
+  .aurora-composer-c1-inner {
+    padding: 8px;
+    border-radius: 17px;
+  }
+
+  .aurora-composer-c1-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .aurora-composer-c1-quick button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .aurora-composer-c1-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .aurora-composer-c1-tools {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .aurora-composer-c1-tools button {
+    padding-inline: 5px;
+  }
+
+  .aurora-composer-c1-tools button span {
+    display: none;
+  }
+
+  .aurora-composer-c1-publish {
+    width: 100%;
+  }
+}

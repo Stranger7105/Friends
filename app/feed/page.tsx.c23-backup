@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -429,22 +429,6 @@ export default function FeedPage() {
     event.preventDefault();
 
     const content = postText.trim();
-    const formData = new FormData(event.currentTarget);
-    const audienceTypeValue = formData.get("audience_type");
-    const audienceGroupValue = formData.get("audience_group_id");
-
-    const audienceType =
-      audienceTypeValue === "group" || audienceTypeValue === "private"
-        ? audienceTypeValue
-        : "friends";
-
-    const audienceGroupId =
-      audienceType === "group" &&
-      typeof audienceGroupValue === "string" &&
-      audienceGroupValue
-        ? audienceGroupValue
-        : null;
-
     if ((!content && !selectedImage) || !currentUserId || publishing) return;
 
     setPublishing(true);
@@ -478,8 +462,6 @@ export default function FeedPage() {
         content,
         user_id: currentUserId,
         image_path: uploadedPath,
-        audience_type: audienceType,
-        audience_group_id: audienceGroupId,
       });
 
       if (error) {
