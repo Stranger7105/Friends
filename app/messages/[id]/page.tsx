@@ -18,8 +18,7 @@ import { supabase } from "@/lib/supabase";
 import ConversationCallMenu from "@/components/calls/ConversationCallMenu";
 import { requestGlobalCall } from "@/components/calls/globalCallEvents";
 import "./aurora-chat.css";
-import "@/styles/friends-mobile-chat-fix.css";
-import "@/styles/friends-mobile-chat-input-fix-v2.css";
+import "@/styles/friends-mobile-chat.css";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -2147,8 +2146,8 @@ export default function ConversationPage() {
           <input
             ref={inputRef}
             type="text"
-inputMode="text"
-enterKeyHint="send"
+            inputMode="text"
+            enterKeyHint="send"
             value={text}
             onChange={handleTextChange}
             onPaste={handleComposerPaste}
