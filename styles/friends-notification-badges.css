@@ -1,0 +1,77 @@
+/* Friends — buline notificări desktop și mobil */
+
+.friends-nav-link {
+  position: relative;
+}
+
+.friends-request-count-badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  z-index: 3;
+
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+
+  color: #fff;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+
+  border: 2px solid rgba(4, 30, 25, 0.92);
+  border-radius: 999px;
+  background: #ef4444;
+  box-sizing: border-box;
+}
+
+.friends-mobile-notification-button {
+  position: relative;
+}
+
+.friends-mobile-header-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+
+  color: #fff;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+
+  border: 2px solid #062b23;
+  border-radius: 999px;
+  background: #ef4444;
+  box-sizing: border-box;
+}
+
+.friends-native-drawer-link {
+  position: relative;
+}
+
+.friends-native-drawer-badge {
+  margin-left: auto;
+
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+
+  color: #fff;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+
+  border-radius: 999px;
+  background: #ef4444;
+  box-sizing: border-box;
+}

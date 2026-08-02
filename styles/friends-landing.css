@@ -1,0 +1,196 @@
+/* Friends — pagina publică de intrare */
+
+.friends-entry-page {
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+  min-height: 100dvh;
+  padding:
+    calc(24px + env(safe-area-inset-top))
+    18px
+    calc(24px + env(safe-area-inset-bottom));
+
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(115, 242, 143, 0.22), transparent 34%),
+    radial-gradient(circle at 85% 18%, rgba(68, 174, 255, 0.18), transparent 32%),
+    linear-gradient(145deg, #031915 0%, #07352d 54%, #08251f 100%);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.friends-entry-page::before {
+  content: "";
+  position: absolute;
+  inset: auto -18% -32% -18%;
+  height: 55%;
+  border-radius: 50%;
+  background: rgba(38, 215, 137, 0.11);
+  filter: blur(55px);
+  pointer-events: none;
+}
+
+.friends-entry-card {
+  position: relative;
+  z-index: 1;
+
+  width: min(100%, 520px);
+  padding: clamp(24px, 5vw, 42px);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
+  background: rgba(4, 30, 25, 0.78);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-sizing: border-box;
+}
+
+.friends-entry-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.friends-entry-logo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  width: 58px;
+  height: 58px;
+
+  border: 2px solid #73f28f;
+  border-radius: 50%;
+  background: #0b5d50;
+  box-shadow: 0 0 28px rgba(115, 242, 143, 0.18);
+}
+
+.friends-entry-logo span {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #d9ffe6;
+}
+
+.friends-entry-kicker {
+  display: block;
+  margin-bottom: 2px;
+
+  color: #73f28f;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.friends-entry-brand h1 {
+  margin: 0;
+  font-size: clamp(30px, 8vw, 42px);
+  line-height: 1;
+}
+
+.friends-entry-copy {
+  margin-top: 34px;
+}
+
+.friends-entry-copy h2 {
+  margin: 0;
+  max-width: 420px;
+  font-size: clamp(27px, 7vw, 40px);
+  line-height: 1.08;
+}
+
+.friends-entry-copy p {
+  margin: 16px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.friends-entry-actions {
+  display: grid;
+  gap: 11px;
+  margin-top: 30px;
+}
+
+.friends-entry-primary,
+.friends-entry-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 52px;
+  padding: 0 18px;
+
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+
+  border-radius: 15px;
+  box-sizing: border-box;
+}
+
+.friends-entry-primary {
+  color: #03231c;
+  background: #73f28f;
+  border: 1px solid #9dffae;
+}
+
+.friends-entry-secondary {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.friends-entry-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 25px;
+}
+
+.friends-entry-features span {
+  padding: 7px 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 750;
+  border: 1px solid rgba(115, 242, 143, 0.20);
+  border-radius: 999px;
+  background: rgba(115, 242, 143, 0.07);
+}
+
+.friends-entry-note {
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.friends-entry-loading {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.friends-entry-loading strong {
+  font-size: 26px;
+}
+
+.friends-entry-loading p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.60);
+}
+
+@media (max-width: 520px) {
+  .friends-entry-card {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+
+  .friends-entry-copy {
+    margin-top: 28px;
+  }
+}

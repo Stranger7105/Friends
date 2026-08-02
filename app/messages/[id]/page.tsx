@@ -18,6 +18,8 @@ import { supabase } from "@/lib/supabase";
 import ConversationCallMenu from "@/components/calls/ConversationCallMenu";
 import { requestGlobalCall } from "@/components/calls/globalCallEvents";
 import "./aurora-chat.css";
+import "@/styles/friends-mobile-chat-fix.css";
+import "@/styles/friends-mobile-chat-input-fix-v2.css";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,

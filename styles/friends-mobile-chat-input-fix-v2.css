@@ -1,0 +1,157 @@
+/* =========================================================
+   FRIENDS — MOBILE CHAT INPUT FIX V2
+   Forțează afișarea clară a câmpului de scriere.
+   ========================================================= */
+
+@media (max-width: 767px) {
+  .chat-theme-page .aurora-chat-composer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 7px !important;
+
+    width: 100% !important;
+    min-height: 112px !important;
+    padding:
+      9px
+      9px
+      calc(9px + env(safe-area-inset-bottom)) !important;
+
+    background: #f8fafc !important;
+    border-top: 1px solid #cbd5e1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Câmpul de scriere — țintit direct după placeholder. */
+  .chat-theme-page
+  .aurora-chat-composer
+  input[placeholder*="Scrie un mesaj"] {
+    order: -2 !important;
+    display: block !important;
+    flex: 1 1 calc(100% - 62px) !important;
+
+    width: calc(100% - 62px) !important;
+    min-width: 180px !important;
+    max-width: none !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+
+    color: #111827 !important;
+    caret-color: #059669 !important;
+    -webkit-text-fill-color: #111827 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    line-height: 48px !important;
+
+    border: 2px solid #94a3b8 !important;
+    border-radius: 15px !important;
+    outline: none !important;
+    background: #ffffff !important;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08) !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    z-index: 50 !important;
+    box-sizing: border-box !important;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  input[placeholder*="Scrie un mesaj"]:focus {
+    border-color: #10b981 !important;
+    box-shadow:
+      0 0 0 3px rgba(16, 185, 129, 0.18),
+      inset 0 1px 2px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  input[placeholder*="Scrie un mesaj"]::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1 !important;
+  }
+
+  /* Butonul de trimitere stă lângă input. */
+  .chat-theme-page .aurora-chat-composer > button[type="submit"] {
+    order: -1 !important;
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 48px !important;
+
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #ffffff !important;
+    font-size: 0 !important;
+    border: 0 !important;
+    border-radius: 15px !important;
+    background: #059669 !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 50 !important;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  > button[type="submit"]::after {
+    content: "➤";
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  > button[type="submit"]:disabled {
+    background: #94a3b8 !important;
+    opacity: 0.65 !important;
+  }
+
+  /* Emoji și celelalte unelte rămân pe al doilea rând. */
+  .chat-theme-page .aurora-chat-composer > div:first-child,
+  .chat-theme-page
+  .aurora-chat-composer
+  > button:not([type="submit"]) {
+    order: 2 !important;
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    height: 38px !important;
+    margin: 0 !important;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  > div:first-child
+  > button {
+    width: 40px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+    border-radius: 11px !important;
+  }
+
+  .chat-theme-page
+  .aurora-chat-composer
+  > button:not([type="submit"]) {
+    padding: 0 !important;
+    font-size: 18px !important;
+    border-radius: 11px !important;
+  }
+
+  .chat-theme-page .aurora-chat-composer > span {
+    order: 3 !important;
+  }
+}
