@@ -2146,6 +2146,9 @@ export default function ConversationPage() {
 
           <input
             ref={inputRef}
+            type="text"
+inputMode="text"
+enterKeyHint="send"
             value={text}
             onChange={handleTextChange}
             onPaste={handleComposerPaste}
