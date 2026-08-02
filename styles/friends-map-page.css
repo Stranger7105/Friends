@@ -1,0 +1,201 @@
+/* =========================================================
+   FRIENDS — PAGINA HARTĂ
+   Transformă FriendsLocationMap din card desktop în ecran mobil.
+   ========================================================= */
+
+.friends-map-page {
+  width: 100%;
+  min-height: 100dvh;
+  color: rgb(var(--friends-text));
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgb(var(--friends-primary) / 0.16),
+      transparent 34rem
+    ),
+    linear-gradient(
+      150deg,
+      rgb(var(--friends-bg-1)),
+      rgb(var(--friends-bg-2))
+    );
+}
+
+.friends-map-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 68px;
+  padding:
+    calc(10px + env(safe-area-inset-top))
+    16px
+    10px;
+
+  color: rgb(var(--friends-text));
+  background: rgb(var(--friends-surface) / 0.92);
+  border-bottom: 1px solid rgb(var(--friends-border) / 0.26);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-sizing: border-box;
+}
+
+.friends-map-back-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  width: 42px;
+  height: 42px;
+
+  color: rgb(var(--friends-text));
+  text-decoration: none;
+  border: 1px solid rgb(var(--friends-border) / 0.28);
+  border-radius: 14px;
+  background: rgb(var(--friends-surface-strong) / 0.72);
+}
+
+.friends-map-page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.friends-map-page-icon {
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  color: white;
+  border-radius: 14px;
+  background: rgb(var(--friends-primary));
+  box-shadow: 0 10px 24px rgb(var(--friends-primary) / 0.22);
+}
+
+.friends-map-page-title span {
+  display: block;
+  color: rgb(var(--friends-primary));
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+
+.friends-map-page-title h1 {
+  margin: 1px 0 0;
+  font-size: 19px;
+  line-height: 1.1;
+}
+
+.friends-map-page-content {
+  width: 100%;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+/*
+ * Componenta existentă este un card de sidebar.
+ * În pagina /map o extindem la dimensiunea disponibilă.
+ */
+.friends-map-page .friends-location-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 16px !important;
+
+  color: rgb(var(--friends-text)) !important;
+  border: 1px solid rgb(var(--friends-border) / 0.28) !important;
+  border-radius: 24px !important;
+  background: rgb(var(--friends-surface) / 0.90) !important;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.16) !important;
+  box-sizing: border-box !important;
+}
+
+.friends-map-page .friends-location-map {
+  position: relative !important;
+  width: 100% !important;
+  min-height: 58vh !important;
+  height: 58vh !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+}
+
+.friends-map-page .friends-location-map > * {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.friends-map-page .friends-location-header-expand {
+  display: none !important;
+}
+
+.friends-map-page .friends-location-sharing {
+  margin-top: 14px !important;
+}
+
+@media (max-width: 767px) {
+  .friends-map-page {
+    min-height: 100dvh;
+    padding-bottom:
+      calc(
+        var(--friends-mobile-bottom-height, 76px) +
+        env(safe-area-inset-bottom)
+      );
+  }
+
+  .friends-map-page-header {
+    min-height: 62px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .friends-map-page-content {
+    padding: 8px 8px 12px;
+  }
+
+  .friends-map-page .friends-location-card {
+    padding: 12px !important;
+    border-radius: 18px !important;
+  }
+
+  .friends-map-page .friends-location-header {
+    margin-bottom: 10px !important;
+  }
+
+  .friends-map-page .friends-map-group-filter {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .friends-map-page .friends-map-group-filter select {
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .friends-map-page .friends-location-map {
+    min-height: calc(100dvh - 330px) !important;
+    height: calc(100dvh - 330px) !important;
+    border-radius: 16px !important;
+  }
+
+  .friends-map-page .friends-location-map-caption {
+    font-size: 11px !important;
+  }
+
+  .friends-map-page .friends-location-sharing {
+    display: grid !important;
+    gap: 8px !important;
+  }
+
+  .friends-map-page .friends-location-sharing button {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+}

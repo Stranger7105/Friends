@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Clapperboard,
   Home,
+  MapPinned,
   MessageCircle,
   Plus,
   User,
@@ -17,9 +17,9 @@ const sideLinks = [
     icon: Home,
   },
   {
-    href: "/reels",
-    label: "Reels",
-    icon: Clapperboard,
+    href: "/map",
+    label: "Hartă",
+    icon: MapPinned,
   },
   {
     href: "/messages",
