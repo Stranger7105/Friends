@@ -110,22 +110,40 @@ export default function StoryViewer({
   }, [initialIndex]);
 
   useEffect(() => {
+    if (showComments) {
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      return;
+    }
+
+    startedAtRef.current =
+      performance.now() - (progress / 100) * STORY_DURATION;
+
     function tick(now: number) {
       const elapsed = now - startedAtRef.current;
       const nextProgress = Math.min(100, (elapsed / STORY_DURATION) * 100);
+
       setProgress(nextProgress);
+
       if (nextProgress >= 100) {
         goNext();
         return;
       }
+
       frameRef.current = requestAnimationFrame(tick);
     }
 
     frameRef.current = requestAnimationFrame(tick);
+
     return () => {
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
     };
-  }, [activeIndex, goNext]);
+  }, [activeIndex, goNext, showComments]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -285,7 +303,7 @@ export default function StoryViewer({
       active = false;
       void supabase.removeChannel(channel);
     };
-  }, [commentProfiles, showComments, story?.id]);
+  }, [showComments, story?.id]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -382,8 +400,6 @@ export default function StoryViewer({
 
     setSendingComment(true);
     setCommentError("");
-    startedAtRef.current = performance.now();
-    setProgress(0);
 
     const { data, error } = await supabase
       .from("story_comments")
@@ -653,8 +669,6 @@ export default function StoryViewer({
             aria-expanded={showComments}
             onClick={() => {
               setShowComments(true);
-              startedAtRef.current = performance.now();
-              setProgress(0);
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
