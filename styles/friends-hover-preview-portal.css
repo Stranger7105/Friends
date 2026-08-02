@@ -1,0 +1,65 @@
+/* =========================================================
+   FRIENDS — HOVER PREVIEW PORTAL FIX 2
+   Preview real, peste toate containerele
+   ========================================================= */
+
+.friends-hover-video-anchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.friends-hover-video-portal {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  display: block !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(125, 247, 197, .58);
+  border-radius: 22px;
+  background: #02080d;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, .56),
+    0 0 0 1px rgba(255, 255, 255, .10),
+    0 0 42px rgba(66, 255, 154, .28);
+  animation: friends-preview-pop .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+.friends-hover-video-portal video {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+}
+
+.friends-hover-video-portal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 55%, rgba(0, 5, 9, .38) 100%);
+  pointer-events: none;
+}
+
+.friends-hover-video {
+  display: none !important;
+}
+
+@keyframes friends-preview-pop {
+  from {
+    opacity: 0;
+    transform: scale(.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .friends-hover-video-portal {
+    display: none !important;
+  }
+}

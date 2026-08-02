@@ -1,0 +1,9 @@
+/* Stories portal media */
+.friends-hover-video-portal img,
+.friends-hover-video-portal video {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  pointer-events: none !important;
+}

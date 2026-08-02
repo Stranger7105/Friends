@@ -32,6 +32,14 @@ import "@/styles/friends-groups-g11.css";
 import "@/styles/friends-composer-c21.css";
 import "@/styles/friends-composer-c22.css";
 import "@/styles/friends-audience-badge.css";
+import "@/styles/friends-stories-reels-card-fix.css";
+import "@/styles/friends-stories-reels-no-titles.css";
+import "@/styles/friends-feed-section-titles.css";
+import "@/styles/theme-contrast.css";
+import "@/styles/friends-reels-r11.css";
+import "@/styles/friends-smart-video-preview.css";
+import "@/styles/friends-hover-preview-portal.css";
+import "@/styles/friends-hover-preview-portal-stories.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;

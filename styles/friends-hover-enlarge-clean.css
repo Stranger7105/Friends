@@ -1,0 +1,69 @@
+/* =========================================================
+   FRIENDS — HOVER ENLARGE CLEAN FIX
+   Un singur fișier, fără transform-uri CSS care să blocheze Framer Motion
+   ========================================================= */
+
+/*
+  IMPORTANT:
+  Mărirea este controlată în componente prin Framer Motion:
+  whileHover={{ y: -7, scale: 1.11, zIndex: 30 }}
+
+  Acest CSS NU setează transform.
+*/
+
+/* Permite cardurilor mărite să iasă vizibil din rând. */
+.friends-feed-stories-slot,
+.friends-feed-reels-slot,
+.friends-feed-stories-slot .aurora-stories-section,
+.friends-feed-reels-slot .feed-reels-strip {
+  overflow: visible !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-scroller,
+.friends-feed-reels-slot .feed-reels-track {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+/* Cardul mărit apare peste vecini. */
+.aurora-story-card,
+.feed-reel-card-shell {
+  position: relative;
+  transform-origin: center center;
+}
+
+.aurora-story-card:hover,
+.feed-reel-card-shell:hover {
+  z-index: 40 !important;
+  box-shadow:
+    0 20px 44px rgba(0, 0, 0, .34),
+    0 0 0 1px rgba(125, 247, 197, .34),
+    0 0 28px rgba(66, 255, 154, .20) !important;
+}
+
+/* Media rămâne tăiată frumos în interiorul cardului. */
+.aurora-story-card,
+.feed-reel-card {
+  overflow: hidden !important;
+}
+
+/* Nu suprascriem niciodată transform-ul inline al Framer Motion. */
+.aurora-story-card,
+.feed-reel-card-shell,
+.aurora-story-card:hover,
+.feed-reel-card-shell:hover {
+  transition-property: box-shadow !important;
+}
+
+/* Pe touch nu rezervăm spațiu suplimentar pentru hover. */
+@media (hover: none), (pointer: coarse) {
+  .friends-feed-stories-slot .aurora-stories-scroller,
+  .friends-feed-reels-slot .feed-reels-track {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}

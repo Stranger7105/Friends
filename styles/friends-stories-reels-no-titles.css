@@ -1,0 +1,80 @@
+/* =========================================================
+   FRIENDS — STORIES + REELS FĂRĂ TITLURI
+   Spațiul este folosit doar de carduri
+   ========================================================= */
+
+/* Elimină complet rândurile de titlu */
+.friends-feed-stories-slot .aurora-stories-heading-row,
+.friends-feed-reels-slot .feed-reels-header {
+  display: none !important;
+}
+
+/* Secțiunile devin doar containere pentru carduri */
+.friends-feed-stories-slot .aurora-stories-section,
+.friends-feed-reels-slot .feed-reels-strip {
+  padding: 8px !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* Scroller-ele ocupă tot spațiul disponibil */
+.friends-feed-stories-slot .aurora-stories-scroller,
+.friends-feed-reels-slot .feed-reels-track {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 9px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-scroller::-webkit-scrollbar,
+.friends-feed-reels-slot .feed-reels-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Cardurile sunt afișate complet */
+.friends-feed-stories-slot .aurora-story-card {
+  flex: 0 0 auto !important;
+  height: 154px !important;
+  min-height: 154px !important;
+  margin: 0 !important;
+}
+
+.friends-feed-reels-slot .feed-reel-card,
+.friends-feed-reels-slot .feed-reel-see-all {
+  flex: 0 0 auto !important;
+  height: 154px !important;
+  min-height: 154px !important;
+  margin: 0 !important;
+}
+
+/* Elimină și mesajele care ocupă spațiu sub Stories */
+.friends-feed-stories-slot .aurora-stories-section > p:not([role="alert"]) {
+  display: none !important;
+}
+
+/* Sloturile nu mai taie conținutul */
+.friends-feed-stories-slot,
+.friends-feed-reels-slot {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 640px) {
+  .friends-feed-stories-slot .aurora-story-card,
+  .friends-feed-reels-slot .feed-reel-card,
+  .friends-feed-reels-slot .feed-reel-see-all {
+    height: 142px !important;
+    min-height: 142px !important;
+  }
+}

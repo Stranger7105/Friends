@@ -1,0 +1,60 @@
+/* =========================================================
+   FRIENDS — TITLURI SIMPLE PENTRU SECȚIUNILE FEED-ULUI
+   Stories / Reels / Postări
+   ========================================================= */
+
+/* Titluri comune */
+.friends-feed-stories-slot::before,
+.friends-feed-reels-slot::before {
+  display: block;
+  margin: 0 0 7px;
+  padding-left: 2px;
+  color: rgba(255,255,255,.96);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+.friends-feed-stories-slot::before {
+  content: "Stories";
+}
+
+.friends-feed-reels-slot::before {
+  content: "Reels";
+}
+
+/* Titlul Postări existent devine vizibil și are același stil */
+.friends-feed-posts-slot .aurora-feed-heading-hidden {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 0 9px !important;
+  padding: 0 0 0 2px !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: normal !important;
+  position: static !important;
+  color: rgba(255,255,255,.96) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.02em !important;
+}
+
+/* Păstrăm cardurile compacte și complet vizibile */
+.friends-feed-stories-slot,
+.friends-feed-reels-slot,
+.friends-feed-posts-slot {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .friends-feed-stories-slot::before,
+  .friends-feed-reels-slot::before,
+  .friends-feed-posts-slot .aurora-feed-heading-hidden {
+    font-size: 15px !important;
+    margin-bottom: 6px !important;
+  }
+}

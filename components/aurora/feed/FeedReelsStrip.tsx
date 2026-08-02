@@ -4,7 +4,9 @@ import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
+  Heart,
   LoaderCircle,
+  MessageCircle,
   Pause,
   Play,
   Volume2,
@@ -21,6 +23,8 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import ReelComments from "@/components/reels/ReelComments";
+import HoverVideo from "@/components/media/HoverVideo";
+import VisibilityVideo from "@/components/media/VisibilityVideo";
 
 type Profile = {
   id: string;
@@ -40,8 +44,15 @@ type ReelRow = {
   comments_count: number;
 };
 
+type ReelLikeRow = {
+  reel_id: string;
+  user_id: string;
+};
+
 type FeedReel = ReelRow & {
   profile: Profile | null;
+  likes_count: number;
+  liked_by_me: boolean;
 };
 
 type FeedReelsStripProps = {
@@ -70,6 +81,7 @@ export default function FeedReelsStrip({
   const [playing, setPlaying] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [commentsReelId, setCommentsReelId] = useState<string | null>(null);
+  const [likingReelId, setLikingReelId] = useState<string | null>(null);
 
   const trackRef = useRef<HTMLDivElement | null>(null);
   const viewerVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -122,11 +134,43 @@ export default function FeedReelsStrip({
       }
     }
 
+    const reelIds = rows.map((reel) => reel.id);
+    let likes: ReelLikeRow[] = [];
+
+    if (reelIds.length > 0) {
+      const { data: likeRows, error: likesError } = await supabase
+        .from("reel_likes")
+        .select("reel_id,user_id")
+        .in("reel_id", reelIds);
+
+      if (likesError) {
+        console.warn("Feed Reels likes warning:", likesError);
+      } else {
+        likes = (likeRows ?? []) as ReelLikeRow[];
+      }
+    }
+
+    const likesByReelId = new Map<string, ReelLikeRow[]>();
+
+    for (const like of likes) {
+      const current = likesByReelId.get(like.reel_id) ?? [];
+      current.push(like);
+      likesByReelId.set(like.reel_id, current);
+    }
+
     setReels(
-      rows.map((reel) => ({
-        ...reel,
-        profile: profiles.get(reel.user_id) ?? null,
-      }))
+      rows.map((reel) => {
+        const reelLikes = likesByReelId.get(reel.id) ?? [];
+
+        return {
+          ...reel,
+          profile: profiles.get(reel.user_id) ?? null,
+          likes_count: reelLikes.length,
+          liked_by_me: reelLikes.some(
+            (like) => like.user_id === currentUserId
+          ),
+        };
+      })
     );
     setLoading(false);
   }, [currentUserId]);
@@ -146,6 +190,15 @@ export default function FeedReelsStrip({
           event: "*",
           schema: "public",
           table: "reels",
+        },
+        () => void loadReels()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "reel_likes",
         },
         () => void loadReels()
       )
@@ -228,6 +281,63 @@ export default function FeedReelsStrip({
     setPlaying(true);
   }
 
+  async function toggleLike(reel: FeedReel) {
+    if (!currentUserId || likingReelId !== null) return;
+
+    const nextLiked = !reel.liked_by_me;
+
+    setLikingReelId(reel.id);
+    setErrorMessage("");
+
+    setReels((current) =>
+      current.map((item) =>
+        item.id === reel.id
+          ? {
+              ...item,
+              liked_by_me: nextLiked,
+              likes_count: Math.max(
+                0,
+                item.likes_count + (nextLiked ? 1 : -1)
+              ),
+            }
+          : item
+      )
+    );
+
+    const result = nextLiked
+      ? await supabase.from("reel_likes").upsert(
+          {
+            reel_id: reel.id,
+            user_id: currentUserId,
+          },
+          { onConflict: "reel_id,user_id" }
+        )
+      : await supabase
+          .from("reel_likes")
+          .delete()
+          .eq("reel_id", reel.id)
+          .eq("user_id", currentUserId);
+
+    if (result.error) {
+      console.error("Reel like error:", result.error);
+      setErrorMessage(`Like-ul nu a putut fi salvat: ${result.error.message}`);
+
+      setReels((current) =>
+        current.map((item) =>
+          item.id === reel.id
+            ? {
+                ...item,
+                liked_by_me: reel.liked_by_me,
+                likes_count: reel.likes_count,
+              }
+            : item
+        )
+      );
+    }
+
+    setLikingReelId(null);
+  }
+
   if (loading) {
     return (
       <section className="feed-reels-strip feed-reels-loading">
@@ -282,14 +392,18 @@ export default function FeedReelsStrip({
 
         <div ref={trackRef} className="feed-reels-track">
           {reels.map((reel, index) => (
-            <motion.button
+            <motion.div
               key={reel.id}
-              type="button"
-              className="feed-reel-card"
-              onClick={() => openViewer(index)}
-              whileHover={{ y: -5, scale: 1.018 }}
+              className="feed-reel-card-shell"
+              whileHover={{ y: -7, scale: 1.11, zIndex: 30 }}
               whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 360, damping: 24 }}
             >
+              <button
+                type="button"
+                className="feed-reel-card"
+                onClick={() => openViewer(index)}
+              >
               {reel.thumbnail_url ? (
                 <img
                   src={reel.thumbnail_url}
@@ -306,6 +420,18 @@ export default function FeedReelsStrip({
                   className="feed-reel-cover"
                 />
               )}
+
+              <HoverVideo
+                src={reel.video_url}
+                poster={reel.thumbnail_url}
+                className="feed-reel-cover"
+              />
+
+              <VisibilityVideo
+                src={reel.video_url}
+                poster={reel.thumbnail_url}
+                className="feed-reel-cover"
+              />
 
               <span className="feed-reel-overlay" aria-hidden="true" />
 
@@ -334,7 +460,46 @@ export default function FeedReelsStrip({
               {reel.caption && (
                 <span className="feed-reel-caption">{reel.caption}</span>
               )}
-            </motion.button>
+              </button>
+
+              <div className="feed-reel-card-stats">
+                <button
+                  type="button"
+                  className={`feed-reel-card-like ${
+                    reel.liked_by_me ? "is-liked" : ""
+                  }`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void toggleLike(reel);
+                  }}
+                  disabled={likingReelId === reel.id}
+                  aria-label={
+                    reel.liked_by_me
+                      ? "Elimină aprecierea"
+                      : "Apreciază Reel-ul"
+                  }
+                >
+                  <Heart
+                    size={13}
+                    fill={reel.liked_by_me ? "currentColor" : "none"}
+                  />
+                  <span>{reel.likes_count}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="feed-reel-card-comments"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setCommentsReelId(reel.id);
+                  }}
+                  aria-label="Deschide comentariile"
+                >
+                  <MessageCircle size={13} />
+                  <span>{reel.comments_count}</span>
+                </button>
+              </div>
+            </motion.div>
           ))}
 
           <Link href="/reels" className="feed-reel-see-all">
@@ -448,22 +613,38 @@ export default function FeedReelsStrip({
 
                 {activeReel.caption && <p>{activeReel.caption}</p>}
 
-                <button
-                  type="button"
-                  onClick={() => setCommentsReelId(activeReel.id)}
-                  style={{
-                    marginTop: 10,
-                    border: "1px solid rgba(190,242,100,.2)",
-                    borderRadius: 10,
-                    background: "rgba(132,204,22,.08)",
-                    padding: "8px 10px",
-                    color: "#bef264",
-                    fontSize: 10,
-                    fontWeight: 900,
-                  }}
-                >
-                  Comentarii ({activeReel.comments_count})
-                </button>
+                <div className="feed-reel-viewer-social">
+                  <button
+                    type="button"
+                    className={`feed-reel-viewer-like ${
+                      activeReel.liked_by_me ? "is-liked" : ""
+                    }`}
+                    onClick={() => void toggleLike(activeReel)}
+                    disabled={likingReelId === activeReel.id}
+                  >
+                    <Heart
+                      size={17}
+                      fill={
+                        activeReel.liked_by_me ? "currentColor" : "none"
+                      }
+                    />
+                    <span>
+                      {activeReel.likes_count}{" "}
+                      {activeReel.likes_count === 1
+                        ? "apreciere"
+                        : "aprecieri"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="feed-reel-viewer-comments"
+                    onClick={() => setCommentsReelId(activeReel.id)}
+                  >
+                    <MessageCircle size={17} />
+                    <span>Comentarii ({activeReel.comments_count})</span>
+                  </button>
+                </div>
 
                 <Link href="/reels">Deschide pagina Reels →</Link>
               </div>

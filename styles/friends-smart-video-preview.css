@@ -1,0 +1,116 @@
+/* =========================================================
+   FRIENDS — SMART VIDEO PREVIEW R1.2
+   Hover pe desktop + vizibilitate pe mobil
+   ========================================================= */
+
+.friends-hover-video,
+.friends-visibility-video {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: auto;
+  transition: opacity .18s ease;
+}
+
+.friends-hover-video.is-active,
+.friends-visibility-video.is-active {
+  opacity: 1;
+}
+
+.friends-hover-video video,
+.friends-visibility-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Doar componenta potrivită pentru dispozitiv rămâne activă. */
+@media (hover: hover) and (pointer: fine) {
+  .friends-visibility-video {
+    display: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .friends-hover-video {
+    display: none;
+  }
+}
+
+/* Reels */
+.feed-reel-card-shell .friends-hover-video,
+.feed-reel-card-shell .friends-visibility-video {
+  border-radius: inherit;
+}
+
+.feed-reel-card-shell:has(.friends-hover-video.is-active),
+.feed-reel-card-shell:has(.friends-visibility-video.is-active) {
+  box-shadow:
+    0 0 0 1px rgba(125,247,197,.38),
+    0 0 26px rgba(66,255,154,.2);
+}
+
+.feed-reel-card-shell .friends-hover-video::after,
+.feed-reel-card-shell .friends-visibility-video::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 45%, rgba(0,5,9,.76) 100%);
+}
+
+/* Stories */
+.aurora-story-card {
+  position: relative;
+}
+
+.aurora-story-card .friends-hover-video,
+.aurora-story-card .friends-visibility-video {
+  border-radius: inherit;
+}
+
+.aurora-story-card-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aurora-story-card:has(.friends-hover-video.is-active),
+.aurora-story-card:has(.friends-visibility-video.is-active) {
+  box-shadow:
+    0 0 0 1px rgba(125,247,197,.42),
+    0 0 24px rgba(66,255,154,.2);
+}
+
+/* Păstrăm overlay-urile și textele deasupra preview-ului. */
+.feed-reel-overlay,
+.feed-reel-play,
+.feed-reel-author,
+.feed-reel-caption,
+.feed-reel-card-stats,
+.aurora-story-card-shade,
+.aurora-story-avatar-ring,
+.aurora-story-card-name,
+.aurora-story-card-note {
+  z-index: 5;
+}
+
+
+/* FIX: hostul trebuie să primească hover; doar video-ul nu interceptează clickul */
+.friends-hover-video video,
+.friends-visibility-video video {
+  pointer-events: none;
+}
+
+
+/* FIX FINAL: hover-ul este ascultat pe cardul părinte */
+.friends-hover-video {
+  pointer-events: none !important;
+}
+
+.friends-hover-video video {
+  pointer-events: none !important;
+}

@@ -1,0 +1,167 @@
+/* =========================================================
+   FRIENDS — STORIES + REELS CARD LAYOUT FIX
+   Titluri compacte, carduri complet vizibile
+   ========================================================= */
+
+/* ---------- Containere ---------- */
+
+.friends-feed-stories-slot .aurora-stories-section,
+.friends-feed-reels-slot .feed-reels-strip {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ---------- Header Stories compact ---------- */
+
+.friends-feed-stories-slot .aurora-stories-section {
+  padding: 10px 12px 12px !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-heading-row {
+  min-height: 26px;
+  align-items: center !important;
+  margin-bottom: 7px !important;
+  padding-inline: 2px !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-heading-row > div {
+  min-width: 0;
+}
+
+.friends-feed-stories-slot .aurora-stories-kicker,
+.friends-feed-stories-slot .aurora-stories-hint {
+  display: none !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-heading-row h2 {
+  margin: 0 !important;
+  overflow: hidden;
+  color: rgba(255,255,255,.95) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-feed-stories-slot .aurora-stories-heading-row h2::before {
+  content: "Momentele prietenilor";
+}
+
+/* Ascundem textul original fără să stricăm aria-label-ul. */
+.friends-feed-stories-slot .aurora-stories-heading-row h2 {
+  font-size: 0 !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-heading-row h2::before {
+  font-size: 14px;
+}
+
+/* ---------- Scroller Stories ---------- */
+
+.friends-feed-stories-slot .aurora-stories-scroller {
+  display: flex !important;
+  min-width: 0;
+  align-items: stretch !important;
+  gap: 9px !important;
+  padding: 1px 1px 3px !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-width: none;
+}
+
+.friends-feed-stories-slot .aurora-stories-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.friends-feed-stories-slot .aurora-story-card {
+  min-height: 154px !important;
+  height: 154px !important;
+  flex: 0 0 auto !important;
+}
+
+/* ---------- Header Reels compact ---------- */
+
+.friends-feed-reels-slot .feed-reels-strip {
+  padding: 10px 12px 12px !important;
+}
+
+.friends-feed-reels-slot .feed-reels-header {
+  min-height: 28px;
+  align-items: center !important;
+  margin-bottom: 7px !important;
+  gap: 8px !important;
+}
+
+.friends-feed-reels-slot .feed-reels-header > div:first-child {
+  min-width: 0;
+}
+
+.friends-feed-reels-slot .feed-reels-kicker {
+  display: none !important;
+}
+
+.friends-feed-reels-slot .feed-reels-header h2 {
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: 14px !important;
+  line-height: 1.1 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-feed-reels-slot .feed-reels-header-actions {
+  flex: 0 0 auto;
+}
+
+.friends-feed-reels-slot .feed-reels-header-actions > a {
+  font-size: 9px !important;
+}
+
+.friends-feed-reels-slot .feed-reels-header-actions button {
+  width: 27px !important;
+  height: 27px !important;
+  border-radius: 9px !important;
+}
+
+/* ---------- Carduri Reels complet vizibile ---------- */
+
+.friends-feed-reels-slot .feed-reels-track {
+  min-height: 154px;
+  align-items: stretch;
+  padding: 1px 1px 3px;
+}
+
+.friends-feed-reels-slot .feed-reel-card,
+.friends-feed-reels-slot .feed-reel-see-all {
+  height: 154px !important;
+  min-height: 154px !important;
+}
+
+/* ---------- Evităm tăierea cardurilor ---------- */
+
+.friends-feed-stories-slot,
+.friends-feed-reels-slot {
+  min-width: 0;
+  overflow: visible !important;
+}
+
+@media (max-width: 640px) {
+  .friends-feed-stories-slot .aurora-stories-section,
+  .friends-feed-reels-slot .feed-reels-strip {
+    padding: 9px 10px 10px !important;
+  }
+
+  .friends-feed-stories-slot .aurora-story-card,
+  .friends-feed-reels-slot .feed-reel-card,
+  .friends-feed-reels-slot .feed-reel-see-all {
+    height: 142px !important;
+    min-height: 142px !important;
+  }
+
+  .friends-feed-reels-slot .feed-reels-track {
+    min-height: 142px;
+  }
+}

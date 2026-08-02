@@ -1,0 +1,87 @@
+/* =========================================================
+   FRIENDS — STORIES + REELS HOVER ZOOM
+   Mărire discretă a imaginii/video-ului la hover
+   ========================================================= */
+
+/* Cardurile rămân în locul lor; doar imaginea/video-ul se măresc. */
+.feed-reel-cover,
+.feed-reel-card-shell .friends-hover-video video,
+.feed-reel-card-shell .friends-visibility-video video,
+.aurora-story-card-cover,
+.aurora-story-card .friends-hover-video video,
+.aurora-story-card .friends-visibility-video video {
+  transform: scale(1);
+  transform-origin: center center;
+  transition:
+    transform .34s cubic-bezier(.22, 1, .36, 1),
+    filter .28s ease;
+  will-change: transform;
+}
+
+/* Reels */
+.feed-reel-card-shell:hover .feed-reel-cover,
+.feed-reel-card-shell:hover .friends-hover-video video,
+.feed-reel-card-shell:hover .friends-visibility-video video {
+  transform: scale(1.085);
+  filter: saturate(1.08) contrast(1.03);
+}
+
+/* Stories */
+.aurora-story-card:hover .aurora-story-card-cover,
+.aurora-story-card:hover .friends-hover-video video,
+.aurora-story-card:hover .friends-visibility-video video {
+  transform: scale(1.085);
+  filter: saturate(1.08) contrast(1.03);
+}
+
+/* Ușoară ridicare a cardului, fără să schimbăm dimensiunea layout-ului. */
+.feed-reel-card-shell,
+.aurora-story-card {
+  transition:
+    transform .25s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .25s ease;
+}
+
+.feed-reel-card-shell:hover,
+.aurora-story-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Overlay-ul rămâne stabil și textul lizibil. */
+.feed-reel-overlay,
+.aurora-story-card-shade {
+  transition: background .28s ease, opacity .28s ease;
+}
+
+.feed-reel-card-shell:hover .feed-reel-overlay {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.03) 18%,
+      rgba(0,0,0,.20) 52%,
+      rgba(0,5,9,.92) 100%
+    ),
+    radial-gradient(circle at center, transparent 30%, rgba(0,0,0,.10));
+}
+
+.aurora-story-card:hover .aurora-story-card-shade {
+  opacity: .94;
+}
+
+/* Pe dispozitive tactile nu aplicăm hover-ul. */
+@media (hover: none), (pointer: coarse) {
+  .feed-reel-card-shell:hover,
+  .aurora-story-card:hover {
+    transform: none;
+  }
+
+  .feed-reel-card-shell:hover .feed-reel-cover,
+  .feed-reel-card-shell:hover .friends-hover-video video,
+  .feed-reel-card-shell:hover .friends-visibility-video video,
+  .aurora-story-card:hover .aurora-story-card-cover,
+  .aurora-story-card:hover .friends-hover-video video,
+  .aurora-story-card:hover .friends-visibility-video video {
+    transform: scale(1);
+    filter: none;
+  }
+}

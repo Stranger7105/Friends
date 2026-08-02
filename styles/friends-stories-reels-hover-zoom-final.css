@@ -1,0 +1,90 @@
+/* =========================================================
+   FRIENDS — STORIES + REELS HOVER ZOOM FINAL
+   Forțează mărirea imaginii/video-ului în interiorul cardului
+   ========================================================= */
+
+/* Cardurile trebuie să taie imaginea mărită în interior */
+.feed-reel-card,
+.aurora-story-card {
+  overflow: hidden !important;
+}
+
+/* Pregătire media */
+.feed-reel-card > .feed-reel-cover,
+.feed-reel-card .friends-hover-video video,
+.feed-reel-card .friends-visibility-video video,
+.aurora-story-card > .aurora-story-card-cover,
+.aurora-story-card .friends-hover-video video,
+.aurora-story-card .friends-visibility-video video {
+  transform: scale(1) !important;
+  transform-origin: center center !important;
+  transition:
+    transform .38s cubic-bezier(.22, 1, .36, 1),
+    filter .28s ease !important;
+  will-change: transform;
+}
+
+/* Reels: imaginea și preview-ul video se măresc */
+.feed-reel-card-shell:hover .feed-reel-card > .feed-reel-cover,
+.feed-reel-card-shell:hover .feed-reel-card .friends-hover-video video,
+.feed-reel-card-shell:hover .feed-reel-card .friends-visibility-video video {
+  transform: scale(1.16) !important;
+  filter: saturate(1.1) contrast(1.04) !important;
+}
+
+/* Stories: imaginea și preview-ul video se măresc */
+.aurora-story-card:hover > .aurora-story-card-cover,
+.aurora-story-card:hover .friends-hover-video video,
+.aurora-story-card:hover .friends-visibility-video video {
+  transform: scale(1.16) !important;
+  filter: saturate(1.1) contrast(1.04) !important;
+}
+
+/* Imaginea de fundal la Stories trebuie să poată fi scalată vizibil */
+.aurora-story-card-cover {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-position: center !important;
+  background-size: cover !important;
+}
+
+/* Ridicare discretă a cardurilor */
+.feed-reel-card-shell:hover,
+.aurora-story-card:hover {
+  transform: translateY(-4px) !important;
+}
+
+/* Overlay-urile rămân deasupra */
+.feed-reel-overlay,
+.feed-reel-play,
+.feed-reel-author,
+.feed-reel-caption,
+.feed-reel-card-stats,
+.aurora-story-card-shade,
+.aurora-story-avatar-ring,
+.aurora-story-card-name,
+.aurora-story-card-note {
+  position: relative;
+  z-index: 6 !important;
+}
+
+/* Pe dispozitive tactile nu forțăm hover */
+@media (hover: none), (pointer: coarse) {
+  .feed-reel-card-shell:hover,
+  .aurora-story-card:hover {
+    transform: none !important;
+  }
+
+  .feed-reel-card-shell:hover .feed-reel-card > .feed-reel-cover,
+  .feed-reel-card-shell:hover .feed-reel-card .friends-hover-video video,
+  .feed-reel-card-shell:hover .feed-reel-card .friends-visibility-video video,
+  .aurora-story-card:hover > .aurora-story-card-cover,
+  .aurora-story-card:hover .friends-hover-video video,
+  .aurora-story-card:hover .friends-visibility-video video {
+    transform: scale(1) !important;
+    filter: none !important;
+  }
+}

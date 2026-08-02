@@ -1,0 +1,53 @@
+/* =========================================================
+   FRIENDS — MĂRIRE REALĂ CARDURI STORIES + REELS
+   Mărește întregul card, nu doar imaginea din interior
+   ========================================================= */
+
+/* Scroller-ele trebuie să lase cardul mărit să iasă în afară. */
+.friends-feed-stories-slot,
+.friends-feed-reels-slot,
+.friends-feed-stories-slot .aurora-stories-section,
+.friends-feed-reels-slot .feed-reels-strip,
+.friends-feed-stories-slot .aurora-stories-scroller,
+.friends-feed-reels-slot .feed-reels-track {
+  overflow-y: visible !important;
+}
+
+.friends-feed-stories-slot .aurora-stories-scroller,
+.friends-feed-reels-slot .feed-reels-track {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* Spațiu lateral pentru primul și ultimul card mărit. */
+.friends-feed-stories-slot .aurora-stories-scroller,
+.friends-feed-reels-slot .feed-reels-track {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Cardul activ rămâne deasupra vecinilor. */
+.aurora-story-card:hover,
+.feed-reel-card-shell:hover {
+  position: relative;
+  z-index: 30 !important;
+  box-shadow:
+    0 22px 44px rgba(0, 0, 0, .34),
+    0 0 0 1px rgba(125, 247, 197, .34),
+    0 0 26px rgba(66, 255, 154, .18) !important;
+}
+
+/* Nu mai aplicăm alte transformări CSS care pot concura cu Framer Motion. */
+.aurora-story-card,
+.feed-reel-card-shell {
+  transform-origin: center center;
+}
+
+/* Pe touch nu există hover real. */
+@media (hover: none), (pointer: coarse) {
+  .friends-feed-stories-slot .aurora-stories-scroller,
+  .friends-feed-reels-slot .feed-reels-track {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}

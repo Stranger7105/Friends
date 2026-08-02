@@ -13,12 +13,33 @@ export const FRIENDS_THEMES = [
 ] as const;
 
 export type FriendsTheme = (typeof FRIENDS_THEMES)[number];
+export type FriendsThemeMode = "dark" | "light";
 
 const STORAGE_KEY = "friends-theme";
 const THEME_EVENT = "friends-theme-change";
 
+const LIGHT_THEMES = new Set<FriendsTheme>([
+  "frozen",
+  "cherry-blossom",
+]);
+
 function isFriendsTheme(value: string | null): value is FriendsTheme {
   return !!value && FRIENDS_THEMES.includes(value as FriendsTheme);
+}
+
+function getThemeMode(theme: FriendsTheme): FriendsThemeMode {
+  return LIGHT_THEMES.has(theme) ? "light" : "dark";
+}
+
+function setThemeAttributes(theme: FriendsTheme) {
+  if (typeof document === "undefined") return;
+
+  const root = document.documentElement;
+  const mode = getThemeMode(theme);
+
+  root.dataset.friendsTheme = theme;
+  root.dataset.themeMode = mode;
+  root.style.colorScheme = mode;
 }
 
 export function getFriendsTheme(): FriendsTheme {
@@ -29,9 +50,7 @@ export function getFriendsTheme(): FriendsTheme {
 }
 
 export function applyFriendsTheme(theme: FriendsTheme) {
-  if (typeof document === "undefined") return;
-
-  document.documentElement.dataset.friendsTheme = theme;
+  setThemeAttributes(theme);
 
   if (typeof window !== "undefined") {
     window.localStorage.setItem(STORAGE_KEY, theme);
@@ -42,7 +61,7 @@ export function applyFriendsTheme(theme: FriendsTheme) {
 export default function ThemeLoader() {
   useEffect(() => {
     const applyStoredTheme = () => {
-      document.documentElement.dataset.friendsTheme = getFriendsTheme();
+      setThemeAttributes(getFriendsTheme());
     };
 
     applyStoredTheme();
@@ -53,8 +72,9 @@ export default function ThemeLoader() {
 
     const handleThemeEvent = (event: Event) => {
       const theme = (event as CustomEvent<string>).detail;
+
       if (isFriendsTheme(theme)) {
-        document.documentElement.dataset.friendsTheme = theme;
+        setThemeAttributes(theme);
       }
     };
 

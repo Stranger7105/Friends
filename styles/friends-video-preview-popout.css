@@ -1,0 +1,83 @@
+/* =========================================================
+   FRIENDS — VIDEO PREVIEW POPOUT FIX
+   Mărește efectiv stratul video, fără transform și fără conflict
+   cu Framer Motion sau alte CSS-uri.
+   ========================================================= */
+
+/* Permitem preview-ului activ să iasă din card. */
+.feed-reel-card:has(.friends-hover-video.is-active),
+.aurora-story-card:has(.friends-hover-video.is-active) {
+  overflow: visible !important;
+  z-index: 80 !important;
+}
+
+/* Permitem și containerelor să nu taie preview-ul mărit. */
+.friends-feed-reels-slot,
+.friends-feed-stories-slot,
+.feed-reels-strip,
+.feed-reels-track,
+.aurora-stories-section,
+.aurora-stories-scroller {
+  overflow-y: visible !important;
+}
+
+/* Preview-ul devine fizic mai mare prin inset negativ.
+   Nu folosim transform, deci nu poate fi blocat de alte reguli. */
+.feed-reel-card .friends-hover-video.is-active,
+.aurora-story-card .friends-hover-video.is-active {
+  top: -12px !important;
+  right: -12px !important;
+  bottom: -12px !important;
+  left: -12px !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: 70 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(125, 247, 197, .48);
+  border-radius: 20px !important;
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, .42),
+    0 0 0 1px rgba(255,255,255,.08),
+    0 0 30px rgba(66, 255, 154, .22);
+  opacity: 1 !important;
+}
+
+/* Video-ul umple complet noua dimensiune mărită. */
+.feed-reel-card .friends-hover-video.is-active video,
+.aurora-story-card .friends-hover-video.is-active video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transform: none !important;
+}
+
+/* Păstrăm textele și butoanele deasupra preview-ului. */
+.feed-reel-overlay,
+.feed-reel-play,
+.feed-reel-author,
+.feed-reel-caption,
+.feed-reel-card-stats,
+.aurora-story-card-shade,
+.aurora-story-avatar-ring,
+.aurora-story-card-name,
+.aurora-story-card-note {
+  z-index: 90 !important;
+}
+
+/* Spațiu ca preview-ul să nu fie tăiat sus/jos. */
+.feed-reels-track,
+.aurora-stories-scroller {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+/* Pe mobil nu facem popout. */
+@media (hover: none), (pointer: coarse) {
+  .feed-reel-card .friends-hover-video.is-active,
+  .aurora-story-card .friends-hover-video.is-active {
+    inset: 0 !important;
+    border: 0;
+    border-radius: inherit !important;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,165 @@
+/* =========================================================
+   FRIENDS — CONTRAST ADAPTIV PENTRU TEME
+   Text lizibil pe fundal deschis și întunecat
+   ========================================================= */
+
+:root {
+  --friends-text-primary: rgba(255, 255, 255, 0.97);
+  --friends-text-secondary: rgba(255, 255, 255, 0.76);
+  --friends-text-muted: rgba(255, 255, 255, 0.56);
+  --friends-text-soft: rgba(255, 255, 255, 0.42);
+  --friends-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.52);
+  --friends-icon-color: rgba(255, 255, 255, 0.82);
+  --friends-control-surface: rgba(3, 13, 20, 0.28);
+  --friends-control-border: rgba(255, 255, 255, 0.16);
+}
+
+:root[data-theme-mode="light"] {
+  --friends-text-primary: rgba(22, 24, 31, 0.96);
+  --friends-text-secondary: rgba(35, 39, 50, 0.78);
+  --friends-text-muted: rgba(45, 50, 64, 0.62);
+  --friends-text-soft: rgba(45, 50, 64, 0.48);
+  --friends-text-shadow: 0 1px 1px rgba(255, 255, 255, 0.42);
+  --friends-icon-color: rgba(28, 32, 42, 0.82);
+  --friends-control-surface: rgba(255, 255, 255, 0.52);
+  --friends-control-border: rgba(25, 30, 42, 0.14);
+}
+
+/* Titlurile principale ale feed-ului */
+.friends-feed-stories-slot::before,
+.friends-feed-reels-slot::before,
+.friends-feed-posts-slot .aurora-feed-heading-hidden {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow) !important;
+}
+
+/* Composer */
+.aurora-composer-c21-copy strong,
+.aurora-composer-c21-field textarea,
+.aurora-composer-c21-field textarea::placeholder {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow);
+}
+
+.aurora-composer-c21-copy span,
+.aurora-composer-c21-count {
+  color: var(--friends-text-muted) !important;
+}
+
+/* Stories */
+.aurora-story-card-name {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow) !important;
+}
+
+.aurora-story-card-note {
+  color: var(--friends-text-secondary) !important;
+  text-shadow: var(--friends-text-shadow) !important;
+}
+
+/* Reels */
+.feed-reel-author strong,
+.feed-reel-caption,
+.feed-reel-see-all strong {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow) !important;
+}
+
+.feed-reel-author small,
+.feed-reel-see-all small {
+  color: var(--friends-text-secondary) !important;
+  text-shadow: var(--friends-text-shadow) !important;
+}
+
+/* Postări și comentarii */
+.aurora-post-author,
+.aurora-post-content,
+.aurora-comment-author,
+.aurora-comment-text,
+.aurora-comments-heading h3 {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow);
+}
+
+.aurora-post-time,
+.aurora-comment-time,
+.aurora-comments-kicker,
+.aurora-comments-total,
+.aurora-comment-limit {
+  color: var(--friends-text-muted) !important;
+}
+
+/* Acțiuni */
+.aurora-post-action,
+.aurora-comment-count-button,
+.aurora-secondary-button {
+  color: var(--friends-text-secondary) !important;
+}
+
+.aurora-post-action svg,
+.aurora-action-icon {
+  color: var(--friends-icon-color) !important;
+}
+
+/* Cardul Prieteni / grupuri / laterale */
+.aurora-sidebar-card,
+.friends-dashboard-card,
+.friends-online-card,
+.friends-location-card {
+  color: var(--friends-text-primary);
+}
+
+.aurora-sidebar-card h2,
+.aurora-sidebar-card h3,
+.friends-dashboard-card h2,
+.friends-dashboard-card h3,
+.friends-online-card h2,
+.friends-online-card h3,
+.friends-location-card h2,
+.friends-location-card h3 {
+  color: var(--friends-text-primary) !important;
+  text-shadow: var(--friends-text-shadow);
+}
+
+/* Select, input și butoane de tip glass */
+:root[data-theme-mode="light"] :is(
+  .aurora-composer-c21-field textarea,
+  .aurora-comment-input,
+  .friends-search-input,
+  .aurora-composer-c22-native-audience
+) {
+  border-color: var(--friends-control-border) !important;
+  background: var(--friends-control-surface) !important;
+  color: var(--friends-text-primary) !important;
+}
+
+/* Badge audiență — contrast suplimentar în temele deschise */
+:root[data-theme-mode="light"] .friends-audience-badge {
+  color: rgba(20, 25, 34, 0.9) !important;
+  text-shadow: none !important;
+}
+
+:root[data-theme-mode="light"] .friends-audience-badge.is-friends {
+  background: rgba(14, 116, 144, 0.12);
+  border-color: rgba(14, 116, 144, 0.28);
+}
+
+:root[data-theme-mode="light"] .friends-audience-badge.is-group {
+  background: rgba(5, 150, 105, 0.12);
+  border-color: rgba(5, 150, 105, 0.28);
+}
+
+:root[data-theme-mode="light"] .friends-audience-badge.is-private {
+  background: rgba(126, 34, 206, 0.11);
+  border-color: rgba(126, 34, 206, 0.26);
+}
+
+/* Temele luminoase existente */
+:root[data-friends-theme="frozen"],
+:root[data-friends-theme="cherry-blossom"] {
+  --friends-text-primary: rgba(22, 24, 31, 0.96);
+  --friends-text-secondary: rgba(35, 39, 50, 0.78);
+  --friends-text-muted: rgba(45, 50, 64, 0.62);
+  --friends-text-soft: rgba(45, 50, 64, 0.48);
+  --friends-text-shadow: 0 1px 1px rgba(255, 255, 255, 0.42);
+}
