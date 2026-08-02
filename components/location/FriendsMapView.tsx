@@ -63,7 +63,7 @@ export default function FriendsMapView({
         zoom: fullscreen ? 4.4 : 3.2,
         minZoom: 2,
         maxZoom: 17,
-        attributionControl: true,
+        attributionControl: {},
       });
 
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");

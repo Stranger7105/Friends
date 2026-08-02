@@ -166,6 +166,7 @@ const AuroraDrawCanvas = forwardRef<
     if (!canvas || !parent) return;
 
     function resizeCanvas() {
+      if (!parent) return;
       const rect = parent.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 

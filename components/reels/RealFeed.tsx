@@ -22,7 +22,7 @@ import {
   useState,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 type Profile = {
   id: string;

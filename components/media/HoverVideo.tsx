@@ -58,6 +58,7 @@ export default function HoverVideo({
     }
 
     function calculateRect() {
+      if (!parent) return;
       const rect = parent.getBoundingClientRect();
       const scale = 1.28;
       const width = rect.width * scale;
