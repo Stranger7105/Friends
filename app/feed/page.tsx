@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -16,6 +16,7 @@ import FeedReelsStrip from "@/components/aurora/feed/FeedReelsStrip";
 import FriendsLocationMap from "@/components/feed/FriendsLocationMap";
 import OnlineFriendsCard from "@/components/feed/OnlineFriendsCard";
 import FeedLayout from "@/components/feed/FeedLayout";
+import AudienceBadge from "@/components/feed/AudienceBadge";
 import "@/styles/aurora-feed.css";
 import "@/styles/feed-reels-strip.css";
 import "@/styles/friends-location-map.css";
@@ -30,6 +31,7 @@ import "@/styles/friends-groups-g11.css";
 
 import "@/styles/friends-composer-c21.css";
 import "@/styles/friends-composer-c22.css";
+import "@/styles/friends-audience-badge.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
@@ -42,6 +44,17 @@ type Profile = {
   avatar_url: string | null;
 };
 
+type AudienceType = "friends" | "group" | "private";
+
+type Friendship = {
+  user_id: string;
+  friend_id: string;
+};
+
+type GroupMembership = {
+  group_id: string;
+};
+
 type Post = {
   id: number;
   content: string;
@@ -50,6 +63,9 @@ type Post = {
   shared_post_id: number | null;
   created_at: string;
   updated_at: string | null;
+  audience_type: AudienceType;
+  audience_group_id: string | null;
+  audience_group_name: string | null;
   profiles: Profile | null;
   shared_post: {
     id: number;
@@ -57,6 +73,9 @@ type Post = {
     user_id: string;
     image_path: string | null;
     created_at: string;
+    audience_type: AudienceType;
+    audience_group_id: string | null;
+    audience_group_name: string | null;
     profiles: Profile | null;
   } | null;
 };
@@ -169,6 +188,65 @@ export default function FeedPage() {
 
     setCurrentUserId(user.id);
 
+    const [friendshipsResult, groupMembershipsResult] = await Promise.all([
+      supabase
+        .from("friends")
+        .select("user_id, friend_id")
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`),
+      supabase
+        .from("friend_group_members")
+        .select("group_id")
+        .eq("friend_id", user.id),
+    ]);
+
+    if (friendshipsResult.error) {
+      setErrorMessage(
+        `Lista de prieteni nu a putut fi verificată: ${friendshipsResult.error.message}`
+      );
+      setLoadingPosts(false);
+      return;
+    }
+
+    if (groupMembershipsResult.error) {
+      setErrorMessage(
+        `Apartenența la grupuri nu a putut fi verificată: ${groupMembershipsResult.error.message}`
+      );
+      setLoadingPosts(false);
+      return;
+    }
+
+    const friendIds = new Set(
+      ((friendshipsResult.data ?? []) as Friendship[]).map((friendship) =>
+        friendship.user_id === user.id
+          ? friendship.friend_id
+          : friendship.user_id
+      )
+    );
+
+    const visibleGroupIds = new Set(
+      ((groupMembershipsResult.data ?? []) as GroupMembership[]).map(
+        (membership) => membership.group_id
+      )
+    );
+
+    function canViewAudience(
+      authorId: string,
+      audienceType: AudienceType,
+      audienceGroupId: string | null
+    ) {
+      if (authorId === user.id) return true;
+
+      if (audienceType === "private") return false;
+
+      if (audienceType === "group") {
+        return Boolean(
+          audienceGroupId && visibleGroupIds.has(audienceGroupId)
+        );
+      }
+
+      return friendIds.has(authorId);
+    }
+
     const postsResult = await supabase
       .from("posts")
       .select(`
@@ -178,7 +256,9 @@ export default function FeedPage() {
         image_path,
         shared_post_id,
         created_at,
-        updated_at
+        updated_at,
+        audience_type,
+        audience_group_id
       `)
       .order("created_at", { ascending: false });
 
@@ -190,6 +270,12 @@ export default function FeedPage() {
 
     const basePosts = (postsResult.data ?? []).map((row: any) => ({
       ...row,
+      audience_type:
+        row.audience_type === "group" || row.audience_type === "private"
+          ? row.audience_type
+          : "friends",
+      audience_group_id: row.audience_group_id ?? null,
+      audience_group_name: null,
       profiles: null,
       shared_post: null,
     })) as Post[];
@@ -213,7 +299,9 @@ export default function FeedPage() {
           content,
           user_id,
           image_path,
-          created_at
+          created_at,
+          audience_type,
+          audience_group_id
         `)
         .in("id", sharedPostIds);
 
@@ -223,6 +311,34 @@ export default function FeedPage() {
         );
       } else {
         rawSharedPosts = sharedPostsResult.data ?? [];
+      }
+    }
+
+    const audienceGroupIds = [
+      ...new Set(
+        [
+          ...basePosts.map((post) => post.audience_group_id),
+          ...rawSharedPosts.map((post) => post.audience_group_id),
+        ].filter((id): id is string => typeof id === "string" && id.length > 0)
+      ),
+    ];
+
+    const groupNamesById = new Map<string, string>();
+
+    if (audienceGroupIds.length > 0) {
+      const groupsResult = await supabase
+        .from("friend_groups")
+        .select("id, name")
+        .in("id", audienceGroupIds);
+
+      if (groupsResult.error) {
+        setErrorMessage(
+          `Numele grupurilor nu au putut fi încărcate: ${groupsResult.error.message}`
+        );
+      } else {
+        for (const group of groupsResult.data ?? []) {
+          groupNamesById.set(group.id, group.name);
+        }
       }
     }
 
@@ -294,19 +410,52 @@ export default function FeedPage() {
         row.id,
         {
           ...row,
+          audience_type:
+            row.audience_type === "group" || row.audience_type === "private"
+              ? row.audience_type
+              : "friends",
+          audience_group_id: row.audience_group_id ?? null,
+          audience_group_name: row.audience_group_id
+            ? groupNamesById.get(row.audience_group_id) ?? null
+            : null,
           profiles: profilesById.get(row.user_id) ?? null,
         },
       ])
     );
 
-    const normalizedPosts = basePosts.map((post) => ({
-      ...post,
-      profiles: profilesById.get(post.user_id) ?? null,
-      shared_post:
-        post.shared_post_id !== null
-          ? sharedPostsById.get(post.shared_post_id) ?? null
-          : null,
-    }));
+    const normalizedPosts = basePosts
+      .map((post) => {
+        const sharedPost =
+          post.shared_post_id !== null
+            ? sharedPostsById.get(post.shared_post_id) ?? null
+            : null;
+
+        const visibleSharedPost =
+          sharedPost &&
+          canViewAudience(
+            sharedPost.user_id,
+            sharedPost.audience_type,
+            sharedPost.audience_group_id
+          )
+            ? sharedPost
+            : null;
+
+        return {
+          ...post,
+          audience_group_name: post.audience_group_id
+            ? groupNamesById.get(post.audience_group_id) ?? null
+            : null,
+          profiles: profilesById.get(post.user_id) ?? null,
+          shared_post: visibleSharedPost,
+        };
+      })
+      .filter((post) =>
+        canViewAudience(
+          post.user_id,
+          post.audience_type,
+          post.audience_group_id
+        )
+      );
 
     const normalizedComments = rawComments.map((row: any) => ({
       ...row,
@@ -662,6 +811,8 @@ export default function FeedPage() {
       user_id: currentUserId,
       content: "",
       shared_post_id: sharedId,
+      audience_type: "friends",
+      audience_group_id: null,
     });
 
     if (error) {
@@ -728,7 +879,7 @@ export default function FeedPage() {
             </div>
           ) : posts.length === 0 ? (
             <div className="aurora-feed-state">
-              Nu există încă postări.
+              Nu există încă postări vizibile pentru tine.
             </div>
           ) : (
             <div className="aurora-post-list">
@@ -782,9 +933,11 @@ export default function FeedPage() {
                           <p className="aurora-post-time">
                             <span>{formatRelativeDate(post.created_at)}</span>
                             {post.updated_at ? <span> · editat</span> : null}
-                            <span className="aurora-post-visibility" title="Vizibil prietenilor">
-                              ◉
-                            </span>
+                            <AudienceBadge
+                              audienceType={post.audience_type}
+                              groupName={post.audience_group_name}
+                              compact
+                            />
                           </p>
                         </div>
                       </div>
@@ -888,9 +1041,16 @@ export default function FeedPage() {
                               <p className="aurora-post-author">
                                 {getDisplayName(post.shared_post.profiles)}
                               </p>
-                              <p className="aurora-post-time">
-                                {formatRelativeDate(post.shared_post.created_at)}
-                              </p>
+                              <div className="aurora-shared-meta-line">
+                                <p className="aurora-post-time">
+                                  {formatRelativeDate(post.shared_post.created_at)}
+                                </p>
+                                <AudienceBadge
+                                  audienceType={post.shared_post.audience_type}
+                                  groupName={post.shared_post.audience_group_name}
+                                  compact
+                                />
+                              </div>
                             </div>
                           </div>
 

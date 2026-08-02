@@ -1,0 +1,88 @@
+/* =========================================================
+   FRIENDS — C2.4 AUDIENCE BADGE
+   ========================================================= */
+
+.friends-audience-badge {
+  display: inline-flex;
+  max-width: 190px;
+  align-items: center;
+  gap: 6px;
+  min-height: 27px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  color: rgba(239,255,249,.78);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+  backdrop-filter: blur(12px);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    color .18s ease;
+}
+
+.friends-audience-badge > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-audience-badge:hover {
+  transform: translateY(-1px);
+}
+
+.friends-audience-badge.is-friends {
+  border-color: rgba(56,189,248,.30);
+  background: rgba(56,189,248,.10);
+  color: #c9f2ff;
+}
+
+.friends-audience-badge.is-group {
+  border-color: rgba(125,247,197,.34);
+  background: rgba(125,247,197,.11);
+  color: #bfffe2;
+}
+
+.friends-audience-badge.is-private {
+  border-color: rgba(192,132,252,.34);
+  background: rgba(192,132,252,.11);
+  color: #ead5ff;
+}
+
+.friends-audience-badge.is-compact {
+  min-height: 21px;
+  max-width: 150px;
+  padding: 4px 7px;
+  gap: 4px;
+  font-size: 9px;
+  letter-spacing: .01em;
+}
+
+.aurora-post-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.aurora-shared-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+@media (max-width: 520px) {
+  .friends-audience-badge {
+    max-width: 135px;
+  }
+
+  .friends-audience-badge.is-compact {
+    max-width: 110px;
+  }
+}
