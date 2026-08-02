@@ -11,6 +11,21 @@ type StoryViewerProps = {
   onClose: () => void;
 };
 
+type StoryComment = {
+  id: number;
+  story_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+};
+
+type CommentProfile = {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
 const STORY_DURATION = 6000;
 const STORY_REACTIONS = ["❤️", "👍", "😂", "😮", "😢", "🔥"] as const;
 
@@ -37,9 +52,19 @@ export default function StoryViewer({
   const [selectedReaction, setSelectedReaction] = useState("");
   const [reactionMessage, setReactionMessage] = useState("");
   const [savingReaction, setSavingReaction] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<StoryComment[]>([]);
+  const [commentProfiles, setCommentProfiles] = useState<
+    Record<string, CommentProfile>
+  >({});
+  const [commentText, setCommentText] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [sendingComment, setSendingComment] = useState(false);
+  const [commentError, setCommentError] = useState("");
   const frameRef = useRef<number | null>(null);
   const startedAtRef = useRef(performance.now());
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
 
   const goNext = useCallback(() => {
     if (activeIndex >= stories.length - 1) {
@@ -154,6 +179,115 @@ export default function StoryViewer({
   }, [currentUserId, story?.id]);
 
   useEffect(() => {
+    if (!story?.id || !showComments) return;
+
+    let active = true;
+    setLoadingComments(true);
+    setCommentError("");
+
+    async function loadComments() {
+      const { data, error } = await supabase
+        .from("story_comments")
+        .select("id, story_id, user_id, content, created_at")
+        .eq("story_id", String(story.id))
+        .order("created_at", { ascending: true });
+
+      if (!active) return;
+
+      if (error) {
+        setCommentError(`Comentariile nu au putut fi încărcate: ${error.message}`);
+        setLoadingComments(false);
+        return;
+      }
+
+      const loadedComments = (data || []) as StoryComment[];
+      setComments(loadedComments);
+
+      const profileIds = Array.from(
+        new Set(loadedComments.map((comment) => comment.user_id)),
+      );
+
+      if (profileIds.length > 0) {
+        const profilesResult = await supabase
+          .from("profiles")
+          .select("id, username, full_name, avatar_url")
+          .in("id", profileIds);
+
+        if (!profilesResult.error && active) {
+          const profileMap = Object.fromEntries(
+            ((profilesResult.data || []) as CommentProfile[]).map((profile) => [
+              profile.id,
+              profile,
+            ]),
+          );
+          setCommentProfiles((current) => ({ ...current, ...profileMap }));
+        }
+      }
+
+      setLoadingComments(false);
+    }
+
+    void loadComments();
+
+    const channel = supabase
+      .channel(`story-comments-${String(story.id)}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "story_comments",
+          filter: `story_id=eq.${String(story.id)}`,
+        },
+        async (payload) => {
+          const newComment = payload.new as StoryComment;
+
+          setComments((current) =>
+            current.some((comment) => comment.id === newComment.id)
+              ? current
+              : [...current, newComment],
+          );
+
+          if (!commentProfiles[newComment.user_id]) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id, username, full_name, avatar_url")
+              .eq("id", newComment.user_id)
+              .maybeSingle();
+
+            if (profile) {
+              setCommentProfiles((current) => ({
+                ...current,
+                [profile.id]: profile as CommentProfile,
+              }));
+            }
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "story_comments",
+          filter: `story_id=eq.${String(story.id)}`,
+        },
+        (payload) => {
+          const deleted = payload.old as Partial<StoryComment>;
+          setComments((current) =>
+            current.filter((comment) => comment.id !== deleted.id),
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [commentProfiles, showComments, story?.id]);
+
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !story?.audioUrl) {
       setAudioBlocked(false);
@@ -237,6 +371,67 @@ export default function StoryViewer({
     }
 
     setSavingReaction(false);
+  }
+
+  async function sendStoryComment(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const content = commentText.trim();
+
+    if (!content || !story?.id || !currentUserId || sendingComment) return;
+
+    setSendingComment(true);
+    setCommentError("");
+    startedAtRef.current = performance.now();
+    setProgress(0);
+
+    const { data, error } = await supabase
+      .from("story_comments")
+      .insert({
+        story_id: String(story.id),
+        user_id: currentUserId,
+        owner_id: story.userId,
+        content,
+      })
+      .select("id, story_id, user_id, content, created_at")
+      .single();
+
+    if (error) {
+      setCommentError(`Comentariul nu a putut fi trimis: ${error.message}`);
+      setSendingComment(false);
+      return;
+    }
+
+    const savedComment = data as StoryComment;
+
+    setComments((current) =>
+      current.some((comment) => comment.id === savedComment.id)
+        ? current
+        : [...current, savedComment],
+    );
+    setCommentText("");
+    setSendingComment(false);
+
+    requestAnimationFrame(() => commentInputRef.current?.focus());
+  }
+
+  async function deleteStoryComment(comment: StoryComment) {
+    if (comment.user_id !== currentUserId) return;
+
+    const { error } = await supabase
+      .from("story_comments")
+      .delete()
+      .eq("id", comment.id)
+      .eq("user_id", currentUserId);
+
+    if (error) {
+      setCommentError(`Comentariul nu a putut fi șters: ${error.message}`);
+      return;
+    }
+
+    setComments((current) =>
+      current.filter((item) => item.id !== comment.id),
+    );
   }
 
   return (
@@ -449,12 +644,170 @@ export default function StoryViewer({
               </span>
             );
           })}
+
+          <span
+            role="button"
+            tabIndex={0}
+            className="aurora-story-comment-open-fixed"
+            aria-label="Deschide comentariile"
+            aria-expanded={showComments}
+            onClick={() => {
+              setShowComments(true);
+              startedAtRef.current = performance.now();
+              setProgress(0);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setShowComments(true);
+              }
+            }}
+          >
+            💬
+            {comments.length > 0 && (
+              <small>{comments.length > 99 ? "99+" : comments.length}</small>
+            )}
+          </span>
         </div>
 
         <p className="aurora-story-reaction-dock-status">
           {reactionMessage || "Alege o reacție pentru această poveste."}
         </p>
       </div>
+
+
+      {showComments && (
+        <div
+          className="aurora-story-comments-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Comentarii la poveste"
+        >
+          <button
+            type="button"
+            className="aurora-story-comments-backdrop"
+            onClick={() => setShowComments(false)}
+            aria-label="Închide comentariile"
+          />
+
+          <section className="aurora-story-comments-sheet">
+            <header className="aurora-story-comments-header">
+              <div>
+                <strong>Comentarii</strong>
+                <span>
+                  {comments.length}{" "}
+                  {comments.length === 1 ? "comentariu" : "comentarii"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowComments(false)}
+                aria-label="Închide comentariile"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className="aurora-story-comments-list">
+              {loadingComments && (
+                <p className="aurora-story-comments-empty">
+                  Se încarcă comentariile...
+                </p>
+              )}
+
+              {!loadingComments && comments.length === 0 && (
+                <p className="aurora-story-comments-empty">
+                  Nu există comentarii încă. Scrie primul comentariu.
+                </p>
+              )}
+
+              {comments.map((comment) => {
+                const profile = commentProfiles[comment.user_id];
+                const name =
+                  profile?.full_name ||
+                  profile?.username ||
+                  "Utilizator Friends";
+
+                return (
+                  <article
+                    key={comment.id}
+                    className="aurora-story-comment-item"
+                  >
+                    <div className="aurora-story-comment-avatar">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" />
+                      ) : (
+                        name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+
+                    <div className="aurora-story-comment-body">
+                      <div className="aurora-story-comment-meta">
+                        <strong>{name}</strong>
+                        <time>
+                          {new Date(comment.created_at).toLocaleTimeString(
+                            "ro-RO",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </time>
+                      </div>
+
+                      <p>{comment.content}</p>
+                    </div>
+
+                    {comment.user_id === currentUserId && (
+                      <button
+                        type="button"
+                        className="aurora-story-comment-delete"
+                        onClick={() => void deleteStoryComment(comment)}
+                        aria-label="Șterge comentariul"
+                        title="Șterge comentariul"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+
+            {commentError && (
+              <p className="aurora-story-comments-error">{commentError}</p>
+            )}
+
+            <form
+              className="aurora-story-comment-composer"
+              onSubmit={sendStoryComment}
+            >
+              <input
+                ref={commentInputRef}
+                type="text"
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                placeholder="Scrie un comentariu..."
+                maxLength={500}
+                autoComplete="off"
+                inputMode="text"
+              />
+
+              <button
+                type="submit"
+                disabled={
+                  sendingComment ||
+                  !commentText.trim() ||
+                  !currentUserId
+                }
+              >
+                {sendingComment ? "…" : "➤"}
+              </button>
+            </form>
+          </section>
+        </div>
+      )}
 
       <style jsx>{`
         .aurora-effect-wave {
@@ -744,6 +1097,348 @@ export default function StoryViewer({
         @media (min-width: 768px) {
           .aurora-story-reaction-dock-fixed {
             bottom: 24px !important;
+          }
+        }
+
+
+        .aurora-story-comment-open-fixed {
+          position: relative !important;
+          display: grid !important;
+          place-items: center !important;
+          flex: 1 1 0 !important;
+          min-width: 0 !important;
+          height: 44px !important;
+          color: #ffffff !important;
+          font-size: 23px !important;
+          border: 1px solid rgba(255,255,255,.15) !important;
+          border-radius: 14px !important;
+          background: rgba(255,255,255,.1) !important;
+          cursor: pointer !important;
+          user-select: none !important;
+        }
+
+        .aurora-story-comment-open-fixed small {
+          position: absolute;
+          top: -5px;
+          right: -3px;
+          display: grid;
+          place-items: center;
+          min-width: 18px;
+          height: 18px;
+          padding: 0 4px;
+          color: white;
+          font-size: 9px;
+          font-weight: 900;
+          border: 2px solid #020617;
+          border-radius: 999px;
+          background: #ef4444;
+        }
+
+        .aurora-story-comments-overlay {
+          position: fixed !important;
+          inset: 0 !important;
+          z-index: 2147483500 !important;
+          display: flex !important;
+          align-items: flex-end !important;
+          justify-content: center !important;
+          pointer-events: auto !important;
+        }
+
+        .aurora-story-comments-backdrop {
+          position: absolute !important;
+          inset: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          border: 0 !important;
+          background: rgba(0,0,0,.58) !important;
+          backdrop-filter: blur(4px) !important;
+          -webkit-backdrop-filter: blur(4px) !important;
+        }
+
+        .aurora-story-comments-sheet {
+          position: relative !important;
+          z-index: 2 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          width: min(100%, 540px) !important;
+          height: min(72dvh, 680px) !important;
+          max-height: 72dvh !important;
+          color: #e5eef9 !important;
+          border: 1px solid rgba(255,255,255,.14) !important;
+          border-bottom: 0 !important;
+          border-radius: 24px 24px 0 0 !important;
+          background: #071a18 !important;
+          box-shadow: 0 -24px 70px rgba(0,0,0,.48) !important;
+          overflow: hidden !important;
+        }
+
+        .aurora-story-comments-header {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          flex: 0 0 auto !important;
+          min-height: 64px !important;
+          padding: 10px 14px !important;
+          border-bottom: 1px solid rgba(255,255,255,.11) !important;
+          background: rgba(2, 20, 18, .96) !important;
+        }
+
+        .aurora-story-comments-header strong,
+        .aurora-story-comments-header span {
+          display: block !important;
+        }
+
+        .aurora-story-comments-header strong {
+          font-size: 17px !important;
+        }
+
+        .aurora-story-comments-header span {
+          margin-top: 2px !important;
+          color: rgba(255,255,255,.56) !important;
+          font-size: 11px !important;
+        }
+
+        .aurora-story-comments-header button {
+          display: grid !important;
+          place-items: center !important;
+          width: 40px !important;
+          height: 40px !important;
+          color: white !important;
+          font-size: 24px !important;
+          border: 1px solid rgba(255,255,255,.14) !important;
+          border-radius: 13px !important;
+          background: rgba(255,255,255,.08) !important;
+        }
+
+        .aurora-story-comments-list {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          padding: 12px !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .aurora-story-comments-empty {
+          margin: 0 !important;
+          padding: 30px 15px !important;
+          color: rgba(255,255,255,.56) !important;
+          text-align: center !important;
+        }
+
+        .aurora-story-comment-item {
+          display: grid !important;
+          grid-template-columns: 40px minmax(0, 1fr) 32px !important;
+          align-items: start !important;
+          gap: 9px !important;
+          padding: 9px 0 !important;
+          border-bottom: 1px solid rgba(255,255,255,.07) !important;
+        }
+
+        .aurora-story-comment-avatar {
+          display: grid !important;
+          place-items: center !important;
+          width: 40px !important;
+          height: 40px !important;
+          overflow: hidden !important;
+          color: white !important;
+          font-weight: 900 !important;
+          border-radius: 999px !important;
+          background: #059669 !important;
+        }
+
+        .aurora-story-comment-avatar img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
+
+        .aurora-story-comment-body {
+          min-width: 0 !important;
+          padding: 8px 10px !important;
+          border-radius: 14px !important;
+          background: rgba(255,255,255,.075) !important;
+        }
+
+        .aurora-story-comment-meta {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 8px !important;
+        }
+
+        .aurora-story-comment-meta strong {
+          overflow: hidden !important;
+          font-size: 12px !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+        }
+
+        .aurora-story-comment-meta time {
+          flex: 0 0 auto !important;
+          color: rgba(255,255,255,.42) !important;
+          font-size: 9px !important;
+        }
+
+        .aurora-story-comment-body p {
+          margin: 4px 0 0 !important;
+          color: rgba(255,255,255,.88) !important;
+          font-size: 14px !important;
+          line-height: 1.42 !important;
+          overflow-wrap: anywhere !important;
+        }
+
+        .aurora-story-comment-delete {
+          display: grid !important;
+          place-items: center !important;
+          width: 30px !important;
+          height: 30px !important;
+          color: rgba(255,255,255,.48) !important;
+          border: 0 !important;
+          border-radius: 10px !important;
+          background: transparent !important;
+        }
+
+        .aurora-story-comments-error {
+          flex: 0 0 auto !important;
+          margin: 0 !important;
+          padding: 8px 12px !important;
+          color: #fecaca !important;
+          font-size: 11px !important;
+          background: rgba(127,29,29,.52) !important;
+        }
+
+        .aurora-story-comment-composer {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) 48px !important;
+          gap: 8px !important;
+          flex: 0 0 auto !important;
+          padding:
+            10px
+            10px
+            max(10px, env(safe-area-inset-bottom)) !important;
+          border-top: 1px solid rgba(255,255,255,.12) !important;
+          background: #021412 !important;
+        }
+
+        .aurora-story-comment-composer input {
+          display: block !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          height: 48px !important;
+          padding: 0 14px !important;
+          color: #111827 !important;
+          -webkit-text-fill-color: #111827 !important;
+          caret-color: #059669 !important;
+          font-size: 16px !important;
+          border: 2px solid #94a3b8 !important;
+          border-radius: 15px !important;
+          outline: none !important;
+          background: white !important;
+          box-sizing: border-box !important;
+        }
+
+        .aurora-story-comment-composer button {
+          display: grid !important;
+          place-items: center !important;
+          width: 48px !important;
+          height: 48px !important;
+          color: white !important;
+          font-size: 21px !important;
+          border: 0 !important;
+          border-radius: 15px !important;
+          background: #059669 !important;
+        }
+
+        .aurora-story-comment-composer button:disabled {
+          opacity: .5 !important;
+        }
+
+        @media (max-width: 520px) {
+          .aurora-story-comments-sheet {
+            height: 76dvh !important;
+            max-height: 76dvh !important;
+            border-radius: 20px 20px 0 0 !important;
+          }
+        }
+
+
+        /* STORY COMMENTS — composer vizibil deasupra barei mobile */
+        .aurora-story-comments-overlay {
+          padding-bottom:
+            calc(
+              var(--friends-mobile-bottom-height, 76px) +
+              env(safe-area-inset-bottom)
+            ) !important;
+          box-sizing: border-box !important;
+        }
+
+        .aurora-story-comments-sheet {
+          height: min(68dvh, 640px) !important;
+          max-height:
+            calc(
+              100dvh -
+              var(--friends-mobile-bottom-height, 76px) -
+              env(safe-area-inset-bottom) -
+              24px
+            ) !important;
+        }
+
+        .aurora-story-comment-composer {
+          position: sticky !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          z-index: 50 !important;
+          flex: 0 0 auto !important;
+          width: 100% !important;
+          min-height:
+            calc(68px + env(safe-area-inset-bottom)) !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        .aurora-story-comment-composer input,
+        .aurora-story-comment-composer button {
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        @media (max-width: 520px) {
+          .aurora-story-comments-overlay {
+            align-items: flex-end !important;
+            padding-bottom:
+              calc(76px + env(safe-area-inset-bottom)) !important;
+          }
+
+          .aurora-story-comments-sheet {
+            height: calc(
+              100dvh -
+              150px -
+              env(safe-area-inset-bottom)
+            ) !important;
+            max-height: calc(
+              100dvh -
+              150px -
+              env(safe-area-inset-bottom)
+            ) !important;
+          }
+
+          .aurora-story-comments-list {
+            padding-bottom: 14px !important;
+          }
+
+          .aurora-story-comment-composer {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) 48px !important;
+            gap: 8px !important;
+            padding:
+              10px
+              10px
+              max(10px, env(safe-area-inset-bottom)) !important;
+            background: #021412 !important;
+            border-top: 1px solid rgba(255,255,255,.14) !important;
           }
         }
 
