@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import StoryProgress from "./StoryProgress";
+import { supabase } from "@/lib/supabase";
 import type { AuroraStory } from "./stories";
 
 type StoryViewerProps = {
@@ -11,6 +12,7 @@ type StoryViewerProps = {
 };
 
 const STORY_DURATION = 6000;
+const STORY_REACTIONS = ["❤️", "👍", "😂", "😮", "😢", "🔥"] as const;
 
 function formatStoryTime(value: string) {
   const minutes = Math.max(
@@ -31,6 +33,10 @@ export default function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [musicMuted, setMusicMuted] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [selectedReaction, setSelectedReaction] = useState("");
+  const [reactionMessage, setReactionMessage] = useState("");
+  const [savingReaction, setSavingReaction] = useState(false);
   const frameRef = useRef<number | null>(null);
   const startedAtRef = useRef(performance.now());
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -51,6 +57,26 @@ export default function StoryViewer({
     setProgress(0);
     startedAtRef.current = performance.now();
   }, [activeIndex]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCurrentUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (active) {
+        setCurrentUserId(user?.id || "");
+      }
+    }
+
+    void loadCurrentUser();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     setActiveIndex(initialIndex);
@@ -95,6 +121,39 @@ export default function StoryViewer({
   const story = stories[activeIndex];
 
   useEffect(() => {
+    if (!story?.id || !currentUserId) {
+      setSelectedReaction("");
+      return;
+    }
+
+    let active = true;
+
+    async function loadReaction() {
+      const { data, error } = await supabase
+        .from("story_reactions")
+        .select("emoji")
+        .eq("story_id", String(story.id))
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Reacția la Story nu a putut fi încărcată:", error.message);
+        return;
+      }
+
+      setSelectedReaction(data?.emoji || "");
+    }
+
+    void loadReaction();
+
+    return () => {
+      active = false;
+    };
+  }, [currentUserId, story?.id]);
+
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !story?.audioUrl) {
       setAudioBlocked(false);
@@ -132,6 +191,54 @@ export default function StoryViewer({
     }
   }
 
+  async function sendReaction(emoji: string) {
+    if (!story?.id || !currentUserId || savingReaction) return;
+
+    setSavingReaction(true);
+    setReactionMessage("");
+    startedAtRef.current = performance.now();
+    setProgress(0);
+
+    if (selectedReaction === emoji) {
+      const { error } = await supabase
+        .from("story_reactions")
+        .delete()
+        .eq("story_id", String(story.id))
+        .eq("user_id", currentUserId);
+
+      if (error) {
+        setReactionMessage(`Reacția nu a putut fi eliminată: ${error.message}`);
+      } else {
+        setSelectedReaction("");
+        setReactionMessage("Reacția a fost eliminată.");
+      }
+
+      setSavingReaction(false);
+      return;
+    }
+
+    const { error } = await supabase.from("story_reactions").upsert(
+      {
+        story_id: String(story.id),
+        user_id: currentUserId,
+        owner_id: story.userId,
+        emoji,
+      },
+      {
+        onConflict: "story_id,user_id",
+      },
+    );
+
+    if (error) {
+      setReactionMessage(`Reacția nu a putut fi trimisă: ${error.message}`);
+    } else {
+      setSelectedReaction(emoji);
+      setReactionMessage(`${emoji} Reacția a fost trimisă.`);
+    }
+
+    setSavingReaction(false);
+  }
+
   return (
     <div
       className="aurora-story-viewer"
@@ -146,7 +253,7 @@ export default function StoryViewer({
         aria-label="Închide povestea"
       />
 
-      <section className="aurora-story-viewer-panel">
+      <section className="aurora-story-viewer-panel aurora-story-viewer-panel-with-reactions">
         <StoryProgress
           count={stories.length}
           activeIndex={activeIndex}
@@ -292,6 +399,36 @@ export default function StoryViewer({
           <p className="aurora-story-caption">{story.caption}</p>
         )}
 
+        <div className="aurora-story-reaction-area">
+          <div className="aurora-story-reaction-bar" aria-label="Reacții la poveste">
+            {STORY_REACTIONS.map((emoji) => {
+              const active = selectedReaction === emoji;
+
+              return (
+                <button
+                  key={emoji}
+                  type="button"
+                  className={`aurora-story-reaction-button ${
+                    active ? "is-active" : ""
+                  }`}
+                  onClick={() => void sendReaction(emoji)}
+                  disabled={savingReaction || !currentUserId}
+                  aria-label={`Reacționează cu ${emoji}`}
+                  aria-pressed={active}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
+          </div>
+
+          {reactionMessage && (
+            <p className="aurora-story-reaction-message" role="status">
+              {reactionMessage}
+            </p>
+          )}
+        </div>
+
         <button
           type="button"
           className="aurora-story-nav aurora-story-nav-previous"
@@ -366,6 +503,103 @@ export default function StoryViewer({
         .aurora-effect-glow {
           box-shadow: inset 0 0 90px rgba(34,211,238,.55), inset 0 0 140px rgba(168,85,247,.42);
           animation: auroraGlow 3s ease-in-out infinite alternate;
+        }
+
+        .aurora-story-viewer-panel-with-reactions {
+          position: relative;
+          padding-bottom: 0;
+        }
+        .aurora-story-reaction-area {
+          position: absolute;
+          left: 50%;
+          bottom: max(18px, env(safe-area-inset-bottom));
+          z-index: 80;
+          width: min(92%, 430px);
+          padding: 0;
+          transform: translateX(-50%);
+          pointer-events: auto;
+        }
+        .aurora-story-reaction-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 8px;
+          border: 1px solid rgba(255,255,255,.16);
+          border-radius: 999px;
+          background: rgba(2,6,23,.72);
+          box-shadow: 0 14px 34px rgba(0,0,0,.28);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+        }
+        .aurora-story-reaction-button {
+          display: grid;
+          place-items: center;
+          width: 43px;
+          height: 43px;
+          padding: 0;
+          font-size: 24px;
+          border: 1px solid transparent;
+          border-radius: 999px;
+          background: rgba(255,255,255,.06);
+          transition: transform .16s ease, background .16s ease, border-color .16s ease;
+        }
+        .aurora-story-reaction-button:hover,
+        .aurora-story-reaction-button:focus-visible {
+          transform: translateY(-3px) scale(1.08);
+          background: rgba(255,255,255,.14);
+        }
+        .aurora-story-reaction-button.is-active {
+          transform: scale(1.12);
+          border-color: rgba(167,243,208,.85);
+          background: rgba(16,185,129,.26);
+          box-shadow: 0 0 0 4px rgba(16,185,129,.12);
+        }
+        .aurora-story-reaction-button:disabled {
+          cursor: not-allowed;
+          opacity: .5;
+        }
+        .aurora-story-reaction-message {
+          margin: 7px 0 0;
+          color: rgba(255,255,255,.78);
+          font-size: 12px;
+          text-align: center;
+        }
+        @media (max-width: 520px) {
+          .aurora-story-reaction-area {
+            bottom: max(12px, env(safe-area-inset-bottom));
+            width: calc(100% - 18px);
+            padding: 0;
+          }
+          .aurora-story-reaction-bar {
+            gap: 5px;
+            padding: 6px;
+          }
+          .aurora-story-reaction-button {
+            width: 39px;
+            height: 39px;
+            font-size: 22px;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .aurora-story-viewer-panel-with-reactions .aurora-story-media {
+            padding-bottom: 72px;
+            box-sizing: border-box;
+          }
+          .aurora-story-viewer-panel-with-reactions .aurora-story-caption {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 78px;
+            z-index: 70;
+            margin: 0;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,.75);
+          }
+          .aurora-story-viewer-panel-with-reactions .aurora-story-nav {
+            z-index: 90;
+          }
         }
         @keyframes auroraWave {
           from { transform: translate3d(-8%, -4%, 0) rotate(-5deg) scale(1); }
