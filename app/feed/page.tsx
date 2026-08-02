@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import {
@@ -187,6 +187,7 @@ export default function FeedPage() {
     }
 
     setCurrentUserId(user.id);
+    const currentUserIdSafe = user.id;
 
     const [friendshipsResult, groupMembershipsResult] = await Promise.all([
       supabase
@@ -234,7 +235,7 @@ export default function FeedPage() {
       audienceType: AudienceType,
       audienceGroupId: string | null
     ) {
-      if (authorId === user.id) return true;
+      if (authorId === currentUserIdSafe) return true;
 
       if (audienceType === "private") return false;
 
