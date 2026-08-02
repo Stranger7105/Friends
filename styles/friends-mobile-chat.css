@@ -1,16 +1,11 @@
 /* =========================================================
-   FRIENDS — MOBILE CHAT
-   Un singur layout pentru conversație și bara de scriere.
+   FRIENDS — MOBILE CHAT FINAL
+   Safari/iPhone: folosește înălțimea vizibilă reală a ecranului.
    ========================================================= */
 
 @media (max-width: 767px) {
-  /*
-   * MobileShell afișează headerul Friends separat.
-   * Conținutul conversației ocupă exact restul ecranului.
-   */
   .friends-mobile-content {
     width: 100% !important;
-    height: calc(100dvh - 58px - env(safe-area-inset-top)) !important;
     min-height: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -19,23 +14,30 @@
   .chat-theme-page {
     display: block !important;
     width: 100% !important;
-    height: 100% !important;
+    height: var(
+      --friends-chat-visible-height,
+      calc(100dvh - 58px - env(safe-area-inset-top))
+    ) !important;
     min-height: 0 !important;
+    max-height: var(
+      --friends-chat-visible-height,
+      calc(100dvh - 58px - env(safe-area-inset-top))
+    ) !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
   }
 
   .chat-theme-page .aurora-chat-shell {
     display: flex !important;
     flex-direction: column !important;
-
     width: 100% !important;
     max-width: none !important;
     height: 100% !important;
     min-height: 0 !important;
+    max-height: 100% !important;
     margin: 0 !important;
-
     border-radius: 0 !important;
     box-shadow: none !important;
     overflow: hidden !important;
@@ -44,7 +46,6 @@
   .chat-theme-page .aurora-chat-header {
     position: relative !important;
     z-index: 20 !important;
-
     flex: 0 0 auto !important;
     min-height: 58px !important;
     padding: 9px 10px !important;
@@ -53,46 +54,38 @@
   .chat-theme-page .aurora-chat-messages {
     position: relative !important;
     z-index: 1 !important;
-
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     min-height: 0 !important;
     padding: 12px 10px 18px !important;
-
     overflow-x: hidden !important;
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
-    scroll-padding-bottom: 130px !important;
+    scroll-padding-bottom: 116px !important;
     -webkit-overflow-scrolling: touch;
   }
 
-  /*
-   * Composerul este ultimul element din flex-column.
-   * Nu este fixed/sticky/absolute și nu poate ieși sub ecran.
-   */
   .chat-theme-page .aurora-chat-composer {
     position: relative !important;
     inset: auto !important;
     z-index: 50 !important;
-
-    display: flex !important;
-    flex: 0 0 auto !important;
-    flex-wrap: wrap !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 48px !important;
+    grid-template-rows: 48px 40px !important;
     align-items: center !important;
     gap: 7px !important;
-
+    flex: 0 0 111px !important;
     width: 100% !important;
-    min-height: 108px !important;
+    height: 111px !important;
+    min-height: 111px !important;
     margin: 0 !important;
     padding:
       8px
       8px
-      max(10px, env(safe-area-inset-bottom)) !important;
-
+      max(8px, env(safe-area-inset-bottom)) !important;
     color: #111827 !important;
     background: #f8fafc !important;
     border-top: 1px solid #cbd5e1 !important;
-    box-shadow: 0 -8px 24px rgb(15 23 42 / 0.16) !important;
-
+    box-shadow: 0 -7px 20px rgb(15 23 42 / 0.15) !important;
     opacity: 1 !important;
     visibility: visible !important;
     overflow: visible !important;
@@ -100,36 +93,28 @@
     box-sizing: border-box !important;
   }
 
-  /*
-   * Rândul principal: câmpul + butonul de trimitere.
-   */
   .chat-theme-page .aurora-chat-composer
   input[placeholder="Scrie un mesaj sau lipește o imagine..."] {
-    order: 1 !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
     display: block !important;
-    flex: 1 1 calc(100% - 58px) !important;
-
-    width: calc(100% - 58px) !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: none !important;
     height: 48px !important;
     min-height: 48px !important;
     margin: 0 !important;
     padding: 0 14px !important;
-
     color: #111827 !important;
     caret-color: #059669 !important;
     -webkit-text-fill-color: #111827 !important;
     font-size: 16px !important;
     font-weight: 500 !important;
     line-height: normal !important;
-
     border: 2px solid #94a3b8 !important;
     border-radius: 15px !important;
     outline: none !important;
     background: #ffffff !important;
     box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.08) !important;
-
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
@@ -155,28 +140,24 @@
   }
 
   .chat-theme-page .aurora-chat-composer > button[type="submit"] {
-    order: 2 !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     display: grid !important;
     place-items: center !important;
-    flex: 0 0 48px !important;
-
     width: 48px !important;
     min-width: 48px !important;
     height: 48px !important;
     margin: 0 !important;
     padding: 0 !important;
-
     color: #ffffff !important;
     font-size: 0 !important;
     border: 0 !important;
     border-radius: 15px !important;
     background: #059669 !important;
-
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
     touch-action: manipulation !important;
-    box-sizing: border-box !important;
   }
 
   .chat-theme-page .aurora-chat-composer > button[type="submit"]::after {
@@ -191,13 +172,11 @@
     opacity: 0.65 !important;
   }
 
-  /*
-   * Rândul secundar: emoji, fotografie, fișier, locație, microfon.
-   */
   .chat-theme-page .aurora-chat-composer > div:first-child {
-    order: 3 !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
     position: relative !important;
-    flex: 0 0 40px !important;
     width: 40px !important;
     height: 38px !important;
     margin: 0 !important;
@@ -207,20 +186,16 @@
   .chat-theme-page .aurora-chat-composer > button:not([type="submit"]) {
     display: grid !important;
     place-items: center !important;
-
-    flex: 0 0 40px !important;
     width: 40px !important;
     min-width: 40px !important;
     height: 38px !important;
     margin: 0 !important;
     padding: 0 !important;
-
     color: #111827 !important;
     font-size: 18px !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 11px !important;
     background: #ffffff !important;
-
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
@@ -229,24 +204,43 @@
   }
 
   .chat-theme-page .aurora-chat-composer > button:not([type="submit"]) {
-    order: 4 !important;
+    grid-row: 2 !important;
+  }
+
+  .chat-theme-page .aurora-chat-composer > button:nth-of-type(1) {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 47px !important;
+  }
+
+  .chat-theme-page .aurora-chat-composer > button:nth-of-type(2) {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 94px !important;
+  }
+
+  .chat-theme-page .aurora-chat-composer > button:nth-of-type(3) {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 141px !important;
+  }
+
+  .chat-theme-page .aurora-chat-composer > button:nth-of-type(4) {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 188px !important;
   }
 
   .chat-theme-page .aurora-chat-composer > span {
-    order: 5 !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
     align-self: center !important;
   }
 
-  /*
-   * Inputurile pentru fișiere trebuie să rămână ascunse.
-   */
   .chat-theme-page .aurora-chat-composer input[type="file"] {
     display: none !important;
   }
 
-  /*
-   * Pickerul emoji este deasupra composerului și încape pe ecran.
-   */
   .chat-theme-page .aurora-chat-composer > div:first-child > div {
     position: absolute !important;
     left: 0 !important;
@@ -254,12 +248,4 @@
     z-index: 200 !important;
     max-width: calc(100vw - 16px) !important;
   }
-
-  .chat-theme-page .aurora-chat-composer > div:first-child > div > aside {
-    max-width: calc(100vw - 16px) !important;
-  }
 }
-
-/*
- * Pe desktop nu schimbăm layoutul existent al conversației.
- */

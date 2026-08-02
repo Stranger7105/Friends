@@ -174,6 +174,7 @@ export default function ConversationPage() {
   const [savingAppearance, setSavingAppearance] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const chatViewportRef = useRef<HTMLElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -191,6 +192,38 @@ export default function ConversationPage() {
   const latestMessageIdRef = useRef(0);
   const pollingBusyRef = useRef(false);
   const dragDepthRef = useRef(0);
+
+  useEffect(() => {
+    function updateChatViewportHeight() {
+      const element = chatViewportRef.current;
+      if (!element) return;
+
+      const visibleHeight =
+        window.visualViewport?.height ?? window.innerHeight;
+      const elementTop = Math.max(0, element.getBoundingClientRect().top);
+      const availableHeight = Math.max(320, visibleHeight - elementTop);
+
+      element.style.setProperty(
+        "--friends-chat-visible-height",
+        `${availableHeight}px`,
+      );
+    }
+
+    updateChatViewportHeight();
+
+    const visualViewport = window.visualViewport;
+    visualViewport?.addEventListener("resize", updateChatViewportHeight);
+    visualViewport?.addEventListener("scroll", updateChatViewportHeight);
+    window.addEventListener("resize", updateChatViewportHeight);
+    window.addEventListener("orientationchange", updateChatViewportHeight);
+
+    return () => {
+      visualViewport?.removeEventListener("resize", updateChatViewportHeight);
+      visualViewport?.removeEventListener("scroll", updateChatViewportHeight);
+      window.removeEventListener("resize", updateChatViewportHeight);
+      window.removeEventListener("orientationchange", updateChatViewportHeight);
+    };
+  }, []);
 
   const markConversationSeen = useCallback(async () => {
     if (!currentUserId || !Number.isFinite(conversationId)) return;
@@ -1537,6 +1570,7 @@ export default function ConversationPage() {
 
   return (
     <main
+      ref={chatViewportRef}
       className="chat-theme-page min-h-screen px-4 py-6"
       data-chat-wallpaper={chatWallpaper}
     >
