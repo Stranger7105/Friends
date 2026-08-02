@@ -40,6 +40,7 @@ import "@/styles/friends-reels-r11.css";
 import "@/styles/friends-smart-video-preview.css";
 import "@/styles/friends-hover-preview-portal.css";
 import "@/styles/friends-hover-preview-portal-stories.css";
+import "@/styles/friends-reels-r13-beta.css";
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;

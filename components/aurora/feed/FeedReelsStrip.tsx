@@ -82,17 +82,33 @@ export default function FeedReelsStrip({
   const [errorMessage, setErrorMessage] = useState("");
   const [commentsReelId, setCommentsReelId] = useState<string | null>(null);
   const [likingReelId, setLikingReelId] = useState<string | null>(null);
+  const [heartBurstReelId, setHeartBurstReelId] = useState<string | null>(null);
+  const [likePulseReelId, setLikePulseReelId] = useState<string | null>(null);
 
   const trackRef = useRef<HTMLDivElement | null>(null);
   const viewerVideoRef = useRef<HTMLVideoElement | null>(null);
+  const heartBurstTimerRef = useRef<number | null>(null);
+  const likePulseTimerRef = useRef<number | null>(null);
 
   const activeReel =
     viewerIndex !== null ? reels[viewerIndex] ?? null : null;
 
-  const loadReels = useCallback(async () => {
+  useEffect(() => {
+    return () => {
+      if (heartBurstTimerRef.current !== null) {
+        window.clearTimeout(heartBurstTimerRef.current);
+      }
+
+      if (likePulseTimerRef.current !== null) {
+        window.clearTimeout(likePulseTimerRef.current);
+      }
+    };
+  }, []);
+
+  const loadReels = useCallback(async (showLoader = true) => {
     if (!currentUserId) return;
 
-    setLoading(true);
+    if (showLoader) setLoading(true);
     setErrorMessage("");
 
     const { data: reelRows, error: reelsError } = await supabase
@@ -107,7 +123,7 @@ export default function FeedReelsStrip({
     if (reelsError) {
       console.error("Feed Reels error:", reelsError);
       setErrorMessage("Reels nu au putut fi încărcate.");
-      setLoading(false);
+      if (showLoader) setLoading(false);
       return;
     }
 
@@ -172,11 +188,11 @@ export default function FeedReelsStrip({
         };
       })
     );
-    setLoading(false);
+    if (showLoader) setLoading(false);
   }, [currentUserId]);
 
   useEffect(() => {
-    void loadReels();
+    void loadReels(true);
   }, [loadReels]);
 
   useEffect(() => {
@@ -191,7 +207,7 @@ export default function FeedReelsStrip({
           schema: "public",
           table: "reels",
         },
-        () => void loadReels()
+        () => void loadReels(false)
       )
       .on(
         "postgres_changes",
@@ -200,7 +216,7 @@ export default function FeedReelsStrip({
           schema: "public",
           table: "reel_likes",
         },
-        () => void loadReels()
+        () => void loadReels(false)
       )
       .subscribe();
 
@@ -242,6 +258,26 @@ export default function FeedReelsStrip({
     }
   }, [activeReel, muted, playing]);
 
+  useEffect(() => {
+    if (viewerIndex === null || reels.length < 2) return;
+
+    const nextIndex = viewerIndex === reels.length - 1 ? 0 : viewerIndex + 1;
+    const nextReel = reels[nextIndex];
+
+    if (!nextReel) return;
+
+    const preload = document.createElement("video");
+    preload.preload = "auto";
+    preload.muted = true;
+    preload.src = nextReel.video_url;
+    preload.load();
+
+    return () => {
+      preload.removeAttribute("src");
+      preload.load();
+    };
+  }, [reels, viewerIndex]);
+
   const hasReels = useMemo(() => reels.length > 0, [reels.length]);
 
   function scrollTrack(direction: "left" | "right") {
@@ -281,11 +317,46 @@ export default function FeedReelsStrip({
     setPlaying(true);
   }
 
-  async function toggleLike(reel: FeedReel) {
+  function triggerLikeAnimation(reelId: string, showHeartBurst = false) {
+    setLikePulseReelId(reelId);
+
+    if (likePulseTimerRef.current !== null) {
+      window.clearTimeout(likePulseTimerRef.current);
+    }
+
+    likePulseTimerRef.current = window.setTimeout(() => {
+      setLikePulseReelId((current) => (current === reelId ? null : current));
+    }, 520);
+
+    if (!showHeartBurst) return;
+
+    setHeartBurstReelId(reelId);
+
+    if (heartBurstTimerRef.current !== null) {
+      window.clearTimeout(heartBurstTimerRef.current);
+    }
+
+    heartBurstTimerRef.current = window.setTimeout(() => {
+      setHeartBurstReelId((current) => (current === reelId ? null : current));
+    }, 760);
+  }
+
+  async function likeFromDoubleClick(reel: FeedReel) {
+    triggerLikeAnimation(reel.id, true);
+
+    if (reel.liked_by_me || likingReelId !== null) return;
+
+    await toggleLike(reel, true);
+  }
+
+  async function toggleLike(reel: FeedReel, forceLike = false) {
     if (!currentUserId || likingReelId !== null) return;
 
-    const nextLiked = !reel.liked_by_me;
+    const nextLiked = forceLike ? true : !reel.liked_by_me;
 
+    if (forceLike && reel.liked_by_me) return;
+
+    triggerLikeAnimation(reel.id);
     setLikingReelId(reel.id);
     setErrorMessage("");
 
@@ -351,7 +422,7 @@ export default function FeedReelsStrip({
     return (
       <section className="feed-reels-strip feed-reels-error">
         <span>{errorMessage}</span>
-        <button type="button" onClick={() => void loadReels()}>
+        <button type="button" onClick={() => void loadReels(true)}>
           Încearcă din nou
         </button>
       </section>
@@ -467,6 +538,8 @@ export default function FeedReelsStrip({
                   type="button"
                   className={`feed-reel-card-like ${
                     reel.liked_by_me ? "is-liked" : ""
+                  } ${
+                    likePulseReelId === reel.id ? "is-pulsing" : ""
                   }`}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -483,7 +556,18 @@ export default function FeedReelsStrip({
                     size={13}
                     fill={reel.liked_by_me ? "currentColor" : "none"}
                   />
-                  <span>{reel.likes_count}</span>
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={reel.likes_count}
+                      className="feed-reel-like-count"
+                      initial={{ opacity: 0, y: 7, scale: 0.86 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -7, scale: 0.86 }}
+                      transition={{ duration: 0.18 }}
+                    >
+                      {reel.likes_count}
+                    </motion.span>
+                  </AnimatePresence>
                 </button>
 
                 <button
@@ -543,9 +627,34 @@ export default function FeedReelsStrip({
                 onPlay={() => setPlaying(true)}
                 onPause={() => setPlaying(false)}
                 onClick={() => setPlaying((current) => !current)}
+                onDoubleClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void likeFromDoubleClick(activeReel);
+                }}
               />
 
               <div className="feed-reel-viewer-shade" aria-hidden="true" />
+
+              <AnimatePresence>
+                {heartBurstReelId === activeReel.id && (
+                  <motion.div
+                    key={`heart-${activeReel.id}`}
+                    className="feed-reel-heart-burst"
+                    initial={{ opacity: 0, scale: 0.35, rotate: -12 }}
+                    animate={{
+                      opacity: [0, 1, 1, 0],
+                      scale: [0.35, 1.18, 1, 1.42],
+                      rotate: [-12, 4, 0, 8],
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.72, ease: "easeOut" }}
+                    aria-hidden="true"
+                  >
+                    <Heart fill="currentColor" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <button
                 type="button"
@@ -618,6 +727,8 @@ export default function FeedReelsStrip({
                     type="button"
                     className={`feed-reel-viewer-like ${
                       activeReel.liked_by_me ? "is-liked" : ""
+                    } ${
+                      likePulseReelId === activeReel.id ? "is-pulsing" : ""
                     }`}
                     onClick={() => void toggleLike(activeReel)}
                     disabled={likingReelId === activeReel.id}
@@ -628,8 +739,18 @@ export default function FeedReelsStrip({
                         activeReel.liked_by_me ? "currentColor" : "none"
                       }
                     />
-                    <span>
-                      {activeReel.likes_count}{" "}
+                    <span className="feed-reel-viewer-like-label">
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.strong
+                          key={activeReel.likes_count}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          {activeReel.likes_count}
+                        </motion.strong>
+                      </AnimatePresence>{" "}
                       {activeReel.likes_count === 1
                         ? "apreciere"
                         : "aprecieri"}

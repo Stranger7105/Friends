@@ -1,0 +1,110 @@
+/* =========================================================
+   FRIENDS — REELS R1.3 BETA POLISH
+   Double click like, heart burst, animated counters, preload
+   ========================================================= */
+
+.feed-reel-heart-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 20;
+  display: grid;
+  width: 108px;
+  height: 108px;
+  place-items: center;
+  color: #fb7185;
+  filter:
+    drop-shadow(0 16px 30px rgba(0, 0, 0, .42))
+    drop-shadow(0 0 24px rgba(244, 63, 94, .55));
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.feed-reel-heart-burst svg {
+  width: 88px;
+  height: 88px;
+}
+
+.feed-reel-card-like,
+.feed-reel-viewer-like {
+  transform-origin: center;
+}
+
+.feed-reel-card-like.is-pulsing,
+.feed-reel-viewer-like.is-pulsing {
+  animation: friends-reel-like-pop .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.feed-reel-like-count {
+  display: inline-block;
+  min-width: 1ch;
+  line-height: 1;
+}
+
+.feed-reel-viewer-like-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-reel-viewer-like-label strong {
+  display: inline-block;
+  min-width: 1ch;
+  color: inherit;
+}
+
+@keyframes friends-reel-like-pop {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.22);
+  }
+  68% {
+    transform: scale(.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-reel-card-like.is-pulsing,
+  .feed-reel-viewer-like.is-pulsing {
+    animation: none;
+  }
+
+  .feed-reel-heart-burst {
+    display: none;
+  }
+}
+
+
+/* R1.3 FIX — contoarele rămân permanent vizibile */
+.feed-reel-card-stats {
+  z-index: 40 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.feed-reel-card-stats button {
+  min-width: 38px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.feed-reel-like-count,
+.feed-reel-card-comments > span {
+  display: inline-block !important;
+  min-width: 1ch;
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.feed-reel-viewer-like-label,
+.feed-reel-viewer-like-label strong {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
