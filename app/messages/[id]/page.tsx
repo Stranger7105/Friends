@@ -235,12 +235,12 @@ export default function ConversationPage() {
       ".friends-mobile-header",
     );
 
-    const resizeObserver =
-      typeof ResizeObserver !== "undefined" && mobileHeader
-        ? new ResizeObserver(updateChatViewportHeight)
-        : null;
+    let resizeObserver: ResizeObserver | null = null;
 
-    resizeObserver?.observe(mobileHeader);
+    if (typeof ResizeObserver !== "undefined" && mobileHeader) {
+      resizeObserver = new ResizeObserver(updateChatViewportHeight);
+      resizeObserver.observe(mobileHeader);
+    }
 
     visualViewport?.addEventListener("resize", updateChatViewportHeight);
     visualViewport?.addEventListener("scroll", updateChatViewportHeight);
@@ -1320,18 +1320,6 @@ export default function ConversationPage() {
     }
   }
 
-  function focusMessageInput() {
-    const input = inputRef.current;
-    if (!input) return;
-
-    input.focus();
-
-    requestAnimationFrame(() => {
-      const cursorPosition = input.value.length;
-      input.setSelectionRange(cursorPosition, cursorPosition);
-    });
-  }
-
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -2222,8 +2210,6 @@ export default function ConversationPage() {
 
           <input
             ref={inputRef}
-            onClick={focusMessageInput}
-            onTouchStart={focusMessageInput}
             type="text"
             inputMode="text"
             enterKeyHint="send"
