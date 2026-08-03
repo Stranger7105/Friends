@@ -198,11 +198,30 @@ export default function ConversationPage() {
       const element = chatViewportRef.current;
       if (!element) return;
 
-      const visibleHeight =
-        window.visualViewport?.height ?? window.innerHeight;
-      const elementTop = Math.max(0, element.getBoundingClientRect().top);
-      const availableHeight = Math.max(320, visibleHeight - elementTop);
+      const visualViewport = window.visualViewport;
+      const visibleHeight = visualViewport?.height ?? window.innerHeight;
+      const viewportOffsetTop = visualViewport?.offsetTop ?? 0;
 
+      const mobileHeader = document.querySelector<HTMLElement>(
+        ".friends-mobile-header",
+      );
+
+      const mobileHeaderBottom = mobileHeader
+        ? Math.max(
+            0,
+            mobileHeader.getBoundingClientRect().bottom - viewportOffsetTop,
+          )
+        : 0;
+
+      const availableHeight = Math.max(
+        320,
+        visibleHeight - mobileHeaderBottom,
+      );
+
+      element.style.setProperty(
+        "--friends-mobile-header-bottom",
+        `${mobileHeaderBottom}px`,
+      );
       element.style.setProperty(
         "--friends-chat-visible-height",
         `${availableHeight}px`,
@@ -212,12 +231,24 @@ export default function ConversationPage() {
     updateChatViewportHeight();
 
     const visualViewport = window.visualViewport;
+    const mobileHeader = document.querySelector<HTMLElement>(
+      ".friends-mobile-header",
+    );
+
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" && mobileHeader
+        ? new ResizeObserver(updateChatViewportHeight)
+        : null;
+
+    resizeObserver?.observe(mobileHeader);
+
     visualViewport?.addEventListener("resize", updateChatViewportHeight);
     visualViewport?.addEventListener("scroll", updateChatViewportHeight);
     window.addEventListener("resize", updateChatViewportHeight);
     window.addEventListener("orientationchange", updateChatViewportHeight);
 
     return () => {
+      resizeObserver?.disconnect();
       visualViewport?.removeEventListener("resize", updateChatViewportHeight);
       visualViewport?.removeEventListener("scroll", updateChatViewportHeight);
       window.removeEventListener("resize", updateChatViewportHeight);
@@ -1289,6 +1320,18 @@ export default function ConversationPage() {
     }
   }
 
+  function focusMessageInput() {
+    const input = inputRef.current;
+    if (!input) return;
+
+    input.focus();
+
+    requestAnimationFrame(() => {
+      const cursorPosition = input.value.length;
+      input.setSelectionRange(cursorPosition, cursorPosition);
+    });
+  }
+
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -2179,6 +2222,8 @@ export default function ConversationPage() {
 
           <input
             ref={inputRef}
+            onClick={focusMessageInput}
+            onTouchStart={focusMessageInput}
             type="text"
             inputMode="text"
             enterKeyHint="send"
