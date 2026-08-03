@@ -194,38 +194,6 @@ export default function ConversationPage() {
   const dragDepthRef = useRef(0);
 
 
-  useEffect(() => {
-    function updateChatViewportHeight() {
-      const element = chatViewportRef.current;
-      if (!element) return;
-
-      const visibleHeight =
-        window.visualViewport?.height ?? window.innerHeight;
-      const elementTop = Math.max(0, element.getBoundingClientRect().top);
-      const availableHeight = Math.max(320, visibleHeight - elementTop);
-
-      element.style.setProperty(
-        "--friends-chat-visible-height",
-        `${availableHeight}px`,
-      );
-    }
-
-    updateChatViewportHeight();
-
-    const visualViewport = window.visualViewport;
-    visualViewport?.addEventListener("resize", updateChatViewportHeight);
-    visualViewport?.addEventListener("scroll", updateChatViewportHeight);
-    window.addEventListener("resize", updateChatViewportHeight);
-    window.addEventListener("orientationchange", updateChatViewportHeight);
-
-    return () => {
-      visualViewport?.removeEventListener("resize", updateChatViewportHeight);
-      visualViewport?.removeEventListener("scroll", updateChatViewportHeight);
-      window.removeEventListener("resize", updateChatViewportHeight);
-      window.removeEventListener("orientationchange", updateChatViewportHeight);
-    };
-  }, []);
-
   const markConversationSeen = useCallback(async () => {
     if (!currentUserId || !Number.isFinite(conversationId)) return;
     if (document.visibilityState !== "visible") return;
