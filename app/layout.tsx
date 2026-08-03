@@ -4,6 +4,7 @@ import AppBackground from "@/components/AppBackground";
 import PWARegister from "@/components/pwa/PWARegister";
 import { MobileProvider } from "@/components/mobile/MobileProvider";
 import MobileShell from "@/components/mobile/MobileShell";
+import "@/styles/friends-messenger-mobile.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
