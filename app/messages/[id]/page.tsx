@@ -20,7 +20,6 @@ import { requestGlobalCall } from "@/components/calls/globalCallEvents";
 import "./aurora-chat.css";
 import "@/styles/friends-mobile-chat.css";
 import "@/styles/friends-mobile-conversation-header.css";
-
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
 });

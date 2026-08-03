@@ -1,67 +1,43 @@
 /* =========================================================
-   FRIENDS — ANTET CONVERSAȚIE MOBIL
-   Mută antetul conversației sub bara fixă „Friends”.
+   FRIENDS — ANTET CONVERSAȚIE MOBIL, FIX FINAL
+   Fără spațiu dublu sub bara Friends și fără composer ascuns.
    ========================================================= */
 
 @media (max-width: 767px) {
   /*
-   * MobileShell are bara Friends fixă sus.
-   * Pagina conversației trebuie să înceapă imediat sub ea.
+   * MobileShell poziționează deja conținutul sub bara Friends.
+   * Nu mai adăugăm margin-top; altfel apare spațiul gol.
    */
   .friends-conversation-page {
     position: relative !important;
     z-index: 1 !important;
 
     width: 100% !important;
-    margin:
-      calc(
-        var(--friends-mobile-header-height, 58px) +
-        env(safe-area-inset-top)
-      )
-      0
-      0 !important;
-
+    margin: 0 !important;
     padding: 0 !important;
 
-    height:
-      var(
-        --friends-chat-visible-height,
-        calc(
-          100dvh -
-          var(--friends-mobile-header-height, 58px) -
-          env(safe-area-inset-top)
-        )
-      ) !important;
-
+    height: var(--friends-chat-visible-height, 100dvh) !important;
     min-height: 0 !important;
-    max-height:
-      var(
-        --friends-chat-visible-height,
-        calc(
-          100dvh -
-          var(--friends-mobile-header-height, 58px) -
-          env(safe-area-inset-top)
-        )
-      ) !important;
+    max-height: var(--friends-chat-visible-height, 100dvh) !important;
 
     overflow: hidden !important;
     box-sizing: border-box !important;
   }
 
   .friends-conversation-page .aurora-chat-shell {
+    display: flex !important;
+    flex-direction: column !important;
+
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
     max-height: 100% !important;
-    margin: 0 !important;
 
+    margin: 0 !important;
     border-radius: 0 !important;
     overflow: hidden !important;
   }
 
-  /*
-   * Antetul conversației rămâne primul element vizibil din chat.
-   */
   .friends-conversation-page .aurora-chat-header {
     position: relative !important;
     inset: auto !important;
@@ -69,11 +45,13 @@
 
     display: flex !important;
     align-items: center !important;
-    flex: 0 0 auto !important;
+    flex: 0 0 66px !important;
     gap: 8px !important;
 
     width: 100% !important;
     min-height: 66px !important;
+    height: 66px !important;
+
     margin: 0 !important;
     padding: 8px 9px !important;
 
@@ -88,9 +66,6 @@
     box-sizing: border-box !important;
   }
 
-  /*
-   * Butonul Înapoi.
-   */
   .friends-conversation-page .aurora-chat-header > button:first-child {
     display: grid !important;
     place-items: center !important;
@@ -99,19 +74,18 @@
     width: 40px !important;
     min-width: 40px !important;
     height: 40px !important;
+
     margin: 0 !important;
     padding: 0 !important;
 
     color: #0f172a !important;
     font-size: 20px !important;
+
     border: 1px solid rgba(148, 163, 184, 0.45) !important;
     border-radius: 13px !important;
     background: rgba(255, 255, 255, 0.92) !important;
   }
 
-  /*
-   * Avatarul rămâne complet vizibil.
-   */
   .friends-conversation-page .aurora-chat-header > div:nth-child(2) {
     flex: 0 0 42px !important;
     width: 42px !important;
@@ -126,9 +100,6 @@
     height: 42px !important;
   }
 
-  /*
-   * Numele și statusul primesc tot spațiul rămas.
-   */
   .friends-conversation-page .aurora-chat-header > div:nth-child(3) {
     flex: 1 1 auto !important;
     min-width: 0 !important;
@@ -137,7 +108,6 @@
 
   .friends-conversation-page .aurora-chat-header h1 {
     display: block !important;
-    max-width: 100% !important;
     margin: 0 !important;
 
     color: #111827 !important;
@@ -148,6 +118,7 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+
     visibility: visible !important;
     opacity: 1 !important;
   }
@@ -164,9 +135,6 @@
     opacity: 1 !important;
   }
 
-  /*
-   * Componenta cu telefon, video și meniu rămâne în dreapta.
-   */
   .friends-conversation-page .aurora-chat-header > :last-child {
     position: relative !important;
     z-index: 90 !important;
@@ -194,6 +162,7 @@
     min-width: 36px !important;
     height: 36px !important;
     min-height: 36px !important;
+
     margin: 0 !important;
     padding: 0 !important;
 
@@ -208,18 +177,34 @@
   }
 
   /*
-   * Mesajele ocupă numai spațiul dintre antet și composer.
+   * Mesajele se micșorează corect între header și composer.
    */
   .friends-conversation-page .aurora-chat-messages {
     flex: 1 1 0 !important;
     min-height: 0 !important;
     overflow-y: auto !important;
   }
+
+  /*
+   * Composerul rămâne mereu în structura chatului și vizibil jos.
+   */
+  .friends-conversation-page .aurora-chat-composer {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 100 !important;
+
+    flex: 0 0 111px !important;
+    width: 100% !important;
+    height: 111px !important;
+    min-height: 111px !important;
+
+    margin: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
-/*
- * Telefoane foarte înguste.
- */
 @media (max-width: 390px) {
   .friends-conversation-page .aurora-chat-header {
     gap: 6px !important;
