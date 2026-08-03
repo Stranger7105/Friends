@@ -114,3 +114,91 @@
     padding:0 18px;
     border-radius:22px;
 }
+.friends-m2-message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100%;
+}
+
+.friends-m2-message-row {
+  display: flex;
+  width: 100%;
+}
+
+.friends-m2-message-row.is-mine {
+  justify-content: flex-end;
+}
+
+.friends-m2-message-row.is-theirs {
+  justify-content: flex-start;
+}
+
+.friends-m2-message-bubble {
+  max-width: min(78%, 560px);
+  padding: 10px 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #12201c;
+}
+
+.friends-m2-message-row.is-mine .friends-m2-message-bubble {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.friends-m2-message-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.friends-m2-message-meta {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.friends-m2-message-state {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 24px;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.friends-m2-composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 27, 23, 0.96);
+}
+
+.friends-m2-composer input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  font-size: 16px;
+  outline: none;
+}
+
+.friends-m2-composer button {
+  min-width: 78px;
+  height: 46px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.friends-m2-composer button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}

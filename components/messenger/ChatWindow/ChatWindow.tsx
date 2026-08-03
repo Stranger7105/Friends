@@ -4,9 +4,7 @@ import type {
   MessengerConversation,
   MessengerMessage,
 } from "@/types/messenger";
-import ChatHeader from "./ChatHeader";
-import ChatBody from "./ChatBody";
-import Composer from "../Composer/Composer";
+import ConversationScreen from "../ConversationScreen";
 import styles from "./ChatWindow.module.css";
 
 type ChatWindowProps = {
@@ -16,28 +14,61 @@ type ChatWindowProps = {
   onSend: (text: string) => void | Promise<void>;
 };
 
+function getInitials(value: string) {
+  return value
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
+
 export default function ChatWindow({
   conversation,
   messages,
   currentUserId,
   onSend,
 }: ChatWindowProps) {
-  return (
-    <section className={styles.window}>
-      <ChatHeader conversation={conversation} />
-
-      {conversation ? (
-        <>
-          <ChatBody messages={messages} currentUserId={currentUserId} />
-          <Composer onSend={onSend} />
-        </>
-      ) : (
+  if (!conversation) {
+    return (
+      <section className={styles.window}>
         <div className={styles.noConversation}>
           <div className={styles.orb}>💬</div>
           <strong>Alege o conversație</strong>
-          <span>Friends Messenger este pregătit pentru următorul pas.</span>
+          <span>Friends Messenger este pregătit.</span>
         </div>
-      )}
+      </section>
+    );
+  }
+
+  const otherMember =
+    conversation.members.find(
+      (member) => member.userId !== currentUserId
+    ) ?? conversation.members[0];
+
+  const title =
+    conversation.title ||
+    otherMember?.profile?.fullName ||
+    otherMember?.profile?.username ||
+    "Conversație";
+
+  const avatarUrl =
+    conversation.avatarUrl ||
+    otherMember?.profile?.avatarUrl ||
+    null;
+
+  return (
+    <section className={styles.window}>
+      <ConversationScreen
+        conversationId={conversation.id}
+        currentUserId={currentUserId}
+        title={title}
+        subtitle="Friends Messenger"
+        avatarUrl={avatarUrl}
+        initials={getInitials(title) || "F"}
+        messages={messages}
+        onSend={onSend}
+      />
     </section>
   );
 }

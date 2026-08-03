@@ -6,6 +6,7 @@ import type {
   MessengerMessage,
 } from "@/types/messenger";
 import { useMessengerContext } from "@/contexts/MessengerContext";
+import useMessages from "./hooks/useMessages";
 import ChatList from "./ChatList/ChatList";
 import ChatWindow from "./ChatWindow/ChatWindow";
 import styles from "./MessengerShell.module.css";
@@ -35,25 +36,61 @@ export default function MessengerShell({
     [activeConversationId, conversations]
   );
 
-  const messages = activeConversationId
+  const usesSupabase =
+    activeConversationId !== null &&
+    Number.isFinite(Number(activeConversationId));
+
+  const {
+    messages: databaseMessages,
+    loading: messagesLoading,
+    sending,
+    error,
+    sendMessage,
+  } = useMessages({
+    conversationId: usesSupabase ? activeConversationId : null,
+    currentUserId,
+  });
+
+  const localMessages = activeConversationId
     ? messagesByConversation[activeConversationId] ?? []
     : [];
 
-  async function sendLocalMessage(text: string) {
-    if (!activeConversationId) return;
+  const visibleMessages = usesSupabase
+    ? databaseMessages
+    : localMessages;
+
+  async function sendLocalMessage(
+  text: string,
+  replyToId: string | null = null
+) {
+    const content = text.trim();
+
+    if (!content || !activeConversationId) return;
 
     appendMessage({
       id: crypto.randomUUID(),
       conversationId: activeConversationId,
       senderId: currentUserId,
       kind: "text",
-      text,
+      text: content,
       attachments: [],
-      replyToId: null,
+      replyToId,
       editedAt: null,
       createdAt: new Date().toISOString(),
       status: "sending",
     });
+  }
+
+  async function handleSend(
+  text: string,
+  replyToId: string | null = null
+) {
+    if (usesSupabase) {
+     await sendMessage(text, replyToId);
+      return;
+    }
+
+    await sendLocalMessage(text, replyToId);
   }
 
   return (
@@ -64,12 +101,26 @@ export default function MessengerShell({
         onSelect={setActiveConversationId}
       />
 
-      <ChatWindow
-        conversation={activeConversation}
-        messages={messages}
-        currentUserId={currentUserId}
-        onSend={sendLocalMessage}
-      />
+      <div className={styles.window}>
+        {messagesLoading && usesSupabase && (
+          <div role="status">Se încarcă mesajele...</div>
+        )}
+
+        {error && usesSupabase && (
+          <div role="alert">{error}</div>
+        )}
+
+        <ChatWindow
+          conversation={activeConversation}
+          messages={visibleMessages}
+          currentUserId={currentUserId}
+          onSend={handleSend}
+        />
+
+        {sending && usesSupabase && (
+          <div role="status">Se trimite...</div>
+        )}
+      </div>
     </div>
   );
 }
