@@ -110,6 +110,40 @@
       );
   }
 
+
+
+  /*
+   * În conversația deschisă nu afișăm bara globală Friends.
+   * Ecranul este controlat integral de headerul conversației.
+   */
+  .friends-mobile-content--conversation {
+    width: 100% !important;
+    height:
+      calc(
+        100dvh -
+        env(safe-area-inset-top) -
+        env(safe-area-inset-bottom)
+      ) !important;
+    min-height:
+      calc(
+        100dvh -
+        env(safe-area-inset-top) -
+        env(safe-area-inset-bottom)
+      ) !important;
+    max-height:
+      calc(
+        100dvh -
+        env(safe-area-inset-top) -
+        env(safe-area-inset-bottom)
+      ) !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
   .friends-app-bottom-bar {
     position: fixed !important;
     z-index: 1200 !important;

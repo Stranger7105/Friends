@@ -176,7 +176,7 @@ export default function MobileShell({ children }: MobileShellProps) {
         <Navbar />
       </div>
 
-      {isMobile && (
+      {isMobile && !isOpenConversation && (
         <header className="friends-mobile-header">
           <Link href="/feed" className="friends-mobile-brand">
             <span className="friends-mobile-logo" aria-hidden="true">
@@ -220,7 +220,13 @@ export default function MobileShell({ children }: MobileShellProps) {
 
       <main
         className={
-          isMobile ? "friends-mobile-content" : "friends-desktop-content"
+          isMobile
+            ? `friends-mobile-content ${
+                isOpenConversation
+                  ? "friends-mobile-content--conversation"
+                  : ""
+              }`
+            : "friends-desktop-content"
         }
       >
         {children}
