@@ -19,6 +19,7 @@ import ConversationCallMenu from "@/components/calls/ConversationCallMenu";
 import { requestGlobalCall } from "@/components/calls/globalCallEvents";
 import "./aurora-chat.css";
 import "@/styles/friends-mobile-chat.css";
+import "@/styles/friends-mobile-conversation-header.css";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -1560,7 +1561,7 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <main className="chat-theme-page min-h-screen px-4 py-8">
+      <main className="chat-theme-page friends-conversation-page min-h-screen px-4 py-8">
         <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow">
           Se încarcă conversația...
         </div>
@@ -1571,7 +1572,7 @@ export default function ConversationPage() {
   return (
     <main
       ref={chatViewportRef}
-      className="chat-theme-page min-h-screen px-4 py-6"
+      className="chat-theme-page friends-conversation-page min-h-screen px-4 py-6"
       data-chat-wallpaper={chatWallpaper}
     >
       <div
