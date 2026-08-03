@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { MessengerMessage } from "@/types/messenger";
-import { useMessengerContext } from "@/contexts/MessengerContext";
+
 import ChatHeader from "./ChatHeader";
 import Composer from "./Composer";
 import Layout from "./Layout";
@@ -21,7 +21,15 @@ type ConversationScreenProps = {
   loading?: boolean;
   sending?: boolean;
   error?: string;
-  onSend: (text: string) => Promise<void> | void;
+  onSend: (
+  text: string,
+  replyToId?: string | null
+) => Promise<void> | void;
+
+onReact?: (
+  messageId: string,
+  emoji: string
+) => Promise<boolean> | void;
 };
 
 export default function ConversationScreen({
@@ -36,15 +44,21 @@ export default function ConversationScreen({
   sending = false,
   error = "",
   onSend,
+onReact,
 }: ConversationScreenProps) {
   const router = useRouter();
   const [replyMessage, setReplyMessage] =
   useState<MessengerMessage | null>(null);
+ const handleReaction = (
+  message: MessengerMessage,
+  reaction: string
+) => {
+  if (!onReact) return;
 
-  const {
-    typingByConversation,
-  } = useMessengerContext();
+  void onReact(message.id, reaction);
+};
 
+ const typingByConversation: Record<string, boolean> = {};
   const friendIsTyping = conversationId
     ? typingByConversation[conversationId] ?? false
     : false;
@@ -69,6 +83,7 @@ export default function ConversationScreen({
   loading={loading}
   error={error}
   onReply={setReplyMessage}
+  onReact={handleReaction}
 />
 
             <TypingIndicator

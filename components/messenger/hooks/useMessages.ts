@@ -15,6 +15,14 @@ type DatabaseMessage = {
   reply_to_message_id: number | null;
 };
 
+type DatabaseReaction = {
+  id: number;
+  message_id: number;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+};
+
 type UseMessagesOptions = {
   conversationId: string | null;
   currentUserId: string;
@@ -46,6 +54,48 @@ export default function useMessages({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+
+
+  const loadOwnReactions = useCallback(
+    async (messageIds: string[]) => {
+      if (!currentUserId || messageIds.length === 0) return;
+
+      const numericMessageIds = messageIds
+        .map(Number)
+        .filter(Number.isFinite);
+
+      if (numericMessageIds.length === 0) return;
+
+      const { data, error: reactionsError } = await supabase
+        .from("message_reactions")
+        .select("id, message_id, user_id, emoji, created_at")
+        .eq("user_id", currentUserId)
+        .in("message_id", numericMessageIds);
+
+      if (reactionsError) {
+        console.error(
+          "Reacțiile nu au putut fi încărcate:",
+          reactionsError.message
+        );
+        return;
+      }
+
+      const reactionsByMessage = new Map(
+        ((data ?? []) as DatabaseReaction[]).map((reaction) => [
+          String(reaction.message_id),
+          reaction.emoji,
+        ])
+      );
+
+      setMessages((current) =>
+        current.map((message) => ({
+          ...message,
+          reaction: reactionsByMessage.get(message.id),
+        }))
+      );
+    },
+    [currentUserId]
+  );
 
   const markConversationAsSeen = useCallback(async () => {
     if (!conversationId || !currentUserId) return;
@@ -100,11 +150,18 @@ export default function useMessages({
       return;
     }
 
-    setMessages(((data ?? []) as DatabaseMessage[]).map(mapDatabaseMessage));
+    const loadedMessages = ((data ?? []) as DatabaseMessage[]).map(
+      mapDatabaseMessage
+    );
+
+    setMessages(loadedMessages);
     setLoading(false);
 
-    await markConversationAsSeen();
-  }, [conversationId, markConversationAsSeen]);
+    await Promise.all([
+      markConversationAsSeen(),
+      loadOwnReactions(loadedMessages.map((message) => message.id)),
+    ]);
+  }, [conversationId, loadOwnReactions, markConversationAsSeen]);
 
   useEffect(() => {
     void loadMessages();
@@ -182,7 +239,12 @@ export default function useMessages({
 
           setMessages((current) =>
             current.map((message) =>
-              message.id === updated.id ? updated : message
+              message.id === updated.id
+                ? {
+                    ...updated,
+                    reaction: message.reaction,
+                  }
+                : message
             )
           );
         }
@@ -193,6 +255,95 @@ export default function useMessages({
       void supabase.removeChannel(channel);
     };
   }, [conversationId, currentUserId, markConversationAsSeen]);
+
+  const reactToMessage = useCallback(
+    async (messageId: string, emoji: string) => {
+      if (!currentUserId) return false;
+
+      const numericMessageId = Number(messageId);
+
+      if (!Number.isFinite(numericMessageId)) {
+        setError("Mesajul selectat nu este valid.");
+        return false;
+      }
+
+      const currentMessage = messages.find(
+        (message) => message.id === messageId
+      );
+
+      const previousReaction = currentMessage?.reaction;
+      const shouldRemove = previousReaction === emoji;
+
+      setError("");
+
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                reaction: shouldRemove ? undefined : emoji,
+              }
+            : message
+        )
+      );
+
+      if (shouldRemove) {
+        const { error: deleteError } = await supabase
+          .from("message_reactions")
+          .delete()
+          .eq("message_id", numericMessageId)
+          .eq("user_id", currentUserId);
+
+        if (deleteError) {
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === messageId
+                ? { ...message, reaction: previousReaction }
+                : message
+            )
+          );
+
+          setError(
+            `Reacția nu a putut fi eliminată: ${deleteError.message}`
+          );
+          return false;
+        }
+
+        return true;
+      }
+
+      const { error: upsertError } = await supabase
+        .from("message_reactions")
+        .upsert(
+          {
+            message_id: numericMessageId,
+            user_id: currentUserId,
+            emoji,
+          },
+          {
+            onConflict: "message_id,user_id",
+          }
+        );
+
+      if (upsertError) {
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === messageId
+              ? { ...message, reaction: previousReaction }
+              : message
+          )
+        );
+
+        setError(
+          `Reacția nu a putut fi salvată: ${upsertError.message}`
+        );
+        return false;
+      }
+
+      return true;
+    },
+    [currentUserId, messages]
+  );
 
   const sendMessage = useCallback(
     async (text: string, replyToId: string | null = null) => {
@@ -292,6 +443,7 @@ export default function useMessages({
     error,
     loadMessages,
     markConversationAsSeen,
+    reactToMessage,
     sendMessage,
   };
 }

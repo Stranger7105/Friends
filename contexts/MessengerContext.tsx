@@ -45,6 +45,11 @@ type MessengerContextValue = {
     conversationId: string,
     typing: boolean
   ) => void;
+  addReaction: (
+  conversationId: string,
+  messageId: string,
+  reaction: string
+) => void;
 };
 
 const MessengerContext =
@@ -156,6 +161,30 @@ export function MessengerProvider({
     },
     []
   );
+  const addReaction = useCallback(
+  (
+    conversationId: string,
+    messageId: string,
+    reaction: string
+  ) => {
+    setMessagesByConversation((current) => ({
+      ...current,
+      [conversationId]: (
+        current[conversationId] ?? []
+      ).map((message) => {
+        if (message.id !== messageId) {
+          return message;
+        }
+
+        return {
+          ...message,
+          reaction,
+        };
+      }),
+    }));
+  },
+  []
+);
 
   const value = useMemo<MessengerContextValue>(
     () => ({
@@ -170,6 +199,7 @@ export function MessengerProvider({
       updateMessage,
       removeMessage,
       setTyping,
+addReaction,
     }),
     [
       activeConversationId,
@@ -181,6 +211,7 @@ export function MessengerProvider({
       updateMessage,
       removeMessage,
       setTyping,
+      addReaction,
     ]
   );
 

@@ -41,12 +41,13 @@ export default function MessengerShell({
     Number.isFinite(Number(activeConversationId));
 
   const {
-    messages: databaseMessages,
-    loading: messagesLoading,
-    sending,
-    error,
-    sendMessage,
-  } = useMessages({
+  messages,
+  loading,
+  sending,
+  error,
+  sendMessage,
+  reactToMessage,
+} = useMessages({
     conversationId: usesSupabase ? activeConversationId : null,
     currentUserId,
   });
@@ -56,8 +57,8 @@ export default function MessengerShell({
     : [];
 
   const visibleMessages = usesSupabase
-    ? databaseMessages
-    : localMessages;
+  ? messages
+  : localMessages;
 
   async function sendLocalMessage(
   text: string,
@@ -102,7 +103,7 @@ export default function MessengerShell({
       />
 
       <div className={styles.window}>
-        {messagesLoading && usesSupabase && (
+        {loading && usesSupabase && (
           <div role="status">Se încarcă mesajele...</div>
         )}
 

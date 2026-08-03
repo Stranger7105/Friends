@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type { MessengerMessage } from "@/types/messenger";
+
+const REACTIONS = ["❤️", "👍", "😂", "😮", "😢", "😡"] as const;
+
+type MessageReaction = (typeof REACTIONS)[number];
 
 type MessageListProps = {
   messages: MessengerMessage[];
@@ -8,6 +13,10 @@ type MessageListProps = {
   loading?: boolean;
   error?: string;
   onReply?: (message: MessengerMessage) => void;
+  onReact?: (
+    message: MessengerMessage,
+    reaction: MessageReaction
+  ) => void;
 };
 
 export default function MessageList({
@@ -16,7 +25,11 @@ export default function MessageList({
   loading = false,
   error = "",
   onReply,
+  onReact,
 }: MessageListProps) {
+  const [reactionPickerMessageId, setReactionPickerMessageId] =
+    useState<string | null>(null);
+
   if (loading) {
     return (
       <div className="friends-m2-message-state" role="status">
@@ -45,12 +58,10 @@ export default function MessageList({
     <div className="friends-m2-message-list">
       {messages.map((message) => {
         const isMine = message.senderId === currentUserId;
-        const repliedMessage =
-  message.replyToId
-    ? messages.find(
-        (item) => item.id === message.replyToId
-      )
-    : null;
+
+        const repliedMessage = message.replyToId
+          ? messages.find((item) => item.id === message.replyToId)
+          : null;
 
         const statusLabel =
           message.status === "read"
@@ -60,6 +71,12 @@ export default function MessageList({
               : message.status === "sending"
                 ? "…"
                 : "";
+
+        const pickerIsOpen =
+          reactionPickerMessageId === message.id;
+
+        const canInteract =
+          !message.id.startsWith("temporary-");
 
         return (
           <article
@@ -71,21 +88,27 @@ export default function MessageList({
             <div className="friends-m2-message-stack">
               <div className="friends-m2-message-bubble">
                 {repliedMessage && (
-  <div className="friends-m2-reply-quote">
-    <strong>↩ Răspuns la</strong>
+                  <div className="friends-m2-reply-quote">
+                    <strong>↩ Răspuns la</strong>
+                    <div>{repliedMessage.text}</div>
+                  </div>
+                )}
 
-    <div>
-      {repliedMessage.text}
-    </div>
+                <p>{message.text}</p>
+                {message.reaction && (
+  <div className="friends-m2-message-reaction">
+    {message.reaction}
   </div>
 )}
-                <p>{message.text}</p>
 
                 <span className="friends-m2-message-meta">
-                  {new Date(message.createdAt).toLocaleTimeString("ro-RO", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(message.createdAt).toLocaleTimeString(
+                    "ro-RO",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}
 
                   {isMine && statusLabel && (
                     <>
@@ -96,15 +119,60 @@ export default function MessageList({
                 </span>
               </div>
 
-              {onReply && !message.id.startsWith("temporary-") && (
-                <button
-                  type="button"
-                  className="friends-m2-message-reply-button"
-                  onClick={() => onReply(message)}
-                  aria-label="Răspunde la mesaj"
+              {canInteract && (
+                <div className="friends-m2-message-actions">
+                  {onReply && (
+                    <button
+                      type="button"
+                      className="friends-m2-message-reply-button"
+                      onClick={() => onReply(message)}
+                      aria-label="Răspunde la mesaj"
+                    >
+                      ↩ Răspunde
+                    </button>
+                  )}
+
+                  {onReact && (
+                    <button
+                      type="button"
+                      className="friends-m2-message-reaction-button"
+                      onClick={() =>
+                        setReactionPickerMessageId((current) =>
+                          current === message.id
+                            ? null
+                            : message.id
+                        )
+                      }
+                      aria-label="Adaugă o reacție"
+                      aria-expanded={pickerIsOpen}
+                    >
+                      😊 Reacție
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {pickerIsOpen && onReact && (
+                <div
+                  className="friends-m2-reaction-picker"
+                  role="group"
+                  aria-label="Alege reacția"
                 >
-                  ↩ Răspunde
-                </button>
+                  {REACTIONS.map((reaction) => (
+                    <button
+                      key={reaction}
+                      type="button"
+                      className="friends-m2-reaction-option"
+                      onClick={() => {
+                        onReact(message, reaction);
+                        setReactionPickerMessageId(null);
+                      }}
+                      aria-label={`Reacționează cu ${reaction}`}
+                    >
+                      {reaction}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </article>

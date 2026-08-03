@@ -11,7 +11,14 @@ type ChatWindowProps = {
   conversation: MessengerConversation | null;
   messages: MessengerMessage[];
   currentUserId: string;
-  onSend: (text: string) => void | Promise<void>;
+  onSend: (
+    text: string,
+    replyToId?: string | null
+  ) => void | Promise<void>;
+  onReact?: (
+    messageId: string,
+    emoji: string
+  ) => void | Promise<boolean>;
 };
 
 function getInitials(value: string) {
@@ -28,6 +35,7 @@ export default function ChatWindow({
   messages,
   currentUserId,
   onSend,
+  onReact,
 }: ChatWindowProps) {
   if (!conversation) {
     return (
@@ -68,6 +76,7 @@ export default function ChatWindow({
         initials={getInitials(title) || "F"}
         messages={messages}
         onSend={onSend}
+        onReact={onReact}
       />
     </section>
   );
