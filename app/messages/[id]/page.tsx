@@ -194,34 +194,95 @@ export default function ConversationPage() {
   const dragDepthRef = useRef(0);
 
   useEffect(() => {
+    function updateConversationHeaderTop() {
+      const globalHeader = document.querySelector<HTMLElement>(
+        ".friends-mobile-header",
+      );
+
+      const headerBottom = globalHeader
+        ? Math.max(0, globalHeader.getBoundingClientRect().bottom)
+        : 58;
+
+      document.documentElement.style.setProperty(
+        "--friends-conversation-header-top",
+        `${headerBottom}px`,
+      );
+    }
+
+    updateConversationHeaderTop();
+
+    const visualViewport = window.visualViewport;
+    const globalHeader = document.querySelector<HTMLElement>(
+      ".friends-mobile-header",
+    );
+
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (typeof ResizeObserver !== "undefined" && globalHeader) {
+      resizeObserver = new ResizeObserver(updateConversationHeaderTop);
+      resizeObserver.observe(globalHeader);
+    }
+
+    visualViewport?.addEventListener(
+      "resize",
+      updateConversationHeaderTop,
+    );
+    visualViewport?.addEventListener(
+      "scroll",
+      updateConversationHeaderTop,
+    );
+    window.addEventListener("resize", updateConversationHeaderTop);
+    window.addEventListener(
+      "orientationchange",
+      updateConversationHeaderTop,
+    );
+    window.addEventListener("focus", updateConversationHeaderTop);
+
+    const handleFocusIn = () => {
+      window.setTimeout(updateConversationHeaderTop, 50);
+      window.setTimeout(updateConversationHeaderTop, 350);
+    };
+
+    const handleFocusOut = () => {
+      window.setTimeout(updateConversationHeaderTop, 50);
+      window.setTimeout(updateConversationHeaderTop, 350);
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+
+    return () => {
+      resizeObserver?.disconnect();
+
+      visualViewport?.removeEventListener(
+        "resize",
+        updateConversationHeaderTop,
+      );
+      visualViewport?.removeEventListener(
+        "scroll",
+        updateConversationHeaderTop,
+      );
+      window.removeEventListener("resize", updateConversationHeaderTop);
+      window.removeEventListener(
+        "orientationchange",
+        updateConversationHeaderTop,
+      );
+      window.removeEventListener("focus", updateConversationHeaderTop);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
     function updateChatViewportHeight() {
       const element = chatViewportRef.current;
       if (!element) return;
 
-      const visualViewport = window.visualViewport;
-      const visibleHeight = visualViewport?.height ?? window.innerHeight;
-      const viewportOffsetTop = visualViewport?.offsetTop ?? 0;
+      const visibleHeight =
+        window.visualViewport?.height ?? window.innerHeight;
+      const elementTop = Math.max(0, element.getBoundingClientRect().top);
+      const availableHeight = Math.max(320, visibleHeight - elementTop);
 
-      const mobileHeader = document.querySelector<HTMLElement>(
-        ".friends-mobile-header",
-      );
-
-      const mobileHeaderBottom = mobileHeader
-        ? Math.max(
-            0,
-            mobileHeader.getBoundingClientRect().bottom - viewportOffsetTop,
-          )
-        : 0;
-
-      const availableHeight = Math.max(
-        320,
-        visibleHeight - mobileHeaderBottom,
-      );
-
-      element.style.setProperty(
-        "--friends-mobile-header-bottom",
-        `${mobileHeaderBottom}px`,
-      );
       element.style.setProperty(
         "--friends-chat-visible-height",
         `${availableHeight}px`,
@@ -231,24 +292,12 @@ export default function ConversationPage() {
     updateChatViewportHeight();
 
     const visualViewport = window.visualViewport;
-    const mobileHeader = document.querySelector<HTMLElement>(
-      ".friends-mobile-header",
-    );
-
-    let resizeObserver: ResizeObserver | null = null;
-
-    if (typeof ResizeObserver !== "undefined" && mobileHeader) {
-      resizeObserver = new ResizeObserver(updateChatViewportHeight);
-      resizeObserver.observe(mobileHeader);
-    }
-
     visualViewport?.addEventListener("resize", updateChatViewportHeight);
     visualViewport?.addEventListener("scroll", updateChatViewportHeight);
     window.addEventListener("resize", updateChatViewportHeight);
     window.addEventListener("orientationchange", updateChatViewportHeight);
 
     return () => {
-      resizeObserver?.disconnect();
       visualViewport?.removeEventListener("resize", updateChatViewportHeight);
       visualViewport?.removeEventListener("scroll", updateChatViewportHeight);
       window.removeEventListener("resize", updateChatViewportHeight);

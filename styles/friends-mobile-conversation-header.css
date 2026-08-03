@@ -1,18 +1,18 @@
 /* =========================================================
-   FRIENDS — FIX DOAR ANTET CONVERSAȚIE
-   Păstrează composerul existent și mută numai antetul.
+   FRIENDS — ANTET CONVERSAȚIE STABIL LA TASTATURĂ iPHONE
+   Nu modifică bara de scriere.
    ========================================================= */
 
 @media (max-width: 767px) {
-  /*
-   * Antetul conversației este fixat imediat sub bara globală Friends.
-   * Nu modificăm înălțimea paginii și nu atingem composerul.
-   */
   .aurora-chat-header {
     position: fixed !important;
-    top: var(--friends-mobile-header-height, 58px) !important;
-    left: 0 !important;
+    top:
+      var(
+        --friends-conversation-header-top,
+        calc(58px + env(safe-area-inset-top))
+      ) !important;
     right: 0 !important;
+    left: 0 !important;
     z-index: 9999 !important;
 
     display: flex !important;
@@ -28,11 +28,13 @@
     padding: 8px 10px !important;
 
     color: #111827 !important;
-    background: rgba(255, 255, 255, 0.97) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
     border-bottom: 1px solid rgba(148, 163, 184, 0.45) !important;
     box-shadow: 0 5px 18px rgba(15, 23, 42, 0.14) !important;
 
-    transform: none !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
@@ -40,10 +42,6 @@
     box-sizing: border-box !important;
   }
 
-  /*
-   * Rezervăm loc vizual pentru antet în lista de mesaje.
-   * Composerul rămâne exact cum este acum.
-   */
   .aurora-chat-messages {
     padding-top: 82px !important;
   }
