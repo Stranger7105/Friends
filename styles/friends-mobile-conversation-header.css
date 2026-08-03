@@ -1,22 +1,24 @@
 /* =========================================================
-   FRIENDS — ANTET CONVERSAȚIE STABIL LA TASTATURĂ iPHONE
-   Nu modifică bara de scriere.
+   FRIENDS — ANTET CONVERSAȚIE STABIL PE iPHONE
+   Fără position: fixed și fără măsurători visualViewport.
+   Composerul rămâne neatins.
    ========================================================= */
 
 @media (max-width: 767px) {
-  .aurora-chat-header {
-    position: fixed !important;
-    top:
-      var(
-        --friends-conversation-header-top,
-        calc(58px + env(safe-area-inset-top))
-      ) !important;
-    right: 0 !important;
-    left: 0 !important;
-    z-index: 9999 !important;
+  /*
+   * Antetul rămâne în fluxul conversației.
+   * Sticky nu este deplasat de tastatura iPhone precum fixed.
+   */
+  .friends-conversation-page .aurora-chat-header {
+    position: sticky !important;
+    top: 0 !important;
+    right: auto !important;
+    left: auto !important;
+    z-index: 500 !important;
 
     display: flex !important;
     align-items: center !important;
+    flex: 0 0 66px !important;
     gap: 8px !important;
 
     width: 100% !important;
@@ -32,8 +34,8 @@
     border-bottom: 1px solid rgba(148, 163, 184, 0.45) !important;
     box-shadow: 0 5px 18px rgba(15, 23, 42, 0.14) !important;
 
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
+    transform: none !important;
+    -webkit-transform: none !important;
 
     visibility: visible !important;
     opacity: 1 !important;
@@ -42,11 +44,14 @@
     box-sizing: border-box !important;
   }
 
-  .aurora-chat-messages {
-    padding-top: 82px !important;
+  /*
+   * Elimină spațiul artificial adăugat anterior pentru headerul fixed.
+   */
+  .friends-conversation-page .aurora-chat-messages {
+    padding-top: 16px !important;
   }
 
-  .aurora-chat-header > button:first-child {
+  .friends-conversation-page .aurora-chat-header > button:first-child {
     display: grid !important;
     place-items: center !important;
     flex: 0 0 40px !important;
@@ -62,24 +67,27 @@
     background: #ffffff !important;
   }
 
-  .aurora-chat-header > div:nth-child(2) {
+  .friends-conversation-page .aurora-chat-header > div:nth-child(2) {
     flex: 0 0 42px !important;
     width: 42px !important;
     min-width: 42px !important;
   }
 
-  .aurora-chat-header > div:nth-child(2) > div {
+  .friends-conversation-page
+  .aurora-chat-header
+  > div:nth-child(2)
+  > div {
     width: 42px !important;
     height: 42px !important;
   }
 
-  .aurora-chat-header > div:nth-child(3) {
+  .friends-conversation-page .aurora-chat-header > div:nth-child(3) {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     overflow: hidden !important;
   }
 
-  .aurora-chat-header h1 {
+  .friends-conversation-page .aurora-chat-header h1 {
     display: block !important;
     margin: 0 !important;
     color: #111827 !important;
@@ -91,7 +99,7 @@
     white-space: nowrap !important;
   }
 
-  .aurora-chat-header p {
+  .friends-conversation-page .aurora-chat-header p {
     display: block !important;
     margin: 3px 0 0 !important;
     font-size: 11px !important;
@@ -99,7 +107,7 @@
     line-height: 1.2 !important;
   }
 
-  .aurora-chat-header > :last-child {
+  .friends-conversation-page .aurora-chat-header > :last-child {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -109,7 +117,10 @@
     overflow: visible !important;
   }
 
-  .aurora-chat-header > :last-child button {
+  .friends-conversation-page
+  .aurora-chat-header
+  > :last-child
+  button {
     display: grid !important;
     place-items: center !important;
     width: 36px !important;
@@ -127,33 +138,39 @@
 }
 
 @media (max-width: 390px) {
-  .aurora-chat-header {
+  .friends-conversation-page .aurora-chat-header {
     gap: 6px !important;
     padding-left: 6px !important;
     padding-right: 6px !important;
   }
 
-  .aurora-chat-header > button:first-child {
+  .friends-conversation-page .aurora-chat-header > button:first-child {
     width: 36px !important;
     min-width: 36px !important;
     height: 36px !important;
   }
 
-  .aurora-chat-header > div:nth-child(2) {
+  .friends-conversation-page .aurora-chat-header > div:nth-child(2) {
     width: 38px !important;
     min-width: 38px !important;
   }
 
-  .aurora-chat-header > div:nth-child(2) > div {
+  .friends-conversation-page
+  .aurora-chat-header
+  > div:nth-child(2)
+  > div {
     width: 38px !important;
     height: 38px !important;
   }
 
-  .aurora-chat-header h1 {
+  .friends-conversation-page .aurora-chat-header h1 {
     font-size: 14px !important;
   }
 
-  .aurora-chat-header > :last-child button {
+  .friends-conversation-page
+  .aurora-chat-header
+  > :last-child
+  button {
     width: 33px !important;
     min-width: 33px !important;
     height: 33px !important;
