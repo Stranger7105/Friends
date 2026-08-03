@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bell,
   GalleryHorizontalEnd,
@@ -55,6 +55,7 @@ export default function MobileShell({ children }: MobileShellProps) {
   const [userId, setUserId] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadFriendRequestCount, setUnreadFriendRequestCount] = useState(0);
+  const mobileContentRef = useRef<HTMLElement | null>(null);
 
   const isPublicRoute = publicRoutes.some((route) => {
     if (route === "/") return pathname === "/";
@@ -159,6 +160,67 @@ export default function MobileShell({ children }: MobileShellProps) {
     };
   }, [drawerOpen, isMobile]);
 
+  useEffect(() => {
+    if (!isMobile || !isOpenConversation) return;
+
+   const element = mobileContentRef.current;
+if (!element) return;
+
+function syncConversationViewport() {
+  const viewport = window.visualViewport;
+
+  const height = viewport?.height ?? window.innerHeight;
+  const offsetTop = viewport?.offsetTop ?? 0;
+
+  element?.style.setProperty(
+    "--friends-conversation-viewport-height",
+    `${Math.round(height)}px`
+  );
+
+  element?.style.setProperty(
+    "--friends-conversation-viewport-top",
+    `${Math.round(offsetTop)}px`
+  );
+}
+
+syncConversationViewport();
+
+    const viewport = window.visualViewport;
+
+    viewport?.addEventListener("resize", syncConversationViewport);
+    viewport?.addEventListener("scroll", syncConversationViewport);
+    window.addEventListener("resize", syncConversationViewport);
+    window.addEventListener("orientationchange", syncConversationViewport);
+
+    const handleFocusChange = () => {
+      window.setTimeout(syncConversationViewport, 30);
+      window.setTimeout(syncConversationViewport, 180);
+      window.setTimeout(syncConversationViewport, 420);
+    };
+
+    document.addEventListener("focusin", handleFocusChange);
+    document.addEventListener("focusout", handleFocusChange);
+
+    return () => {
+      viewport?.removeEventListener("resize", syncConversationViewport);
+      viewport?.removeEventListener("scroll", syncConversationViewport);
+      window.removeEventListener("resize", syncConversationViewport);
+      window.removeEventListener(
+        "orientationchange",
+        syncConversationViewport,
+      );
+      document.removeEventListener("focusin", handleFocusChange);
+      document.removeEventListener("focusout", handleFocusChange);
+
+      element.style.removeProperty(
+        "--friends-conversation-viewport-height",
+      );
+      element.style.removeProperty(
+        "--friends-conversation-viewport-top",
+      );
+    };
+  }, [isMobile, isOpenConversation]);
+
   async function handleLogout() {
     setDrawerOpen(false);
     await supabase.auth.signOut();
@@ -219,6 +281,7 @@ export default function MobileShell({ children }: MobileShellProps) {
       )}
 
       <main
+        ref={mobileContentRef}
         className={
           isMobile
             ? `friends-mobile-content ${
