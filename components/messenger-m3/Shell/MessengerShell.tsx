@@ -17,12 +17,12 @@ export default function MessengerShell({
     <main
       style={{
         display: "grid",
-        gridTemplateRows: "72px minmax(0, 1fr) 80px",
+        gridTemplateRows: "72px minmax(0, 1fr) auto",
         height: "calc(100dvh - 128px)",
         minHeight: 0,
         overflow: "hidden",
         background: "#10131a",
-        color: "#fff",
+        color: "#ffffff",
       }}
     >
       {header}
@@ -31,6 +31,7 @@ export default function MessengerShell({
         style={{
           minHeight: 0,
           overflowY: "auto",
+          overflowX: "hidden",
           padding: 16,
         }}
       >

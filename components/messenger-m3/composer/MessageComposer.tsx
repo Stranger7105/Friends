@@ -1,63 +1,161 @@
 "use client";
 
+import {
+  useCallback,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import useComposer from "../hooks/useComposer";
+import type {
+  MessengerMessage,
+  VoiceRecording,
+} from "../types";
+import ReplyPreview from "./ReplyPreview";
+import VoiceRecorder from "./VoiceRecorder";
 
 type MessageComposerProps = {
-  onSend: (text: string) => void | Promise<void>;
-  sending?: boolean;
+  onSend: (text: string) => Promise<boolean>;
+  onSendVoice: (
+    recording: VoiceRecording
+  ) => Promise<boolean>;
+  onTypingChange: (isTyping: boolean) => void;
+  sending: boolean;
+  replyToMessage: MessengerMessage | null;
+  onCancelReply: () => void;
 };
 
 export default function MessageComposer({
   onSend,
-  sending = false,
+  onSendVoice,
+  onTypingChange,
+  sending,
+  replyToMessage,
+  onCancelReply,
 }: MessageComposerProps) {
   const { text, setText, clear } = useComposer();
+  const [voiceActive, setVoiceActive] = useState(false);
+
+  const handleVoiceActiveChange = useCallback(
+    (active: boolean) => {
+      setVoiceActive(active);
+
+      if (active) {
+        onTypingChange(false);
+      }
+    },
+    [onTypingChange]
+  );
+
+  function handleChange(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    const value = event.target.value;
+
+    setText(value);
+    onTypingChange(Boolean(value.trim()));
+  }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
     const content = text.trim();
 
-    if (!content || sending) return;
+    if (!content || sending || voiceActive) {
+      return;
+    }
 
-    await onSend(content);
-    clear();
+    const sent = await onSend(content);
+
+    if (sent) {
+      clear();
+      onTypingChange(false);
+    }
   }
 
   return (
     <form
       onSubmit={handleSubmit}
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: 16,
+        padding: 12,
+        paddingBottom:
+          "calc(12px + env(safe-area-inset-bottom))",
         borderTop: "1px solid #2a2a2a",
+        background: "#10131a",
+        boxSizing: "border-box",
       }}
     >
-      <input
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        placeholder="Scrie un mesaj..."
-        disabled={sending}
-        style={{
-          flex: 1,
-          minWidth: 0,
-          height: 48,
-          borderRadius: 24,
-          border: "none",
-          padding: "0 16px",
-        }}
-      />
+      {replyToMessage && (
+        <ReplyPreview
+          message={replyToMessage}
+          onCancel={onCancelReply}
+        />
+      )}
 
-      <button
-        type="submit"
-        disabled={sending || !text.trim()}
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          minWidth: 0,
+        }}
       >
-        {sending ? "Se trimite..." : "Trimite"}
-      </button>
+        {!voiceActive && (
+          <input
+            value={text}
+            onChange={handleChange}
+            placeholder="Scrie un mesaj..."
+            disabled={sending}
+            autoComplete="off"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              height: 48,
+              borderRadius: 24,
+              border: "none",
+              padding: "0 16px",
+              fontSize: 16,
+              boxSizing: "border-box",
+            }}
+          />
+        )}
+
+        {!voiceActive && text.trim() ? (
+          <button
+            type="submit"
+            disabled={sending}
+            style={{
+              minHeight: 44,
+              padding: "0 16px",
+              border: 0,
+              borderRadius: 22,
+              background: "#10b981",
+              color: "#ffffff",
+              fontWeight: 700,
+              opacity: sending ? 0.55 : 1,
+            }}
+          >
+            {sending ? "Se trimite..." : "Trimite"}
+          </button>
+        ) : (
+          <div
+            style={{
+              flex: voiceActive ? 1 : "0 0 auto",
+              width: voiceActive ? "100%" : "auto",
+              minWidth: 0,
+            }}
+          >
+            <VoiceRecorder
+              sending={sending}
+              onSend={onSendVoice}
+              onActiveChange={handleVoiceActiveChange}
+            />
+          </div>
+        )}
+      </div>
     </form>
   );
 }
