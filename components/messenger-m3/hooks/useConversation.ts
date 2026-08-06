@@ -32,6 +32,7 @@ import {
   createTypingSession,
   type TypingSession,
 } from "../services/typing";
+import useMessageSound from "./useMessageSound";
 import type {
   MessengerConversation,
   MessengerMessage,
@@ -55,6 +56,8 @@ export default function useConversation(conversationId: string) {
   const [otherUserIsTyping, setOtherUserIsTyping] =
     useState(false);
   const [error, setError] = useState("");
+
+  const { playSound } = useMessageSound(currentUserId);
 
   const typingSessionRef = useRef<TypingSession | null>(null);
   const reactionRealtimeSessionRef =
@@ -191,6 +194,7 @@ export default function useConversation(conversationId: string) {
           });
 
           setOtherUserIsTyping(false);
+          void playSound();
           void markSeen(currentUserId);
         },
 
@@ -219,7 +223,12 @@ export default function useConversation(conversationId: string) {
         },
       }
     );
-  }, [conversationId, currentUserId, markSeen]);
+  }, [
+    conversationId,
+    currentUserId,
+    markSeen,
+    playSound,
+  ]);
 
   useEffect(() => {
     if (!currentUserId) return;

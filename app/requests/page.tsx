@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { notifyNotificationCountsChanged } from "@/lib/notificationEvents";
 
 type FriendRequest = {
   id: number;
@@ -68,6 +69,17 @@ export default function RequestsPage() {
         setMessage(`Nu am putut încărca cererile: ${requestsResult.error.message}`);
         setLoading(false);
         return;
+      }
+
+      const { error: readError } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("recipient_id", user.id)
+        .eq("type", "friend_request")
+        .eq("is_read", false);
+
+      if (!readError) {
+        notifyNotificationCountsChanged();
       }
 
       const requestRows = (requestsResult.data || []) as FriendRequest[];

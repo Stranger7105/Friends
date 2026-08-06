@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { notifyNotificationCountsChanged } from "@/lib/notificationEvents";
 import type { MessengerMessage } from "../types";
 import {
   MESSAGE_SELECT,
@@ -125,6 +126,33 @@ export async function markConversationSeen(
     );
   }
 
+  const { data: conversationMessages } = await supabase
+    .from("messages")
+    .select("id")
+    .eq("conversation_id", numericConversationId)
+    .neq("sender_id", currentUserId);
+
+  const messageIds = (conversationMessages ?? [])
+    .map((row) => Number(row.id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  if (messageIds.length > 0) {
+    const { error: notificationError } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("recipient_id", currentUserId)
+      .eq("type", "message")
+      .eq("is_read", false)
+      .in("message_id", messageIds);
+
+    if (notificationError) {
+      console.error(
+        `Notificările mesajelor nu au putut fi marcate: ${notificationError.message}`
+      );
+    }
+  }
+
+  notifyNotificationCountsChanged();
   return seenAt;
 }
 
