@@ -21,6 +21,7 @@ import { useMobile } from "@/components/mobile/MobileProvider";
 import MobileBottomBar from "@/components/mobile/MobileBottomBar";
 import "@/styles/mobile-shell.css";
 import "@/styles/friends-notification-badges.css";
+import { FRIENDS_NOTIFICATIONS_CHANGED } from "@/lib/notificationEvents";
 
 type MobileShellProps = {
   children: React.ReactNode;
@@ -114,6 +115,32 @@ export default function MobileShell({ children }: MobileShellProps) {
       active = false;
     };
   }, [isPublicRoute, loadCounts]);
+
+  useEffect(() => {
+    if (!userId || isPublicRoute) return;
+
+    function refreshCounts() {
+      void loadCounts(userId);
+    }
+
+    window.addEventListener(
+      FRIENDS_NOTIFICATIONS_CHANGED,
+      refreshCounts
+    );
+
+    return () => {
+      window.removeEventListener(
+        FRIENDS_NOTIFICATIONS_CHANGED,
+        refreshCounts
+      );
+    };
+  }, [isPublicRoute, loadCounts, userId]);
+
+  useEffect(() => {
+    if (userId && !isPublicRoute) {
+      void loadCounts(userId);
+    }
+  }, [isPublicRoute, loadCounts, pathname, userId]);
 
   useEffect(() => {
     if (!userId || isPublicRoute) return;

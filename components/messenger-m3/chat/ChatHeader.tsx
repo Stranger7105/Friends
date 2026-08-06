@@ -1,3 +1,5 @@
+"use client";
+
 import type { MessengerConversation } from "../types";
 
 type ChatHeaderProps = {
@@ -58,7 +60,7 @@ export default function ChatHeader({
         )}
       </div>
 
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
         <strong
           style={{
             display: "block",

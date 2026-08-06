@@ -35,6 +35,7 @@ import {
 import "@/styles/navbar-theme.css";
 import "@/styles/friends-real-calls.css";
 import "@/styles/friends-groups.css";
+import { FRIENDS_NOTIFICATIONS_CHANGED } from "@/lib/notificationEvents";
 
 const navigationLinks = [
   { href: "/feed", label: "Feed", icon: Home },
@@ -155,6 +156,37 @@ export default function Navbar() {
     void initialize();
     return () => { active = false; };
   }, [loadUnreadCount]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    function refreshCounts() {
+      void loadUnreadCount(userId);
+    }
+
+    window.addEventListener(
+      FRIENDS_NOTIFICATIONS_CHANGED,
+      refreshCounts
+    );
+    window.addEventListener("focus", refreshCounts);
+
+    return () => {
+      window.removeEventListener(
+        FRIENDS_NOTIFICATIONS_CHANGED,
+        refreshCounts
+      );
+      window.removeEventListener(
+        "focus",
+        refreshCounts
+      );
+    };
+  }, [loadUnreadCount, userId]);
+
+  useEffect(() => {
+    if (userId) {
+      void loadUnreadCount(userId);
+    }
+  }, [loadUnreadCount, pathname, userId]);
 
   useEffect(() => {
     if (!userId) return;

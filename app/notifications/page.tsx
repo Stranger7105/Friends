@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
+import { notifyNotificationCountsChanged } from "@/lib/notificationEvents";
 
 type NotificationRow = {
   id: number;
@@ -213,6 +214,7 @@ export default function NotificationsPage() {
           item.id === notification.id ? { ...item, is_read: true } : item
         )
       );
+      notifyNotificationCountsChanged();
     }
 
     setProcessing(null);
@@ -235,6 +237,7 @@ export default function NotificationsPage() {
     setNotifications((current) =>
       current.map((item) => ({ ...item, is_read: true }))
     );
+    notifyNotificationCountsChanged();
   }
 
   async function deleteNotification(id: number) {
@@ -250,6 +253,7 @@ export default function NotificationsPage() {
       setMessage(`Notificarea nu a putut fi ștearsă: ${error.message}`);
     } else {
       setNotifications((current) => current.filter((item) => item.id !== id));
+      notifyNotificationCountsChanged();
     }
 
     setProcessing(null);
