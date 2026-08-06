@@ -62,6 +62,7 @@ export interface MessengerMessage {
   editedAt: string | null;
   createdAt: string;
   status: MessageDeliveryStatus;
+  reaction?: string;
 }
 
 export interface ConversationMember {

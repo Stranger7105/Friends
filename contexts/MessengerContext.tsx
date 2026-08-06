@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import type {
   MessengerConversation,
   MessengerMessage,
@@ -17,34 +18,66 @@ type MessengerContextValue = {
   activeConversationId: string | null;
   conversations: MessengerConversation[];
   messagesByConversation: Record<string, MessengerMessage[]>;
+  typingByConversation: Record<string, boolean>;
+
   setActiveConversationId: (conversationId: string | null) => void;
   setConversations: (conversations: MessengerConversation[]) => void;
+
   replaceMessages: (
     conversationId: string,
     messages: MessengerMessage[]
   ) => void;
+
   appendMessage: (message: MessengerMessage) => void;
+
   updateMessage: (
     conversationId: string,
     messageId: string,
     patch: Partial<MessengerMessage>
   ) => void;
-  removeMessage: (conversationId: string, messageId: string) => void;
+
+  removeMessage: (
+    conversationId: string,
+    messageId: string
+  ) => void;
+
+  setTyping: (
+    conversationId: string,
+    typing: boolean
+  ) => void;
+  addReaction: (
+  conversationId: string,
+  messageId: string,
+  reaction: string
+) => void;
 };
 
-const MessengerContext = createContext<MessengerContextValue | null>(null);
+const MessengerContext =
+  createContext<MessengerContextValue | null>(null);
 
-export function MessengerProvider({ children }: { children: ReactNode }) {
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(
-    null
-  );
-  const [conversations, setConversations] = useState<MessengerConversation[]>([]);
-  const [messagesByConversation, setMessagesByConversation] = useState<
-    Record<string, MessengerMessage[]>
-  >({});
+export function MessengerProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [activeConversationId, setActiveConversationId] =
+    useState<string | null>(null);
+
+  const [conversations, setConversations] = useState<
+    MessengerConversation[]
+  >([]);
+
+  const [messagesByConversation, setMessagesByConversation] =
+    useState<Record<string, MessengerMessage[]>>({});
+
+  const [typingByConversation, setTypingByConversation] =
+    useState<Record<string, boolean>>({});
 
   const replaceMessages = useCallback(
-    (conversationId: string, messages: MessengerMessage[]) => {
+    (
+      conversationId: string,
+      messages: MessengerMessage[]
+    ) => {
       setMessagesByConversation((current) => ({
         ...current,
         [conversationId]: messages,
@@ -53,20 +86,31 @@ export function MessengerProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const appendMessage = useCallback((message: MessengerMessage) => {
-    setMessagesByConversation((current) => {
-      const list = current[message.conversationId] ?? [];
+  const appendMessage = useCallback(
+    (message: MessengerMessage) => {
+      setMessagesByConversation((current) => {
+        const list =
+          current[message.conversationId] ?? [];
 
-      if (list.some((item) => item.id === message.id)) {
-        return current;
-      }
+        if (
+          list.some(
+            (item) => item.id === message.id
+          )
+        ) {
+          return current;
+        }
 
-      return {
-        ...current,
-        [message.conversationId]: [...list, message],
-      };
-    });
-  }, []);
+        return {
+          ...current,
+          [message.conversationId]: [
+            ...list,
+            message,
+          ],
+        };
+      });
+    },
+    []
+  );
 
   const updateMessage = useCallback(
     (
@@ -76,8 +120,12 @@ export function MessengerProvider({ children }: { children: ReactNode }) {
     ) => {
       setMessagesByConversation((current) => ({
         ...current,
-        [conversationId]: (current[conversationId] ?? []).map((message) =>
-          message.id === messageId ? { ...message, ...patch } : message
+        [conversationId]: (
+          current[conversationId] ?? []
+        ).map((message) =>
+          message.id === messageId
+            ? { ...message, ...patch }
+            : message
         ),
       }));
     },
@@ -85,10 +133,15 @@ export function MessengerProvider({ children }: { children: ReactNode }) {
   );
 
   const removeMessage = useCallback(
-    (conversationId: string, messageId: string) => {
+    (
+      conversationId: string,
+      messageId: string
+    ) => {
       setMessagesByConversation((current) => ({
         ...current,
-        [conversationId]: (current[conversationId] ?? []).filter(
+        [conversationId]: (
+          current[conversationId] ?? []
+        ).filter(
           (message) => message.id !== messageId
         ),
       }));
@@ -96,26 +149,69 @@ export function MessengerProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const setTyping = useCallback(
+    (
+      conversationId: string,
+      typing: boolean
+    ) => {
+      setTypingByConversation((current) => ({
+        ...current,
+        [conversationId]: typing,
+      }));
+    },
+    []
+  );
+  const addReaction = useCallback(
+  (
+    conversationId: string,
+    messageId: string,
+    reaction: string
+  ) => {
+    setMessagesByConversation((current) => ({
+      ...current,
+      [conversationId]: (
+        current[conversationId] ?? []
+      ).map((message) => {
+        if (message.id !== messageId) {
+          return message;
+        }
+
+        return {
+          ...message,
+          reaction,
+        };
+      }),
+    }));
+  },
+  []
+);
+
   const value = useMemo<MessengerContextValue>(
     () => ({
       activeConversationId,
       conversations,
       messagesByConversation,
+      typingByConversation,
       setActiveConversationId,
       setConversations,
       replaceMessages,
       appendMessage,
       updateMessage,
       removeMessage,
+      setTyping,
+addReaction,
     }),
     [
       activeConversationId,
       conversations,
       messagesByConversation,
+      typingByConversation,
       replaceMessages,
       appendMessage,
       updateMessage,
       removeMessage,
+      setTyping,
+      addReaction,
     ]
   );
 

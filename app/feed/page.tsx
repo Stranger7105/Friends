@@ -41,11 +41,6 @@ import "@/styles/friends-smart-video-preview.css";
 import "@/styles/friends-hover-preview-portal.css";
 import "@/styles/friends-hover-preview-portal-stories.css";
 import "@/styles/friends-reels-r13-beta.css";
-import "@/styles/friends-mobile-feed-pack1.css";
-import MobileComposerBridge from "@/components/mobile/MobileComposerBridge";
-import "@/styles/friends-mobile-pack2a.css";
-import "@/styles/friends-mobile-stories-pack2b.css";
-
 import { supabase } from "@/lib/supabase";
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"] as const;
@@ -841,7 +836,6 @@ export default function FeedPage() {
 
   return (
     <div className="aurora-feed-page">
-      <MobileComposerBridge />
       <div className="aurora-feed-glow aurora-feed-glow-one" aria-hidden="true" />
       <div className="aurora-feed-glow aurora-feed-glow-two" aria-hidden="true" />
       <div className="aurora-feed-glow aurora-feed-glow-three" aria-hidden="true" />

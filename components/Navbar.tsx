@@ -35,7 +35,6 @@ import {
 import "@/styles/navbar-theme.css";
 import "@/styles/friends-real-calls.css";
 import "@/styles/friends-groups.css";
-import "@/styles/friends-notification-badges.css";
 
 const navigationLinks = [
   { href: "/feed", label: "Feed", icon: Home },
@@ -56,7 +55,6 @@ export default function Navbar() {
   const [userId, setUserId] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
-  const [unreadFriendRequestCount, setUnreadFriendRequestCount] = useState(0);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -126,7 +124,7 @@ export default function Navbar() {
 
 
   const loadUnreadCount = useCallback(async (id: string) => {
-    const [allResult, messageResult, friendRequestResult] = await Promise.all([
+    const [allResult, messageResult] = await Promise.all([
       supabase
         .from("notifications")
         .select("id", { count: "exact", head: true })
@@ -138,19 +136,10 @@ export default function Navbar() {
         .eq("recipient_id", id)
         .eq("type", "message")
         .eq("is_read", false),
-      supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("recipient_id", id)
-        .eq("type", "friend_request")
-        .eq("is_read", false),
     ]);
 
     if (!allResult.error) setUnreadCount(allResult.count ?? 0);
     if (!messageResult.error) setUnreadMessageCount(messageResult.count ?? 0);
-    if (!friendRequestResult.error) {
-      setUnreadFriendRequestCount(friendRequestResult.count ?? 0);
-    }
   }, []);
 
   useEffect(() => {
@@ -185,25 +174,6 @@ export default function Navbar() {
       .subscribe();
 
     return () => { void supabase.removeChannel(channel); };
-  }, [loadUnreadCount, userId]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const intervalId = window.setInterval(() => {
-      void loadUnreadCount(userId);
-    }, 15000);
-
-    function refreshOnFocus() {
-      void loadUnreadCount(userId);
-    }
-
-    window.addEventListener("focus", refreshOnFocus);
-
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", refreshOnFocus);
-    };
   }, [loadUnreadCount, userId]);
 
   useEffect(() => {
@@ -313,16 +283,6 @@ export default function Navbar() {
                     >
                       <Icon size={19} strokeWidth={2.1} />
                       <span className="friends-nav-label">{link.label}</span>
-
-                      {link.href === "/requests" &&
-                        unreadFriendRequestCount > 0 && (
-                          <span className="friends-request-count-badge">
-                            {unreadFriendRequestCount > 99
-                              ? "99+"
-                              : unreadFriendRequestCount}
-                          </span>
-                        )}
-
                       {active && (
                         <motion.span
                           layoutId="friends-top-active"
@@ -516,15 +476,6 @@ export default function Navbar() {
                   >
                     <Icon size={19} />
                     <span>{link.label}</span>
-
-                    {link.href === "/requests" &&
-                      unreadFriendRequestCount > 0 && (
-                        <span className="friends-mobile-badge">
-                          {unreadFriendRequestCount > 99
-                            ? "99+"
-                            : unreadFriendRequestCount}
-                        </span>
-                      )}
                   </Link>
                 );
               })}
