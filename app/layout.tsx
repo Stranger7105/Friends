@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import ThemeLoader from "@/components/ThemeLoader";
 import AppBackground from "@/components/AppBackground";
+import CallProvider from "@/components/calls/CallProvider";
 
 
 
@@ -22,10 +23,12 @@ export default function RootLayout({
   return (
     <html lang="ro" suppressHydrationWarning>
       <body>
-        <ThemeLoader />
-        <AppBackground />
-        <Navbar />
-        {children}
+        <CallProvider>
+          <ThemeLoader />
+          <AppBackground />
+          <Navbar />
+          {children}
+        </CallProvider>
       </body>
     </html>
   );

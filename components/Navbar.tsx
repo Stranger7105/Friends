@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabase";
 import GlobalCallLauncher from "@/components/calls/GlobalCallLauncher";
 import GlobalCallOverlay from "@/components/calls/GlobalCallOverlay";
 import { useGlobalCallManager } from "@/components/calls/useGlobalCallManager";
+import useCall from "@/components/calls/useCall";
 import {
   FRIENDS_START_CALL_EVENT,
   FRIENDS_START_CONFERENCE_EVENT,
@@ -64,6 +65,7 @@ export default function Navbar() {
   const [callCenterOpen, setCallCenterOpen] = useState(false);
   const previousUnreadMessageCountRef = useRef(0);
   const callManager = useGlobalCallManager(userId);
+  const persistentCalls = useCall();
 
   useEffect(() => {
     function handleGlobalCallRequest(event: Event) {
@@ -577,7 +579,31 @@ export default function Navbar() {
         open={callCenterOpen}
         currentUserId={userId}
         onClose={() => setCallCenterOpen(false)}
-        onStartPersonCall={callManager.startCall}
+        onStartPersonCall={async ({
+          contact,
+          conversationId,
+        }) => {
+          const started =
+            await persistentCalls.startCall(
+              {
+                conversationId:
+                  String(conversationId),
+                userId: contact.id,
+                fullName: contact.name,
+                avatarUrl:
+                  contact.avatarUrl ??
+                  undefined,
+              },
+              "audio"
+            );
+
+          if (!started) {
+            throw new Error(
+              persistentCalls.error ||
+                "Apelul nu a putut fi pornit."
+            );
+          }
+        }}
       />
 
       <GlobalCallOverlay

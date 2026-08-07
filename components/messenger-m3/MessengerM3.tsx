@@ -5,6 +5,7 @@ import ChatHeader from "./chat/ChatHeader";
 import MessageList from "./chat/MessageList";
 import MessageComposer from "./composer/MessageComposer";
 import useConversation from "./hooks/useConversation";
+import useCall from "@/components/calls/useCall";
 
 type MessengerM3Props = {
   conversationId: string;
@@ -13,6 +14,8 @@ type MessengerM3Props = {
 export default function MessengerM3({
   conversationId,
 }: MessengerM3Props) {
+  const { startCall, activeCall, busy: callBusy } = useCall();
+
   const {
     currentUserId,
     conversation,
@@ -57,6 +60,32 @@ export default function MessengerM3({
         <ChatHeader
           conversation={conversation}
           isTyping={otherUserIsTyping}
+          callAvailable={
+            conversation.type === "direct" &&
+            conversation.members.some(
+              (member) => member.userId !== currentUserId
+            )
+          }
+          callBusy={callBusy || Boolean(activeCall)}
+          onStartAudioCall={async () => {
+            const peer = conversation.members.find(
+              (member) => member.userId !== currentUserId
+            );
+
+            if (!peer || conversation.type !== "direct") {
+              return;
+            }
+
+            await startCall(
+              {
+                conversationId: conversation.id,
+                userId: peer.userId,
+                fullName: peer.fullName,
+                avatarUrl: peer.avatarUrl,
+              },
+              "audio"
+            );
+          }}
         />
       }
       messages={
