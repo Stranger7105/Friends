@@ -1,57 +1,166 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {
+  useEffect,
+  useRef,
+} from "react";
 import type { ActiveCall } from "./types";
 
-const SOUND_SETTING_KEYS = [
-  "friends_message_sounds_enabled",
-  "friends-notification-sound-enabled",
-  "friends_notification_sound_enabled",
-  "friends-sounds-enabled",
-  "friends_sounds_enabled",
-];
+const STORAGE_PREFIX =
+  "friends:messenger:sound-enabled";
 
-function soundsEnabled(): boolean {
+type ToneMode =
+  | "incoming"
+  | "outgoing";
+
+type AudioContextWindow =
+  typeof window & {
+    webkitAudioContext?: typeof AudioContext;
+  };
+
+let sharedContext: AudioContext | null = null;
+let globalUnlockInstalled = false;
+let globalUnlocked = false;
+
+function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") {
-    return false;
+    return null;
   }
 
-  for (const key of SOUND_SETTING_KEYS) {
-    const value =
-      window.localStorage.getItem(key);
-
-    if (value === "false" || value === "0") {
-      return false;
-    }
-
-    if (value === "true" || value === "1") {
-      return true;
-    }
-  }
-
-  // Până găsim cheia setării existente, apelurile au sonerie implicit.
-  return true;
-}
-
-type ToneMode = "incoming" | "outgoing";
-
-function createToneEngine(mode: ToneMode) {
   const AudioContextClass =
-    window.AudioContext ||
-    (
-      window as typeof window & {
-        webkitAudioContext?: typeof AudioContext;
-      }
-    ).webkitAudioContext;
+    window.AudioContext ??
+    (window as AudioContextWindow)
+      .webkitAudioContext;
 
   if (!AudioContextClass) {
     return null;
   }
 
-  const context = new AudioContextClass();
-  const master = context.createGain();
-  master.gain.value = 0.055;
-  master.connect(context.destination);
+  if (!sharedContext) {
+    sharedContext =
+      new AudioContextClass();
+  }
+
+  return sharedContext;
+}
+
+async function resumeContext(): Promise<boolean> {
+  const context = getAudioContext();
+
+  if (!context) {
+    return false;
+  }
+
+  try {
+    if (
+      context.state === "suspended"
+    ) {
+      await context.resume();
+    }
+
+    globalUnlocked =
+      context.state === "running";
+
+    return globalUnlocked;
+  } catch {
+    return false;
+  }
+}
+
+function installGlobalUnlock(): void {
+  if (
+    typeof window === "undefined" ||
+    globalUnlockInstalled
+  ) {
+    return;
+  }
+
+  globalUnlockInstalled = true;
+
+  const unlock = () => {
+    void resumeContext();
+
+    if (globalUnlocked) {
+      window.removeEventListener(
+        "pointerdown",
+        unlock
+      );
+      window.removeEventListener(
+        "keydown",
+        unlock
+      );
+      window.removeEventListener(
+        "touchend",
+        unlock
+      );
+    }
+  };
+
+  // Capture = true: prindem prima interacțiune oriunde în aplicație,
+  // inclusiv înainte ca alte componente să oprească propagarea.
+  window.addEventListener(
+    "pointerdown",
+    unlock,
+    true
+  );
+  window.addEventListener(
+    "keydown",
+    unlock,
+    true
+  );
+  window.addEventListener(
+    "touchend",
+    unlock,
+    true
+  );
+}
+
+function soundsEnabled(
+  userId: string
+): boolean {
+  if (
+    typeof window === "undefined" ||
+    !userId
+  ) {
+    return false;
+  }
+
+  const stored =
+    window.localStorage.getItem(
+      `${STORAGE_PREFIX}:${userId}`
+    );
+
+  // Dacă utilizatorul a ales explicit OFF, respectăm setarea.
+  // Dacă nu a ales încă nimic, păstrăm soneria activă implicit
+  // pentru apeluri, ca apelurile să nu fie ratate.
+  return stored !== "false";
+}
+
+function createToneEngine(
+  mode: ToneMode
+) {
+  const maybeContext = getAudioContext();
+
+  if (!maybeContext) {
+    return null;
+  }
+
+  // După verificarea de mai sus păstrăm o referință nenulă stabilă.
+  // Astfel TypeScript știe că poate fi folosită și în callback-uri async.
+  const context: AudioContext =
+    maybeContext;
+
+  const master =
+    context.createGain();
+
+  master.gain.value =
+    mode === "incoming"
+      ? 0.085
+      : 0.055;
+
+  master.connect(
+    context.destination
+  );
 
   let stopped = false;
   let timers: number[] = [];
@@ -60,106 +169,144 @@ function createToneEngine(mode: ToneMode) {
     for (const timer of timers) {
       window.clearTimeout(timer);
     }
+
     timers = [];
   }
 
-  function beep(
+  function scheduleTone(
     frequency: number,
     durationMs: number,
     delayMs = 0
   ) {
-    const timer = window.setTimeout(() => {
-      if (stopped) return;
+    const timer =
+      window.setTimeout(() => {
+        if (
+          stopped ||
+          context.state !== "running"
+        ) {
+          return;
+        }
 
-      const oscillator =
-        context.createOscillator();
-      const gain = context.createGain();
+        const oscillator =
+          context.createOscillator();
+        const gain =
+          context.createGain();
 
-      oscillator.type = "sine";
-      oscillator.frequency.value = frequency;
+        oscillator.type = "sine";
+        oscillator.frequency
+          .setValueAtTime(
+            frequency,
+            context.currentTime
+          );
 
-      gain.gain.setValueAtTime(
-        0.0001,
-        context.currentTime
-      );
-      gain.gain.exponentialRampToValueAtTime(
-        0.75,
-        context.currentTime + 0.02
-      );
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        context.currentTime +
-          durationMs / 1000
-      );
+        const start =
+          context.currentTime +
+          0.005;
 
-      oscillator.connect(gain);
-      gain.connect(master);
+        gain.gain.setValueAtTime(
+          0.0001,
+          start
+        );
+        gain.gain
+          .exponentialRampToValueAtTime(
+            0.8,
+            start + 0.018
+          );
+        gain.gain
+          .exponentialRampToValueAtTime(
+            0.0001,
+            start +
+              durationMs / 1000
+          );
 
-      oscillator.start();
-      oscillator.stop(
-        context.currentTime +
-          durationMs / 1000 +
-          0.03
-      );
-    }, delayMs);
+        oscillator.connect(gain);
+        gain.connect(master);
+
+        oscillator.start(start);
+        oscillator.stop(
+          start +
+            durationMs / 1000 +
+            0.03
+        );
+      }, delayMs);
 
     timers.push(timer);
   }
 
-  function scheduleIncoming() {
+  function incomingPattern() {
     if (stopped) return;
 
-    beep(880, 330, 0);
-    beep(660, 330, 420);
+    scheduleTone(880, 360);
+    scheduleTone(660, 360, 440);
 
-    const timer = window.setTimeout(
-      scheduleIncoming,
-      2800
-    );
+    const timer =
+      window.setTimeout(
+        incomingPattern,
+        2800
+      );
+
     timers.push(timer);
   }
 
-  function scheduleOutgoing() {
+  function outgoingPattern() {
     if (stopped) return;
 
-    beep(440, 420, 0);
+    scheduleTone(440, 430);
 
-    const timer = window.setTimeout(
-      scheduleOutgoing,
-      2200
-    );
+    const timer =
+      window.setTimeout(
+        outgoingPattern,
+        2200
+      );
+
     timers.push(timer);
   }
-
-  void context.resume().catch(() => {
-    // Browserul poate bloca autoplay până la o interacțiune.
-  });
 
   if (mode === "incoming") {
-    scheduleIncoming();
+    incomingPattern();
   } else {
-    scheduleOutgoing();
+    outgoingPattern();
   }
 
   return {
+    async start() {
+      await resumeContext();
+    },
+
     stop() {
       if (stopped) return;
+
       stopped = true;
       clearTimers();
-      void context.close().catch(() => {});
-    },
-    resume() {
-      void context.resume().catch(() => {});
+
+      try {
+        master.disconnect();
+      } catch {
+        // deja deconectat
+      }
+
+      // IMPORTANT:
+      // nu închidem sharedContext.
+      // Îl păstrăm deblocat pentru următorul apel primit.
     },
   };
 }
 
 export default function useCallRingtone(
-  activeCall: ActiveCall | null
+  activeCall: ActiveCall | null,
+  currentUserId: string
 ) {
-  const engineRef = useRef<ReturnType<
-    typeof createToneEngine
-  > | null>(null);
+  const engineRef =
+    useRef<ReturnType<
+      typeof createToneEngine
+    > | null>(null);
+
+  // Acest hook este montat global prin CallProvider.
+  // Deblocăm audio la prima interacțiune cu aplicația,
+  // înainte să existe un apel primit.
+  useEffect(() => {
+    installGlobalUnlock();
+  }, []);
 
   useEffect(() => {
     engineRef.current?.stop();
@@ -167,48 +314,72 @@ export default function useCallRingtone(
 
     if (
       !activeCall ||
-      activeCall.status !== "ringing" ||
-      !soundsEnabled()
+      activeCall.status !==
+        "ringing" ||
+      !soundsEnabled(
+        currentUserId
+      )
     ) {
       return;
     }
 
     const mode: ToneMode =
-      activeCall.direction === "incoming"
+      activeCall.direction ===
+      "incoming"
         ? "incoming"
         : "outgoing";
 
-    const engine = createToneEngine(mode);
+    const engine =
+      createToneEngine(mode);
+
     engineRef.current = engine;
 
-    // Dacă browserul a blocat autoplay, prima atingere/click îl deblochează.
+    void engine?.start();
+
+    // Fallback: dacă tab-ul nu fusese încă deblocat,
+    // primul click/touch va porni imediat contextul existent.
     const resume = () => {
-      engine?.resume();
+      void resumeContext();
     };
 
     window.addEventListener(
       "pointerdown",
       resume,
-      { once: true }
+      true
     );
     window.addEventListener(
       "keydown",
       resume,
-      { once: true }
+      true
+    );
+    window.addEventListener(
+      "touchend",
+      resume,
+      true
     );
 
     return () => {
       window.removeEventListener(
         "pointerdown",
-        resume
+        resume,
+        true
       );
       window.removeEventListener(
         "keydown",
-        resume
+        resume,
+        true
       );
+      window.removeEventListener(
+        "touchend",
+        resume,
+        true
+      );
+
       engine?.stop();
 
-      if (engineRef.current === engine) {
+      if (
+        engineRef.current === engine
+      ) {
         engineRef.current = null;
       }
     };
@@ -216,5 +387,6 @@ export default function useCallRingtone(
     activeCall?.id,
     activeCall?.status,
     activeCall?.direction,
+    currentUserId,
   ]);
 }

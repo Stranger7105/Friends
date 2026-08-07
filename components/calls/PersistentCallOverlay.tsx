@@ -45,6 +45,7 @@ export default function PersistentCallOverlay() {
     useRef<HTMLAudioElement | null>(null);
 
   const {
+    currentUserId,
     activeCall,
     busy,
     error,
@@ -60,7 +61,10 @@ export default function PersistentCallOverlay() {
     clearCallError,
   } = useCall();
 
-  useCallRingtone(activeCall);
+  useCallRingtone(
+    activeCall,
+    currentUserId
+  );
 
   useEffect(() => {
     const audio =
