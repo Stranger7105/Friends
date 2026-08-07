@@ -201,31 +201,45 @@ export default function FriendsLocationMap() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const url = new URL(window.location.href);
-
-    if (url.searchParams.get("map") !== "1") {
-      return;
+    function openMapFullscreen() {
+      setIsFullscreen(true);
     }
 
-    // Consumăm comanda o singură dată, ca harta să nu se redeschidă
-    // după ce utilizatorul iese din full-screen.
-    url.searchParams.delete("map");
-    const nextUrl =
-      `${url.pathname}${url.search}${url.hash}`;
-
-    window.history.replaceState(
-      window.history.state,
-      "",
-      nextUrl || "/feed"
+    window.addEventListener(
+      "friends:open-map",
+      openMapFullscreen
     );
 
-    // Lăsăm layout-ul Feed să se monteze înainte de full-screen.
-    const timer = window.setTimeout(() => {
-      setIsFullscreen(true);
-    }, 80);
+    const url = new URL(window.location.href);
+
+    if (url.searchParams.get("map") === "1") {
+      url.searchParams.delete("map");
+
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${url.pathname}${url.search}${url.hash}`
+      );
+
+      const timer = window.setTimeout(
+        openMapFullscreen,
+        60
+      );
+
+      return () => {
+        window.clearTimeout(timer);
+        window.removeEventListener(
+          "friends:open-map",
+          openMapFullscreen
+        );
+      };
+    }
 
     return () => {
-      window.clearTimeout(timer);
+      window.removeEventListener(
+        "friends:open-map",
+        openMapFullscreen
+      );
     };
   }, []);
 

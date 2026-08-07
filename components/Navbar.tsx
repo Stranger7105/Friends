@@ -372,6 +372,14 @@ export default function Navbar() {
               >
                 <Link
                   href="/feed?map=1"
+                  onClick={(event) => {
+                    if (pathname === "/feed") {
+                      event.preventDefault();
+                      window.dispatchEvent(
+                        new CustomEvent("friends:open-map")
+                      );
+                    }
+                  }}
                   aria-label="Deschide Harta Friends"
                   title="Hartă"
                   className={`friends-messages-button ${
