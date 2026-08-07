@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Palette,
+  Phone,
   Settings,
   UserRoundPlus,
   Users,
@@ -22,6 +23,8 @@ import MobileBottomBar from "@/components/mobile/MobileBottomBar";
 import "@/styles/mobile-shell.css";
 import "@/styles/friends-notification-badges.css";
 import { FRIENDS_NOTIFICATIONS_CHANGED } from "@/lib/notificationEvents";
+import GlobalCallLauncher from "@/components/calls/GlobalCallLauncher";
+import useCall from "@/components/calls/useCall";
 
 type MobileShellProps = {
   children: React.ReactNode;
@@ -53,6 +56,8 @@ export default function MobileShell({ children }: MobileShellProps) {
      pathname !== "/messages/messenger-demo";
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [callCenterOpen, setCallCenterOpen] = useState(false);
+  const persistentCalls = useCall();
   const [userId, setUserId] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadFriendRequestCount, setUnreadFriendRequestCount] = useState(0);
@@ -357,6 +362,25 @@ syncConversationViewport();
             </div>
 
             <nav className="friends-native-drawer-links">
+              <button
+                type="button"
+                className="friends-native-drawer-link"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  setCallCenterOpen(true);
+                }}
+                style={{
+                  width: "100%",
+                  border: 0,
+                  cursor: "pointer",
+                  font: "inherit",
+                  textAlign: "left",
+                }}
+              >
+                <Phone size={21} />
+                <span>Apeluri</span>
+              </button>
+
               {drawerLinks.map((link) => {
                 const Icon = link.icon;
                 const active =
@@ -397,6 +421,36 @@ syncConversationViewport();
             </button>
           </div>
         </div>
+      )}
+
+      {isMobile && (
+        <GlobalCallLauncher
+          open={callCenterOpen}
+          currentUserId={userId}
+          onClose={() => setCallCenterOpen(false)}
+          onStartPersonCall={async ({
+            contact,
+            conversationId,
+          }) => {
+            const started =
+              await persistentCalls.startCall(
+                {
+                  conversationId: String(conversationId),
+                  userId: contact.id,
+                  fullName: contact.name,
+                  avatarUrl: contact.avatarUrl ?? undefined,
+                },
+                "audio"
+              );
+
+            if (!started) {
+              throw new Error(
+                persistentCalls.error ||
+                  "Apelul nu a putut fi pornit."
+              );
+            }
+          }}
+        />
       )}
     </>
   );
