@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   MessageCircle,
+  MapPinned,
   PhoneCall,
   Palette,
   Search,
@@ -360,6 +361,29 @@ export default function Navbar() {
                       </motion.span>
                     )}
                   </AnimatePresence>
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <Link
+                  href="/map"
+                  aria-label="Deschide Harta Friends"
+                  title="Hartă"
+                  className={`friends-messages-button ${
+                    isActive("/map") ? "is-active" : ""
+                  }`}
+                >
+                  <span
+                    className="friends-button-shine"
+                    aria-hidden="true"
+                  />
+                  <MapPinned size={20} strokeWidth={2.35} />
+                  <span className="friends-messages-label">
+                    Hartă
+                  </span>
                 </Link>
               </motion.div>
 

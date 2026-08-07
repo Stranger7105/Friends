@@ -4,6 +4,11 @@ import Link from "next/link";
 import {
   ArrowLeft,
   CalendarDays,
+  Check,
+  Plus,
+  Search,
+  Trash2,
+  X,
   Download,
   Files,
   Image as ImageIcon,
@@ -41,6 +46,13 @@ type ProfileRow = {
   full_name: string | null;
   avatar_url: string | null;
 };
+
+type FriendshipRow = {
+  user_id: string;
+  friend_id: string;
+};
+
+type ManageableFriend = ProfileRow;
 
 type DisplayMember = CallContact & {
   username: string | null;
@@ -101,6 +113,13 @@ export default function GroupDetailsPage() {
   const [fileUrls, setFileUrls] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [memberManagerOpen, setMemberManagerOpen] = useState(false);
+  const [availableFriends, setAvailableFriends] = useState<ManageableFriend[]>([]);
+  const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
+  const [memberSearch, setMemberSearch] = useState("");
+  const [memberActionBusy, setMemberActionBusy] = useState(false);
+  const [removingMemberId, setRemovingMemberId] = useState("");
+  const [memberMessage, setMemberMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -259,6 +278,213 @@ export default function GroupDetailsPage() {
     [sharedMessages],
   );
 
+
+  const currentMember = useMemo(
+    () => members.find((member) => member.id === currentUserId),
+    [members, currentUserId],
+  );
+
+  const canManageMembers =
+    currentMember?.role === "owner" ||
+    currentMember?.role === "admin" ||
+    group?.owner_id === currentUserId;
+
+  const visibleAvailableFriends = useMemo(() => {
+    const value = memberSearch.trim().toLocaleLowerCase("ro-RO");
+
+    if (!value) return availableFriends;
+
+    return availableFriends.filter((friend) => {
+      const haystack = `${friend.full_name || ""} ${friend.username || ""}`
+        .toLocaleLowerCase("ro-RO");
+
+      return haystack.includes(value);
+    });
+  }, [availableFriends, memberSearch]);
+
+  async function loadAvailableFriends() {
+    if (!currentUserId) return;
+
+    setMemberMessage("");
+    setMemberActionBusy(true);
+
+    const friendshipsResult = await supabase
+      .from("friends")
+      .select("user_id, friend_id")
+      .or(`user_id.eq.${currentUserId},friend_id.eq.${currentUserId}`);
+
+    if (friendshipsResult.error) {
+      setMemberMessage(
+        `Prietenii nu au putut fi încărcați: ${friendshipsResult.error.message}`,
+      );
+      setMemberActionBusy(false);
+      return;
+    }
+
+    const friendships =
+      (friendshipsResult.data || []) as FriendshipRow[];
+
+    const existingMemberIds = new Set(
+      members.map((member) => member.id),
+    );
+
+    const friendIds = Array.from(
+      new Set(
+        friendships.map((friendship) =>
+          friendship.user_id === currentUserId
+            ? friendship.friend_id
+            : friendship.user_id,
+        ),
+      ),
+    ).filter((id) => !existingMemberIds.has(id));
+
+    if (friendIds.length === 0) {
+      setAvailableFriends([]);
+      setMemberActionBusy(false);
+      return;
+    }
+
+    const profilesResult = await supabase
+      .from("profiles")
+      .select("id, username, full_name, avatar_url")
+      .in("id", friendIds)
+      .order("full_name", { ascending: true });
+
+    if (profilesResult.error) {
+      setMemberMessage(
+        `Profilurile nu au putut fi încărcate: ${profilesResult.error.message}`,
+      );
+    } else {
+      setAvailableFriends(
+        (profilesResult.data || []) as ManageableFriend[],
+      );
+    }
+
+    setMemberActionBusy(false);
+  }
+
+  function openMemberManager() {
+    setSelectedFriendIds([]);
+    setMemberSearch("");
+    setMemberMessage("");
+    setMemberManagerOpen(true);
+    void loadAvailableFriends();
+  }
+
+  function toggleSelectedFriend(friendId: string) {
+    setSelectedFriendIds((current) =>
+      current.includes(friendId)
+        ? current.filter((id) => id !== friendId)
+        : [...current, friendId],
+    );
+  }
+
+  async function addSelectedFriends() {
+    if (
+      !group ||
+      selectedFriendIds.length === 0 ||
+      memberActionBusy
+    ) {
+      return;
+    }
+
+    setMemberActionBusy(true);
+    setMemberMessage("");
+
+    const { error: rpcError } = await supabase.rpc(
+      "add_friends_group_members",
+      {
+        target_group_id: group.id,
+        selected_member_ids: selectedFriendIds,
+      },
+    );
+
+    if (rpcError) {
+      setMemberMessage(
+        `Membrii nu au putut fi adăugați: ${rpcError.message}`,
+      );
+      setMemberActionBusy(false);
+      return;
+    }
+
+    const addedProfiles = availableFriends.filter((friend) =>
+      selectedFriendIds.includes(friend.id),
+    );
+
+    const addedMembers: DisplayMember[] = addedProfiles.map(
+      (profile) => ({
+        id: profile.id,
+        name: nameOf(profile),
+        avatarUrl: profile.avatar_url,
+        username: profile.username,
+        role: "member",
+        joinedAt: new Date().toISOString(),
+      }),
+    );
+
+    setMembers((current) =>
+      [...current, ...addedMembers].sort((a, b) =>
+        a.name.localeCompare(b.name, "ro"),
+      ),
+    );
+
+    setAvailableFriends((current) =>
+      current.filter(
+        (friend) => !selectedFriendIds.includes(friend.id),
+      ),
+    );
+    setSelectedFriendIds([]);
+    setMemberMessage("Prietenii selectați au fost adăugați în grup.");
+    setMemberActionBusy(false);
+  }
+
+  async function removeMember(member: DisplayMember) {
+    if (
+      !group ||
+      member.id === group.owner_id ||
+      member.id === currentUserId ||
+      removingMemberId
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Îl elimini pe ${member.name} din grup?`,
+    );
+
+    if (!confirmed) return;
+
+    setRemovingMemberId(member.id);
+    setMemberMessage("");
+
+    const { error: rpcError } = await supabase.rpc(
+      "remove_friends_group_member",
+      {
+        target_group_id: group.id,
+        target_user_id: member.id,
+      },
+    );
+
+    if (rpcError) {
+      setMemberMessage(
+        `Membrul nu a putut fi eliminat: ${rpcError.message}`,
+      );
+      setRemovingMemberId("");
+      return;
+    }
+
+    setMembers((current) =>
+      current.filter((item) => item.id !== member.id),
+    );
+
+    setMemberMessage(`${member.name} a fost eliminat din grup.`);
+    setRemovingMemberId("");
+
+    if (memberManagerOpen) {
+      void loadAvailableFriends();
+    }
+  }
+
   const tabs: Array<{ id: TabId; label: string; icon: typeof Users }> = [
     { id: "overview", label: "Grup", icon: ShieldCheck },
     { id: "chat", label: "Chat", icon: MessageCircle },
@@ -409,22 +635,552 @@ export default function GroupDetailsPage() {
 
             {activeTab === "members" && (
               <section className="friends-group-panel">
-                <div className="friends-group-section-heading">
-                  <div><span>COMUNITATE</span><h2>Membrii grupului</h2></div>
-                  <small>{members.length} membri</small>
+                <div
+                  className="friends-group-section-heading"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 12,
+                  }}
+                >
+                  <div>
+                    <span>COMUNITATE</span>
+                    <h2>Membrii grupului</h2>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <small>{members.length} membri</small>
+
+                    {canManageMembers && (
+                      <button
+                        type="button"
+                        onClick={openMemberManager}
+                        style={{
+                          minHeight: 42,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "0 14px",
+                          border: 0,
+                          borderRadius: 14,
+                          background: "var(--friends-primary)",
+                          color: "#ffffff",
+                          fontWeight: 800,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Plus size={18} />
+                        Adaugă prieteni
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {memberMessage && (
+                  <div
+                    style={{
+                      marginBottom: 14,
+                      padding: "10px 12px",
+                      borderRadius: 12,
+                      background: "rgba(16,185,129,0.12)",
+                      border: "1px solid rgba(16,185,129,0.3)",
+                    }}
+                  >
+                    {memberMessage}
+                  </div>
+                )}
+
                 <div className="friends-group-members-grid">
-                  {members.map((member) => (
-                    <div key={member.id} className="friends-group-member-card">
-                      <div className="friends-group-member-avatar">
-                        {member.avatarUrl ? <img src={member.avatarUrl} alt="" /> : initials(member.name)}
+                  {members.map((member) => {
+                    const removable =
+                      canManageMembers &&
+                      member.id !== group.owner_id &&
+                      member.id !== currentUserId;
+
+                    return (
+                      <div
+                        key={member.id}
+                        className="friends-group-member-card"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "auto minmax(0, 1fr)",
+                          gridAutoFlow: "row",
+                          alignItems: "center",
+                          gap: 12,
+                        }}
+                      >
+                        <div className="friends-group-member-avatar">
+                          {member.avatarUrl ? (
+                            <img src={member.avatarUrl} alt="" />
+                          ) : (
+                            initials(member.name)
+                          )}
+                        </div>
+
+                        <div style={{ minWidth: 0 }}>
+                          <strong
+                            style={{
+                              display: "block",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {member.name}
+                          </strong>
+                          <span
+                            style={{
+                              display: "block",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            @{member.username || "friends"}
+                          </span>
+                          <em className={`role-${member.role}`}>
+                            {roleLabel(member.role)}
+                            {member.id === currentUserId ? " · Tu" : ""}
+                          </em>
+                        </div>
+
+                        {removable && (
+                          <button
+                            type="button"
+                            disabled={removingMemberId === member.id}
+                            onClick={() => void removeMember(member)}
+                            aria-label={`Elimină ${member.name} din grup`}
+                            title="Elimină din grup"
+                            style={{
+                              minHeight: 40,
+                              gridColumn: "1 / -1",
+                              width: "100%",
+                              flexShrink: 0,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 7,
+                              padding: "0 11px",
+                              borderRadius: 12,
+                              border:
+                                "1px solid rgba(248,113,113,0.38)",
+                              background:
+                                "rgba(239,68,68,0.14)",
+                              color: "#fca5a5",
+                              fontSize: 13,
+                              fontWeight: 800,
+                              cursor: "pointer",
+                              opacity:
+                                removingMemberId === member.id
+                                  ? 0.55
+                                  : 1,
+                            }}
+                          >
+                            <Trash2 size={17} />
+                            <span>
+                              {removingMemberId === member.id
+                                ? "Se elimină…"
+                                : "Elimină"}
+                            </span>
+                          </button>
+                        )}
                       </div>
-                      <div><strong>{member.name}</strong><span>@{member.username || "friends"}</span></div>
-                      <em className={`role-${member.role}`}>{roleLabel(member.role)}{member.id === currentUserId ? " · Tu" : ""}</em>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
+                {!canManageMembers && (
+                  <p
+                    style={{
+                      marginTop: 14,
+                      fontSize: 13,
+                      opacity: 0.7,
+                    }}
+                  >
+                    Doar owner-ul sau un administrator poate modifica membrii grupului.
+                  </p>
+                )}
               </section>
+            )}
+
+            {memberManagerOpen && (
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Adaugă prieteni în grup"
+                onClick={() => {
+                  if (!memberActionBusy) {
+                    setMemberManagerOpen(false);
+                  }
+                }}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 100000,
+                  display: "grid",
+                  placeItems: "center",
+                  padding:
+                    "max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom))",
+                  background: "rgba(0,0,0,0.72)",
+                }}
+              >
+                <section
+                  onClick={(event) => event.stopPropagation()}
+                  style={{
+                    width: "min(620px, 100%)",
+                    maxHeight: "min(760px, 92dvh)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    borderRadius: 24,
+                    background:
+                      "var(--friends-surface, #101a20)",
+                    color: "var(--friends-text, #fff)",
+                    border:
+                      "1px solid var(--friends-border, rgba(255,255,255,0.14))",
+                    boxShadow:
+                      "0 24px 80px rgba(0,0,0,0.45)",
+                  }}
+                >
+                  <header
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      padding: 16,
+                      borderBottom:
+                        "1px solid var(--friends-border, rgba(255,255,255,0.12))",
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: 20 }}>
+                        Adaugă prieteni
+                      </strong>
+                      <div
+                        style={{
+                          marginTop: 3,
+                          fontSize: 13,
+                          opacity: 0.7,
+                        }}
+                      >
+                        {selectedFriendIds.length} selectați
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={memberActionBusy}
+                      onClick={() =>
+                        setMemberManagerOpen(false)
+                      }
+                      aria-label="Închide"
+                      style={{
+                        width: 42,
+                        height: 42,
+                        display: "grid",
+                        placeItems: "center",
+                        border: 0,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.08)",
+                        color: "inherit",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <X size={20} />
+                    </button>
+                  </header>
+
+                  <div style={{ padding: 14 }}>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 9,
+                        padding: "0 12px",
+                        minHeight: 46,
+                        borderRadius: 14,
+                        border:
+                          "1px solid var(--friends-border, rgba(255,255,255,0.12))",
+                        background:
+                          "var(--friends-surface-strong, rgba(255,255,255,0.06))",
+                      }}
+                    >
+                      <Search size={18} />
+                      <input
+                        value={memberSearch}
+                        onChange={(event) =>
+                          setMemberSearch(event.target.value)
+                        }
+                        placeholder="Caută un prieten…"
+                        style={{
+                          minWidth: 0,
+                          flex: 1,
+                          border: 0,
+                          outline: 0,
+                          background: "transparent",
+                          color: "inherit",
+                          fontSize: 16,
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    style={{
+                      minHeight: 160,
+                      flex: 1,
+                      overflowY: "auto",
+                      overscrollBehavior: "contain",
+                      padding: "0 14px 14px",
+                    }}
+                  >
+                    {memberActionBusy &&
+                    availableFriends.length === 0 ? (
+                      <div
+                        style={{
+                          padding: 24,
+                          textAlign: "center",
+                          opacity: 0.7,
+                        }}
+                      >
+                        Se încarcă prietenii…
+                      </div>
+                    ) : visibleAvailableFriends.length === 0 ? (
+                      <div
+                        style={{
+                          padding: 24,
+                          textAlign: "center",
+                          opacity: 0.7,
+                        }}
+                      >
+                        {availableFriends.length === 0
+                          ? "Toți prietenii tăi sunt deja în acest grup."
+                          : "Nu am găsit niciun prieten."}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: 9,
+                        }}
+                      >
+                        {visibleAvailableFriends.map(
+                          (friend) => {
+                            const selected =
+                              selectedFriendIds.includes(
+                                friend.id,
+                              );
+                            const friendName =
+                              nameOf(friend);
+
+                            return (
+                              <button
+                                key={friend.id}
+                                type="button"
+                                onClick={() =>
+                                  toggleSelectedFriend(
+                                    friend.id,
+                                  )
+                                }
+                                style={{
+                                  width: "100%",
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "48px minmax(0,1fr) 34px",
+                                  alignItems: "center",
+                                  gap: 11,
+                                  padding: 10,
+                                  borderRadius: 16,
+                                  border: selected
+                                    ? "1px solid var(--friends-primary)"
+                                    : "1px solid var(--friends-border, rgba(255,255,255,0.12))",
+                                  background: selected
+                                    ? "color-mix(in srgb, var(--friends-primary) 16%, var(--friends-surface))"
+                                    : "var(--friends-surface-strong, rgba(255,255,255,0.05))",
+                                  color: "inherit",
+                                  textAlign: "left",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 48,
+                                    height: 48,
+                                    display: "grid",
+                                    placeItems: "center",
+                                    overflow: "hidden",
+                                    borderRadius: "50%",
+                                    background:
+                                      "var(--friends-primary)",
+                                    color: "#fff",
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {friend.avatar_url ? (
+                                    <img
+                                      src={friend.avatar_url}
+                                      alt=""
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  ) : (
+                                    initials(friendName)
+                                  )}
+                                </div>
+
+                                <div style={{ minWidth: 0 }}>
+                                  <strong
+                                    style={{
+                                      display: "block",
+                                      overflow: "hidden",
+                                      textOverflow:
+                                        "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {friendName}
+                                  </strong>
+                                  {friend.username && (
+                                    <span
+                                      style={{
+                                        display: "block",
+                                        marginTop: 2,
+                                        fontSize: 13,
+                                        opacity: 0.65,
+                                        overflow: "hidden",
+                                        textOverflow:
+                                          "ellipsis",
+                                        whiteSpace: "nowrap",
+                                      }}
+                                    >
+                                      @{friend.username}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <span
+                                  style={{
+                                    width: 30,
+                                    height: 30,
+                                    display: "grid",
+                                    placeItems: "center",
+                                    borderRadius: "50%",
+                                    border:
+                                      "1px solid var(--friends-border, rgba(255,255,255,0.18))",
+                                    background: selected
+                                      ? "var(--friends-primary)"
+                                      : "transparent",
+                                    color: selected
+                                      ? "#fff"
+                                      : "inherit",
+                                  }}
+                                >
+                                  {selected ? (
+                                    <Check size={17} />
+                                  ) : (
+                                    <Plus size={17} />
+                                  )}
+                                </span>
+                              </button>
+                            );
+                          },
+                        )}
+                      </div>
+                    )}
+
+                    {memberMessage && (
+                      <div
+                        style={{
+                          marginTop: 10,
+                          padding: 10,
+                          borderRadius: 12,
+                          background:
+                            "rgba(16,185,129,0.12)",
+                        }}
+                      >
+                        {memberMessage}
+                      </div>
+                    )}
+                  </div>
+
+                  <footer
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 10,
+                      padding: 14,
+                      borderTop:
+                        "1px solid var(--friends-border, rgba(255,255,255,0.12))",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      disabled={memberActionBusy}
+                      onClick={() =>
+                        setMemberManagerOpen(false)
+                      }
+                      style={{
+                        minHeight: 44,
+                        padding: "0 16px",
+                        borderRadius: 14,
+                        border:
+                          "1px solid var(--friends-border, rgba(255,255,255,0.16))",
+                        background: "transparent",
+                        color: "inherit",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Închide
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={
+                        memberActionBusy ||
+                        selectedFriendIds.length === 0
+                      }
+                      onClick={() =>
+                        void addSelectedFriends()
+                      }
+                      style={{
+                        minHeight: 44,
+                        padding: "0 17px",
+                        borderRadius: 14,
+                        border: 0,
+                        background:
+                          "var(--friends-primary)",
+                        color: "#fff",
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        opacity:
+                          memberActionBusy ||
+                          selectedFriendIds.length === 0
+                            ? 0.5
+                            : 1,
+                      }}
+                    >
+                      {memberActionBusy
+                        ? "Se adaugă…"
+                        : `Adaugă (${selectedFriendIds.length})`}
+                    </button>
+                  </footer>
+                </section>
+              </div>
             )}
 
             {activeTab === "calls" && (

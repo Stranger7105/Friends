@@ -2,6 +2,7 @@
 
 import { Expand, MapPin, Minimize2, RefreshCw, UsersRound } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import FriendsMapCanvas, { type FriendMapPoint } from "@/components/location/FriendsMapCanvas";
 
@@ -339,7 +340,7 @@ export default function FriendsLocationMap() {
     [groups, selectedGroupId],
   );
 
-  return (
+  const mapCard = (
     <section
       ref={cardRef}
       className={`aurora-sidebar-card friends-location-card ${isFullscreen ? "is-native-fullscreen" : ""}`}
@@ -453,4 +454,13 @@ export default function FriendsLocationMap() {
       </div>
     </section>
   );
+
+  if (
+    isFullscreen &&
+    typeof document !== "undefined"
+  ) {
+    return createPortal(mapCard, document.body);
+  }
+
+  return mapCard;
 }

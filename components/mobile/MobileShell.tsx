@@ -7,6 +7,7 @@ import {
   Bell,
   GalleryHorizontalEnd,
   LogOut,
+  MapPinned,
   Menu,
   Palette,
   Settings,
@@ -275,6 +276,15 @@ syncConversationViewport();
           </Link>
 
           <div className="friends-mobile-header-actions">
+            <Link
+              href="/map"
+              className="friends-mobile-header-button"
+              aria-label="Harta Friends"
+              title="Hartă"
+            >
+              <MapPinned size={21} />
+            </Link>
+
             <Link
               href="/notifications"
               className="friends-mobile-header-button friends-mobile-notification-button"
