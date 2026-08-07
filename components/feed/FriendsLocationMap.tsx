@@ -178,28 +178,85 @@ export default function FriendsLocationMap() {
   }, [loadGroups, loadLocations]);
 
   useEffect(() => {
-    const onFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === cardRef.current);
-    };
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
-  }, []);
+    if (!isFullscreen) return;
 
-  async function toggleFullscreen() {
-    const card = cardRef.current;
-    if (!card) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    try {
-      if (document.fullscreenElement === card) {
-        await document.exitFullscreen();
-      } else {
-        await card.requestFullscreen({ navigationUI: "hide" });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsFullscreen(false);
       }
-    } catch (error) {
-      console.error("Harta nu a putut schimba modul full-screen:", error);
-      setMessage("Browserul nu a permis schimbarea modului full-screen.");
-    }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isFullscreen]);
+
+  function toggleFullscreen() {
+    setIsFullscreen((current) => !current);
   }
+
+  useEffect(() => {
+    if (
+      !currentUserId ||
+      !locationVisible ||
+      !navigator.geolocation
+    ) {
+      return;
+    }
+
+    let lastSavedAt = 0;
+
+    const watchId = navigator.geolocation.watchPosition(
+      ({ coords }) => {
+        const now = Date.now();
+
+        // Nu scriem în Supabase mai des de o dată la 20 secunde.
+        if (now - lastSavedAt < 20000) return;
+        lastSavedAt = now;
+
+        void (async () => {
+          const { error } = await supabase
+            .from("profiles")
+            .update({
+              location_latitude: coords.latitude,
+              location_longitude: coords.longitude,
+              location_updated_at: new Date().toISOString(),
+            })
+            .eq("id", currentUserId)
+            .eq("location_visible", true);
+
+          if (!error) {
+            void loadLocations();
+          }
+        })();
+      },
+      (error) => {
+        // Dacă utilizatorul retrage permisiunea, nu dezactivăm
+        // preferința lui în Friends; doar oprim actualizarea automată.
+        if (error.code !== error.PERMISSION_DENIED) {
+          console.warn(
+            "Actualizarea automată a locației a eșuat:",
+            error.message
+          );
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 15000,
+        timeout: 30000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [currentUserId, loadLocations, locationVisible]);
 
   async function saveExactLocation() {
     if (!currentUserId || sharing) return;
@@ -286,6 +343,23 @@ export default function FriendsLocationMap() {
     <section
       ref={cardRef}
       className={`aurora-sidebar-card friends-location-card ${isFullscreen ? "is-native-fullscreen" : ""}`}
+      style={
+        isFullscreen
+          ? {
+              position: "fixed",
+              inset: 0,
+              zIndex: 100000,
+              width: "100vw",
+              height: "100dvh",
+              maxWidth: "none",
+              margin: 0,
+              borderRadius: 0,
+              overflow: "auto",
+              background: "var(--friends-surface, #08111d)",
+              padding: 12,
+            }
+          : undefined
+      }
     >
       <div className="aurora-sidebar-title-row friends-location-header">
         <div>
@@ -322,7 +396,17 @@ export default function FriendsLocationMap() {
         </select>
       </label>
 
-      <div className={`friends-location-map ${isFullscreen ? "is-fullscreen" : ""}`}>
+      <div
+        className={`friends-location-map ${isFullscreen ? "is-fullscreen" : ""}`}
+        style={
+          isFullscreen
+            ? {
+                height: "calc(100dvh - 210px)",
+                minHeight: 420,
+              }
+            : undefined
+        }
+      >
         <FriendsMapCanvas points={points} fullscreen={isFullscreen} onMapClick={undefined} />
 
         {loading ? (

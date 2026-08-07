@@ -125,6 +125,13 @@ function getInitials(profile: Profile | null) {
     .join("");
 }
 
+function isVideoMediaPath(path: string | null | undefined) {
+  if (!path) return false;
+
+  const cleanPath = path.toLowerCase().split("?")[0];
+  return /\.(mp4|webm|mov|m4v|ogv|ogg)$/.test(cleanPath);
+}
+
 function formatRelativeDate(value: string) {
   const date = new Date(value);
   const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
@@ -550,13 +557,24 @@ export default function FeedPage() {
   }, [posts, imageUrls]);
 
   function selectImageFile(file: File) {
-    if (!file.type.startsWith("image/")) {
-      setErrorMessage("Poți selecta doar o imagine.");
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      setErrorMessage("Poți selecta o fotografie sau un fișier video.");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage("Imaginea este prea mare. Limita este de 10 MB.");
+    const maxSize = isVideo
+      ? 100 * 1024 * 1024
+      : 10 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      setErrorMessage(
+        isVideo
+          ? "Videoclipul este prea mare. Limita este de 100 MB."
+          : "Imaginea este prea mare. Limita este de 10 MB."
+      );
       return;
     }
 
@@ -569,14 +587,25 @@ export default function FeedPage() {
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setErrorMessage("Poți selecta doar o imagine.");
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+      setErrorMessage("Poți selecta o fotografie sau un fișier video.");
       event.currentTarget.value = "";
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage("Imaginea este prea mare. Limita este de 10 MB.");
+    const maxSize = isVideo
+      ? 100 * 1024 * 1024
+      : 10 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      setErrorMessage(
+        isVideo
+          ? "Videoclipul este prea mare. Limita este de 100 MB."
+          : "Imaginea este prea mare. Limita este de 10 MB."
+      );
       event.currentTarget.value = "";
       return;
     }
@@ -628,7 +657,7 @@ export default function FeedPage() {
           });
 
         if (uploadError) {
-          setErrorMessage(`Imaginea nu a putut fi încărcată: ${uploadError.message}`);
+          setErrorMessage(`Fișierul media nu a putut fi încărcat: ${uploadError.message}`);
           return;
         }
       }
@@ -784,17 +813,17 @@ export default function FeedPage() {
   async function deletePost(post: Post) {
     if (post.user_id !== currentUserId || busyPostId !== null) return;
 
-    const confirmed = window.confirm("Ștergi această postare?");
+    const confirmed = window.confirm(
+      "Ștergi această postare? Comentariile, reacțiile și distribuirile legate de ea vor fi eliminate."
+    );
     if (!confirmed) return;
 
     setBusyPostId(post.id);
     setErrorMessage("");
 
-    const { error } = await supabase
-      .from("posts")
-      .delete()
-      .eq("id", post.id)
-      .eq("user_id", currentUserId);
+    const { error } = await supabase.rpc("delete_own_post_cascade", {
+      target_post_id: post.id,
+    });
 
     if (error) {
       setErrorMessage(`Postarea nu a putut fi ștearsă: ${error.message}`);
@@ -803,9 +832,19 @@ export default function FeedPage() {
     }
 
     if (post.image_path) {
-      await supabase.storage.from("post-images").remove([post.image_path]);
+      const { error: storageError } = await supabase.storage
+        .from("post-images")
+        .remove([post.image_path]);
+
+      if (storageError) {
+        console.warn(
+          "Postarea a fost ștearsă, dar fișierul media nu a putut fi eliminat:",
+          storageError.message
+        );
+      }
     }
 
+    setPosts((current) => current.filter((item) => item.id !== post.id));
     setBusyPostId(null);
     await loadFeed();
   }
@@ -1019,12 +1058,22 @@ export default function FeedPage() {
 
                       {post.image_path && imageUrls[post.image_path] && (
                         <div className="aurora-post-media">
-                          <img
-                            src={imageUrls[post.image_path]}
-                            alt="Fotografie din postare"
-                            className="aurora-post-image"
-                            loading="lazy"
-                          />
+                          {isVideoMediaPath(post.image_path) ? (
+                            <video
+                              src={imageUrls[post.image_path]}
+                              className="aurora-post-image"
+                              controls
+                              playsInline
+                              preload="metadata"
+                            />
+                          ) : (
+                            <img
+                              src={imageUrls[post.image_path]}
+                              alt="Fotografie din postare"
+                              className="aurora-post-image"
+                              loading="lazy"
+                            />
+                          )}
                           <div className="aurora-post-media-shine" aria-hidden="true" />
                         </div>
                       )}
@@ -1073,11 +1122,20 @@ export default function FeedPage() {
                           {post.shared_post.image_path &&
                             imageUrls[post.shared_post.image_path] && (
                               <div className="aurora-shared-media">
-                                <img
-                                  src={imageUrls[post.shared_post.image_path]}
-                                  alt="Fotografie distribuită"
-                                  loading="lazy"
-                                />
+                                {isVideoMediaPath(post.shared_post.image_path) ? (
+                                  <video
+                                    src={imageUrls[post.shared_post.image_path]}
+                                    controls
+                                    playsInline
+                                    preload="metadata"
+                                  />
+                                ) : (
+                                  <img
+                                    src={imageUrls[post.shared_post.image_path]}
+                                    alt="Fotografie distribuită"
+                                    loading="lazy"
+                                  />
+                                )}
                               </div>
                             )}
                         </div>

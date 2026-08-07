@@ -57,10 +57,10 @@ type Audience =
   | { type: "group"; groupId: string; label: string };
 
 const actions = [
-  { label: "Foto", icon: ImagePlus, primary: true },
-  { label: "Video", icon: Video },
-  { label: "Stare", icon: Smile },
-  { label: "Locație", icon: MapPin },
+  { label: "Foto", icon: ImagePlus, media: true },
+  { label: "Video", icon: Video, media: true },
+  { label: "Stare", icon: Smile, media: false },
+  { label: "Locație", icon: MapPin, media: false },
 ];
 
 function displayName(profile: ComposerProfile | null) {
@@ -293,8 +293,8 @@ export default function AuroraComposer({
               className="aurora-composer-c21-drop"
             >
               <UploadCloud size={34} />
-              <strong>Lasă fotografia aici</strong>
-              <span>Va fi adăugată postării tale.</span>
+              <strong>Lasă fotografia sau videoclipul aici</strong>
+              <span>Fișierul va fi adăugat postării tale.</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -307,13 +307,22 @@ export default function AuroraComposer({
               exit={{ opacity: 0, height: 0, y: 8 }}
               className="aurora-composer-c21-preview"
             >
-              <img src={previewUrl} alt="Previzualizarea fotografiei" />
+              {selectedImage?.type.startsWith("video/") ? (
+                <video
+                  src={previewUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img src={previewUrl} alt="Previzualizarea fotografiei" />
+              )}
 
               <button
                 type="button"
                 onClick={onRemoveImage}
-                aria-label="Elimină fotografia"
-                title="Elimină fotografia"
+                aria-label="Elimină fișierul media"
+                title="Elimină fișierul media"
               >
                 <X size={18} />
               </button>
@@ -332,19 +341,19 @@ export default function AuroraComposer({
               className="aurora-composer-c21-footer"
             >
               <div className="aurora-composer-c21-actions">
-                {actions.map(({ label, icon: Icon, primary }) => (
+                {actions.map(({ label, icon: Icon, media }) => (
                   <motion.button
                     key={label}
                     type="button"
                     whileHover={{ y: -2, scale: 1.025 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={
-                      primary
+                      media
                         ? () => imageInputRef.current?.click()
                         : undefined
                     }
                     title={
-                      primary ? label : `${label} — disponibil în curând`
+                      media ? label : `${label} — disponibil în curând`
                     }
                   >
                     <Icon size={17} />
@@ -420,7 +429,7 @@ export default function AuroraComposer({
         <input
           ref={imageInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/x-m4v"
           onChange={onImageSelect}
           className="hidden"
         />
