@@ -17,7 +17,7 @@ const sideLinks = [
     icon: Home,
   },
   {
-    href: "/map",
+    href: "/feed?map=1",
     label: "Hartă",
     icon: MapPinned,
   },
@@ -38,9 +38,11 @@ export default function MobileBottomBar() {
   const router = useRouter();
 
   function isActive(href: string) {
+    const route = href.split("?")[0];
+
     return (
-      pathname === href ||
-      (href !== "/feed" && pathname.startsWith(`${href}/`))
+      pathname === route ||
+      (route !== "/feed" && pathname.startsWith(`${route}/`))
     );
   }
 

@@ -545,109 +545,51 @@ export default function OnlineFriendsCard() {
         />
       </label>
 
-      <section className="friends-g11">
-        <button
-          type="button"
-          className="friends-g11-toggle"
-          onClick={() => setGroupsOpen((value) => !value)}
-          aria-expanded={groupsOpen}
+      <section
+        className="friends-g11"
+        style={{
+          padding: 0,
+          overflow: "hidden",
+        }}
+      >
+        <Link
+          href="/groups"
+          style={{
+            minHeight: 48,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "10px 13px",
+            borderRadius: 14,
+            border:
+              "1px solid var(--friends-border, rgba(255,255,255,0.12))",
+            background:
+              "var(--friends-surface-strong, rgba(255,255,255,0.06))",
+            color: "inherit",
+            textDecoration: "none",
+            fontWeight: 800,
+          }}
         >
-          <span>
-            <UsersRound size={17} />
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 9,
+            }}
+          >
+            <UsersRound size={18} />
             Grupurile mele
           </span>
-          {groupsOpen ? <ChevronUp size={17} /> : <ChevronDown size={17} />}
-        </button>
-
-        {groupsOpen && (
-          <div className="friends-g11-panel">
-            <div className="friends-g11-all">
-              <span>Toți prietenii</span>
-              <strong>{friends.length}</strong>
-            </div>
-
-            {groupsLoading ? (
-              <p className="friends-g11-state">Se încarcă grupurile…</p>
-            ) : groupsError ? (
-              <p className="friends-g11-state is-error">{groupsError}</p>
-            ) : groups.length === 0 ? (
-              <p className="friends-g11-state">
-                Nu ai creat încă niciun grup.
-              </p>
-            ) : (
-              <div className="friends-g11-list">
-                {groups.map((group) => {
-                  const selected = selectedGroupId === group.id;
-
-                  return (
-                    <button
-                      key={group.id}
-                      type="button"
-                      className={`friends-g11-row ${selected ? "is-selected" : ""}`}
-                      onClick={() =>
-                        setSelectedGroupId((current) =>
-                          current === group.id ? null : group.id,
-                        )
-                      }
-                      aria-pressed={selected}
-                    >
-                      <span>
-                        {selected && <Check size={14} />}
-                        {group.name}
-                      </span>
-                      <strong>{groupCounts[group.id] || 0}</strong>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {selectedGroup && (
-              <div className="friends-g13-selected">
-                <div className="friends-g13-selected-head">
-                  <span>Grup selectat</span>
-                  <strong>{selectedGroup.name}</strong>
-                </div>
-
-                <div className="friends-g13-actions">
-                  <button
-                    type="button"
-                    onClick={() => void openMembersPreview()}
-                    title="Vezi și selectează membrii grupului"
-                  >
-                    <Edit3 size={15} />
-                    Editează membrii
-                  </button>
-                  <button type="button" title="Disponibil în pasul următor">
-                    <MapPinned size={15} />
-                    Vezi pe hartă
-                  </button>
-                  <button type="button" title="Disponibil în G1.4">
-                    <Pencil size={15} />
-                    Redenumește
-                  </button>
-                  <button type="button" className="is-danger" title="Disponibil în G1.4">
-                    <Trash2 size={15} />
-                    Șterge grup
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="friends-g11-create"
-              onClick={() => {
-                setCreateError("");
-                setNewGroupName("");
-                setCreateOpen(true);
-              }}
-            >
-              <FolderPlus size={16} />
-              Creează grup
-            </button>
-          </div>
-        )}
+          <span
+            style={{
+              fontSize: 13,
+              opacity: 0.7,
+            }}
+          >
+            Deschide →
+          </span>
+        </Link>
       </section>
 
       <div className="friends-card-p1-list">

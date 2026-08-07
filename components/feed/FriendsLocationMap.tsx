@@ -198,6 +198,38 @@ export default function FriendsLocationMap() {
     };
   }, [isFullscreen]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+
+    if (url.searchParams.get("map") !== "1") {
+      return;
+    }
+
+    // Consumăm comanda o singură dată, ca harta să nu se redeschidă
+    // după ce utilizatorul iese din full-screen.
+    url.searchParams.delete("map");
+    const nextUrl =
+      `${url.pathname}${url.search}${url.hash}`;
+
+    window.history.replaceState(
+      window.history.state,
+      "",
+      nextUrl || "/feed"
+    );
+
+    // Lăsăm layout-ul Feed să se monteze înainte de full-screen.
+    const timer = window.setTimeout(() => {
+      setIsFullscreen(true);
+    }, 80);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+
   function toggleFullscreen() {
     setIsFullscreen((current) => !current);
   }
