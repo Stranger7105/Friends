@@ -1,11 +1,5 @@
 export type CallKind = "audio" | "video";
 
-/**
- * Compatibilitate:
- * - M2/M3 call manager folosește idle/calling/connecting/active/failed.
- * - M4.1A persistent signaling folosește accepted/cancelled.
- * Păstrăm toate stările până când motorul vechi este retras complet.
- */
 export type CallStatus =
   | "idle"
   | "calling"
@@ -20,9 +14,13 @@ export type CallStatus =
 
 export type CallDirection = "incoming" | "outgoing";
 
-/**
- * Tipurile legacy sunt încă importate de CallOverlay/useCallManager.
- */
+export type CallConnectionState =
+  | "idle"
+  | "preparing"
+  | "connecting"
+  | "connected"
+  | "failed";
+
 export type CallProfile = {
   id: string;
   name: string;
@@ -52,11 +50,6 @@ export type CallSignal =
       createdAt: string;
     };
 
-/**
- * M4.1A persistent call session.
- * DB-ul M4.1A produce doar ringing/accepted/rejected/cancelled/ended,
- * dar CallStatus rămâne superset pentru compatibilitate.
- */
 export type CallSessionRow = {
   id: string;
   conversation_id: number;
@@ -91,4 +84,16 @@ export type StartCallTarget = {
   userId: string;
   fullName: string;
   avatarUrl?: string;
+};
+
+export type WebRtcSignalType = "offer" | "answer" | "ice";
+
+export type CallSignalRow = {
+  id: number;
+  call_id: string;
+  sender_id: string;
+  recipient_id: string;
+  signal_type: WebRtcSignalType;
+  payload: Record<string, unknown>;
+  created_at: string;
 };
