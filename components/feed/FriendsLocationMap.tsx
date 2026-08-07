@@ -342,6 +342,7 @@ export default function FriendsLocationMap() {
 
   const mapCard = (
     <section
+      id="friends-map"
       ref={cardRef}
       className={`aurora-sidebar-card friends-location-card ${isFullscreen ? "is-native-fullscreen" : ""}`}
       style={

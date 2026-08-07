@@ -369,21 +369,26 @@ export default function Navbar() {
                 whileTap={{ scale: 0.96 }}
               >
                 <Link
-                  href="/map"
+                  href="/feed#friends-map"
                   aria-label="Deschide Harta Friends"
                   title="Hartă"
                   className={`friends-messages-button ${
-                    isActive("/map") ? "is-active" : ""
+                    pathname === "/feed" ? "is-active" : ""
                   }`}
+                  style={{
+                    width: 42,
+                    minWidth: 42,
+                    height: 42,
+                    padding: 0,
+                    display: "grid",
+                    placeItems: "center",
+                  }}
                 >
                   <span
                     className="friends-button-shine"
                     aria-hidden="true"
                   />
                   <MapPinned size={20} strokeWidth={2.35} />
-                  <span className="friends-messages-label">
-                    Hartă
-                  </span>
                 </Link>
               </motion.div>
 
